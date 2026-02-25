@@ -1,49 +1,73 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
-public class GoalRequirement
-{
-    public ItemType type;
-    public int required;
-}
-
 public class ObjectiveTracker : MonoBehaviour
 {
-    [SerializeField] private List<GoalRequirement> goals = new();
+    [Serializable]
+    public class Goal
+    {
+        public ItemType type;
+        public int required;
+        [NonSerialized] public int current;
+    }
 
-    private Dictionary<ItemType, int> _current = new();
-    private Dictionary<ItemType, int> _required = new();
+    [SerializeField] private List<Goal> goals = new();
 
+    private Dictionary<ItemType, Goal> _map;
+
+    private void Awake()
+    {
+        Init();
+    }
+
+    /// <summary>
+    /// Инициализация/переинициализация карты целей.
+    /// Можно безопасно вызывать сколько угодно раз.
+    /// </summary>
     public void Init()
     {
-        _current.Clear();
-        _required.Clear();
+        if (_map == null)
+            _map = new Dictionary<ItemType, Goal>(goals.Count);
+        else
+            _map.Clear();
+
         foreach (var g in goals)
         {
-            _required[g.type] = Mathf.Max(0, g.required);
-            _current[g.type] = 0;
+            if (g == null) continue;
+            g.current = 0;
+            _map[g.type] = g;
         }
     }
 
-    public bool IsGoalItem(ItemType t) => _required.ContainsKey(t);
-
-    public void Add(ItemType t, int amount = 1)
+    /// <summary>
+    /// Сброс прогресса целей без пересоздания списка.
+    /// </summary>
+    public void ResetProgress()
     {
-        if (!_required.ContainsKey(t)) return;
-        _current[t] = Mathf.Clamp(_current[t] + amount, 0, _required[t]);
+        if (_map == null) Init();
+        foreach (var g in goals)
+        {
+            if (g == null) continue;
+            g.current = 0;
+        }
+    }
+
+    public bool IsGoalItem(ItemType type) => _map != null && _map.ContainsKey(type);
+
+    public void Add(ItemType type, int amount)
+    {
+        if (_map == null) Init();
+        if (!_map.TryGetValue(type, out var g)) return;
+        g.current = Mathf.Clamp(g.current + amount, 0, g.required);
     }
 
     public bool IsComplete()
     {
-        foreach (var kv in _required)
-        {
-            if (_current.TryGetValue(kv.Key, out int cur) == false) return false;
-            if (cur < kv.Value) return false;
-        }
+        foreach (var g in goals)
+            if (g != null && g.current < g.required) return false;
         return true;
     }
 
-    public int GetCurrent(ItemType t) => _current.TryGetValue(t, out var v) ? v : 0;
-    public int GetRequired(ItemType t) => _required.TryGetValue(t, out var v) ? v : 0;
+    public IReadOnlyList<Goal> GetGoals() => goals;
 }

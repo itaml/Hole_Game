@@ -1,46 +1,71 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class FloatingXpTextSpawner : MonoBehaviour
 {
-    [SerializeField] private Canvas worldCanvas;
-    [SerializeField] private Text prefab;
-    [SerializeField] private float floatUp = 1.2f;
+    [SerializeField] private Canvas uiCanvas;
+    [SerializeField] private RectTransform uiRoot;
+    [SerializeField] private TextMeshProUGUI prefab;
+
+    [Header("Anim")]
+    [SerializeField] private float floatUpPx = 140f;
     [SerializeField] private float lifeTime = 0.8f;
+
+    private Camera _cam;
+
+    private void Awake()
+    {
+        _cam = Camera.main;
+        if (uiCanvas != null && uiRoot == null)
+            uiRoot = uiCanvas.transform as RectTransform;
+    }
 
     public void Spawn(Vector3 worldPos, int xp)
     {
-        if (!worldCanvas || !prefab) return;
+        if (!uiCanvas || !prefab || uiRoot == null) return;
 
-        var t = Instantiate(prefab, worldCanvas.transform);
+        var t = Instantiate(prefab, uiRoot);
         t.text = $"+{xp}";
 
-        // конверт world -> screen (для World Space canvas не нужно, но зависит от твоей настройки)
-        Vector3 screen = Camera.main.WorldToScreenPoint(worldPos);
-        t.transform.position = screen;
+        Vector2 screen = RectTransformUtility.WorldToScreenPoint(_cam, worldPos);
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            uiRoot,
+            screen,
+            uiCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _cam,
+            out Vector2 localPos
+        );
+
+        var rt = t.rectTransform;
+        rt.anchoredPosition = localPos;
 
         StartCoroutine(Animate(t));
     }
 
-    private System.Collections.IEnumerator Animate(Text t)
+    private System.Collections.IEnumerator Animate(TextMeshProUGUI t)
     {
         float time = 0f;
-        Vector3 start = t.transform.position;
-        Vector3 end = start + Vector3.up * floatUp * 100f;
+        var rt = t.rectTransform;
+
+        Vector2 start = rt.anchoredPosition;
+        Vector2 end = start + Vector2.up * floatUpPx;
 
         Color c = t.color;
+        float startAlpha = c.a;
 
         while (time < lifeTime)
         {
             time += Time.deltaTime;
-            float k = time / lifeTime;
+            float k = Mathf.Clamp01(time / lifeTime);
+            float ease = 1f - Mathf.Pow(1f - k, 3f);
 
-            t.transform.position = Vector3.Lerp(start, end, k);
-            c.a = 1f - k;
+            rt.anchoredPosition = Vector2.Lerp(start, end, ease);
+            c.a = Mathf.Lerp(startAlpha, 0f, k);
             t.color = c;
+
             yield return null;
         }
 
-        if (t) Destroy(t.gameObject);
+        Destroy(t.gameObject);
     }
 }
