@@ -13,25 +13,16 @@ public class ObjectiveTracker : MonoBehaviour
     }
 
     [SerializeField] private List<Goal> goals = new();
-
     private Dictionary<ItemType, Goal> _map;
 
-    private void Awake()
-    {
-        Init();
-    }
+    public event Action<ItemType, int> OnRemainingChanged;  // type, remaining
+    public event Action<ItemType> OnGoalCompleted;          // type
 
-    /// <summary>
-    /// Инициализация/переинициализация карты целей.
-    /// Можно безопасно вызывать сколько угодно раз.
-    /// </summary>
+    private void Awake() => Init();
+
     public void Init()
     {
-        if (_map == null)
-            _map = new Dictionary<ItemType, Goal>(goals.Count);
-        else
-            _map.Clear();
-
+        _map = new Dictionary<ItemType, Goal>(goals.Count);
         foreach (var g in goals)
         {
             if (g == null) continue;
@@ -40,26 +31,38 @@ public class ObjectiveTracker : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Сброс прогресса целей без пересоздания списка.
-    /// </summary>
-    public void ResetProgress()
+    public void SetGoals(List<Goal> newGoals)
     {
-        if (_map == null) Init();
+        goals = newGoals ?? new List<Goal>();
+        Init();
+        // сразу разошлём стартовые remaining
         foreach (var g in goals)
-        {
-            if (g == null) continue;
-            g.current = 0;
-        }
+            if (g != null) OnRemainingChanged?.Invoke(g.type, GetRemaining(g.type));
     }
 
     public bool IsGoalItem(ItemType type) => _map != null && _map.ContainsKey(type);
+
+    public int GetRemaining(ItemType type)
+    {
+        if (_map == null) Init();
+        if (!_map.TryGetValue(type, out var g)) return 0;
+        return Mathf.Max(0, g.required - g.current);
+    }
 
     public void Add(ItemType type, int amount)
     {
         if (_map == null) Init();
         if (!_map.TryGetValue(type, out var g)) return;
+
+        int before = g.current;
         g.current = Mathf.Clamp(g.current + amount, 0, g.required);
+
+        int remaining = Mathf.Max(0, g.required - g.current);
+        OnRemainingChanged?.Invoke(type, remaining);
+
+        // если только что добили цель
+        if (before < g.required && g.current >= g.required)
+            OnGoalCompleted?.Invoke(type);
     }
 
     public bool IsComplete()
@@ -68,6 +71,4 @@ public class ObjectiveTracker : MonoBehaviour
             if (g != null && g.current < g.required) return false;
         return true;
     }
-
-    public IReadOnlyList<Goal> GetGoals() => goals;
 }

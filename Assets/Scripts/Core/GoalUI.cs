@@ -5,29 +5,46 @@ using UnityEngine;
 public class GoalUI : MonoBehaviour
 {
     [Serializable]
-    public class GoalSlot
+    public class Slot
     {
         public ItemType type;
-        public RectTransform target;   // куда летит иконка
+        public RectTransform target;   // куда летит
+        public GoalSlotUI slotUI;      // сам слот
     }
 
-    [SerializeField] private List<GoalSlot> slots = new();
+    [SerializeField] private List<Slot> slots = new();
+    private Dictionary<ItemType, Slot> _map;
 
-    private Dictionary<ItemType, RectTransform> _map;
+    private void Awake() => Rebuild();
 
-    private void Awake()
+    private void Rebuild()
     {
-        _map = new Dictionary<ItemType, RectTransform>(slots.Count);
+        _map = new Dictionary<ItemType, Slot>(slots.Count);
         foreach (var s in slots)
-        {
-            if (s == null || s.target == null) continue;
-            _map[s.type] = s.target;
-        }
+            if (s != null) _map[s.type] = s;
     }
 
     public RectTransform GetTarget(ItemType type)
     {
-        if (_map == null) Awake();
-        return _map.TryGetValue(type, out var t) ? t : null;
+        if (_map == null) Rebuild();
+        return _map.TryGetValue(type, out var s) ? s.target : null;
+    }
+
+    public GoalSlotUI GetSlotUI(ItemType type)
+    {
+        if (_map == null) Rebuild();
+        return _map.TryGetValue(type, out var s) ? s.slotUI : null;
+    }
+
+    public void SetSlots(List<Slot> newSlots)
+    {
+        slots = newSlots ?? new List<Slot>();
+        Rebuild();
+    }
+
+    public void ClearSlots()
+    {
+        slots = new List<Slot>();
+        Rebuild();
     }
 }

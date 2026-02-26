@@ -7,12 +7,6 @@ public class HoleController : MonoBehaviour
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private Rigidbody rb;
 
-    [Header("Growth")]
-    [SerializeField] private float baseRadius = 0.6f;
-    [SerializeField] private float radiusPerLevel = 0.08f;
-    [SerializeField] private Transform visualRoot;
-    [SerializeField] private HolePhysics holePhysics;
-
     public int Level { get; private set; } = 1;
     public int Xp { get; private set; }
 
@@ -44,18 +38,7 @@ public class HoleController : MonoBehaviour
         if (newLevel != Level)
         {
             Level = newLevel;
-            ApplySize();
         }
     }
 
-    private void ApplySize()
-    {
-        float radius = baseRadius + (Level - 1) * radiusPerLevel;
-
-        if (visualRoot)
-            visualRoot.localScale = Vector3.one * radius;
-
-        if (holePhysics)
-            holePhysics.SetHoleRadius(radius);
-    }
 }

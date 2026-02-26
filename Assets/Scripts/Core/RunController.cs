@@ -1,20 +1,21 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class RunController : MonoBehaviour
 {
-    
     [Header("Run Time (minutes)")]
     [Tooltip("Время уровня в минутах. Например 2.3 = 2 минуты 18 секунд.")]
     [SerializeField] private float levelDurationMinutes = 2.3f;
+    [SerializeField] private GoalFinderBoost goalFinderBoost;
+    
 
     [Header("Refs")]
-    [SerializeField] private HoleController hole;
     [SerializeField] private ObjectiveTracker objectives;
     [SerializeField] private GoalUI goalUI;
+    [SerializeField] private GoalUIBuilder goalBuilder;
     [SerializeField] private TimerUI timerUI;
-    
+    [SerializeField] private HoleGrowth holeGrowth;
+    [SerializeField] private FlyToUiIconSpawner flyToUi;
 
     [Header("Screens (optional)")]
     [SerializeField] private GameObject winScreen;
@@ -24,8 +25,7 @@ public class RunController : MonoBehaviour
     [SerializeField] private GameObject chestOfferScreen;
 
     [Header("Debug UI (optional)")]
-    [SerializeField] private Text debugTimerText; // если хочешь видеть mm:ss без TMP
-    
+    [SerializeField] private Text debugTimerText;
 
     public bool IsRunning { get; private set; }
 
@@ -40,19 +40,39 @@ public class RunController : MonoBehaviour
     private int _chestRewardValue;
     private bool _iapDisable;
 
-    private const string CHEST_LAST_TIME_KEY = "chest_last_time_utc"; // PlayerPrefs
+    [Header("Level Spawn (one scene)")]
+[SerializeField] private LevelSequence levelSequence;
+[SerializeField] private LevelItemSpawner levelSpawner;
+[SerializeField] private int debugLevelIndex = 0; // в
 
-    
+    private const string CHEST_LAST_TIME_KEY = "chest_last_time_utc";
 
     private void Awake()
     {
-        // Без “магии” и гонок инициализации.
         Sdk.EnsureInitialized();
+    }
+
+    private void OnEnable()
+    {
+        if (objectives != null)
+        {
+            objectives.OnRemainingChanged += HandleRemainingChanged;
+            objectives.OnGoalCompleted += HandleGoalCompleted;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (objectives != null)
+        {
+            objectives.OnRemainingChanged -= HandleRemainingChanged;
+            objectives.OnGoalCompleted -= HandleGoalCompleted;
+        }
     }
 
     private void Start()
     {
-        // RC (stub сейчас, позже подменят на Firebase Remote Config)
+        // RC (stub сейчас)
         _iapDisable = Sdk.RemoteConfig.GetBool(RemoteKeys.IAP_DISABLE, false);
         _reviveMax = Sdk.RemoteConfig.GetInt(RemoteKeys.REVIVE_MAX_PER_RUN, 2);
         _winMultValue = Sdk.RemoteConfig.GetInt(RemoteKeys.WIN_MULT_VALUE, 2);
@@ -72,13 +92,24 @@ public void StartRun()
     _revivesUsed = 0;
     IsRunning = true;
 
-    if (objectives != null)
-        objectives.ResetProgress(); // ✅ вместо Init() можно ResetProgress()
+    // Сборка целей под уровень
+    goalBuilder?.Build();
+
+    // Сброс роста
+    holeGrowth?.ResetRun();
+
+    // ✅ Генерация предметов уровня (одна сцена)
+    if (levelSpawner != null && levelSequence != null)
+    {
+        var cfg = levelSequence.Get(debugLevelIndex);
+        levelSpawner.Spawn(cfg);
+    }
+
+    timerUI?.Set(_timeLeft, _timeTotal);
+    UpdateDebugTimerText();
 
     Sdk.Analytics.LogEvent(AnalyticsEvents.RUN_START);
 }
-
-    
 
     private void Update()
     {
@@ -91,9 +122,7 @@ public void StartRun()
         UpdateDebugTimerText();
 
         if (_timeLeft <= 0f)
-        {
             GameOverByTime();
-        }
     }
 
     private void UpdateDebugTimerText()
@@ -106,39 +135,69 @@ public void StartRun()
         debugTimerText.text = $"{m:00}:{s:00}";
     }
 
-    // Вызывай из AbsorbDetector, когда предмет “пойман” дырой (начал проваливаться)
-public void OnItemCollected(AbsorbablePhysicsItem item)
-{
-    if (!IsRunning || item == null) return;
-
-    // цели
-    if (objectives != null && objectives.IsGoalItem(item.Type))
+    // Вызывай из HoleCountTrigger, когда предмет реально полностью проглочен и засчитан
+    public void OnItemCollected(AbsorbablePhysicsItem item)
     {
-        objectives.Add(item.Type, 1);
+        if (!IsRunning || item == null) return;
 
-        if (objectives.IsComplete())
+        // XP -> рост
+        holeGrowth?.AddXp(item.XpValue);
+
+        // Цели
+        if (objectives != null && objectives.IsGoalItem(item.Type))
         {
-            Win();
+            goalFinderBoost?.OnGoalItemCollected(item);
+            // уменьшаем remaining внутри ObjectiveTracker
+            objectives.Add(item.Type, 1);
+            goalFinderBoost?.OnGoalItemCollected(item);
+
+            // fly-to-icon + punch при прилёте
+            var target = GetGoalIconTarget(item.Type);
+            var slotUi = GetGoalSlotUI(item.Type);
+
+            if (flyToUi != null && target != null && item.UiIcon != null)
+            {
+                flyToUi.Spawn(
+                    item.transform.position,
+                    item.UiIcon,
+                    target,
+                    onArrived: () => slotUi?.PlayArrivePunch()
+                );
+            }
+
+            if (objectives.IsComplete())
+                Win();
         }
     }
-}
 
-    public bool IsGoalItem(ItemType t)
-        => objectives != null && objectives.IsGoalItem(t);
+    public bool IsGoalItem(ItemType t) => objectives != null && objectives.IsGoalItem(t);
 
-    public RectTransform GetGoalIconTarget(ItemType t)
-        => goalUI ? goalUI.GetTarget(t) : null;
+    public RectTransform GetGoalIconTarget(ItemType t) => goalUI ? goalUI.GetTarget(t) : null;
 
-    #region Run States
+    public GoalSlotUI GetGoalSlotUI(ItemType t) => goalUI ? goalUI.GetSlotUI(t) : null;
+
+    // -------- Goal UI updates from ObjectiveTracker events --------
+
+    private void HandleRemainingChanged(ItemType type, int remaining)
+    {
+        goalUI?.GetSlotUI(type)?.SetRemaining(remaining);
+    }
+
+    private void HandleGoalCompleted(ItemType type)
+    {
+        goalUI?.GetSlotUI(type)?.MarkComplete();
+    }
+
+    // -------- Run States --------
 
     private void Win()
     {
         if (!IsRunning) return;
         IsRunning = false;
 
+        HideAllScreens();
         if (winScreen) winScreen.SetActive(true);
 
-        // После победы обычно предлагают multiplier ad
         ShowMultiplierOffer();
     }
 
@@ -147,15 +206,8 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
         if (!IsRunning) return;
         IsRunning = false;
 
-        // revive offer только если есть попытки
-        if (_revivesUsed < _reviveMax)
-        {
-            ShowReviveOffer();
-        }
-        else
-        {
-            ShowGameOver();
-        }
+        if (_revivesUsed < _reviveMax) ShowReviveOffer();
+        else ShowGameOver();
     }
 
     private void ShowGameOver()
@@ -173,9 +225,7 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
         if (chestOfferScreen) chestOfferScreen.SetActive(false);
     }
 
-    #endregion
-
-    #region Revive Flow
+    // -------- Revive Flow --------
 
     private void ShowReviveOffer()
     {
@@ -185,7 +235,6 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
         Sdk.Analytics.LogEvent(AnalyticsEvents.REVIVE_OFFER_SHOWN);
     }
 
-    // Вешай на кнопку "Revive"
     public void ReviveClicked()
     {
         if (_revivesUsed >= _reviveMax) return;
@@ -213,16 +262,13 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
     {
         _revivesUsed++;
 
-        // Даем минимум 30 секунд (как пример, можешь поменять)
         _timeLeft = Mathf.Max(_timeLeft, 30f);
 
         HideAllScreens();
         IsRunning = true;
     }
 
-    #endregion
-
-    #region Multiplier Flow (after win)
+    // -------- Multiplier Flow --------
 
     private void ShowMultiplierOffer()
     {
@@ -243,10 +289,8 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
             onRewardGranted: () =>
             {
                 Sdk.Analytics.LogEvent(AnalyticsEvents.MULTIPLIER_REWARD_GRANTED);
-
-                // Тут применишь множитель награды (например монеты/опыт)
-                // value = _winMultValue
-                multiplierOfferScreen.SetActive(false);
+                // применяешь _winMultValue
+                if (multiplierOfferScreen) multiplierOfferScreen.SetActive(false);
             }
         );
     }
@@ -256,16 +300,12 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
         if (multiplierOfferScreen) multiplierOfferScreen.SetActive(false);
     }
 
-    #endregion
-
-    #region Chest Flow (cooldown + rewarded)
+    // -------- Chest Flow --------
 
     public void TryShowChestOffer()
     {
         if (!chestOfferScreen) return;
-
-        if (!IsChestAvailable())
-            return;
+        if (!IsChestAvailable()) return;
 
         chestOfferScreen.SetActive(true);
         Sdk.Analytics.LogEvent(AnalyticsEvents.CHEST_OFFER_SHOWN);
@@ -318,13 +358,10 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
 
     private void GrantChestReward(int value)
     {
-        // Заглушка: тут выдача награды (монеты/очки)
         Debug.Log($"[CHEST] Reward granted: {value}");
     }
 
-    #endregion
-
-    #region IAP Disable Ads (stub)
+    // -------- IAP Disable Ads (stub) --------
 
     public bool IsIapDisabledByRemoteConfig() => _iapDisable;
 
@@ -351,9 +388,7 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
         );
     }
 
-    #endregion
-
-    #region Public helpers
+    // -------- Helpers --------
 
     public float GetTimeLeftSeconds() => _timeLeft;
     public float GetTimeTotalSeconds() => _timeTotal;
@@ -363,6 +398,4 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
         if (!IsRunning) return;
         _timeLeft = Mathf.Clamp(_timeLeft + Mathf.Max(0f, seconds), 0f, _timeTotal);
     }
-
-    #endregion
 }

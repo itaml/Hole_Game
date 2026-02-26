@@ -35,9 +35,16 @@ public class HoleMouthTrigger : MonoBehaviour
 
     private void Awake()
     {
+        // страховка, чтобы не ловить "ничего не работает" из-за невыставленной ссылки
+        if (hole == null)
+            hole = GetComponentInParent<HolePhysics>();
+
         _passLayer = LayerMask.NameToLayer(passThroughLayerName);
         if (_passLayer < 0)
+        {
             Debug.LogError($"Layer '{passThroughLayerName}' not found. Create it and set Physics matrix.");
+            // оставим -1, чтобы в SetPassThroughGround не передавать мусор
+        }
     }
 
     private void Reset()
@@ -65,9 +72,12 @@ public class HoleMouthTrigger : MonoBehaviour
                 continue;
             }
 
+            // если в этом FixedUpdate не видели OnTriggerStay — значит вышел/пропал
             if (!_seenThisStep.Contains(item))
             {
-                item.SetPassThroughGround(false, _passLayer);
+                if (_passLayer >= 0)
+                    item.SetPassThroughGround(false, _passLayer);
+
                 RecoverToGround(item);
                 toRemove.Add(item);
             }
@@ -92,7 +102,9 @@ public class HoleMouthTrigger : MonoBehaviour
         // 1) Проверка "влезает ли" по XZ scale
         if (useScaleFitRule && !FitsByScaleXZ(item))
         {
-            item.SetPassThroughGround(false, _passLayer);
+            if (_passLayer >= 0)
+                item.SetPassThroughGround(false, _passLayer);
+
             RecoverToGround(item);
             _insideTime.Remove(item);
             return;
@@ -108,6 +120,7 @@ public class HoleMouthTrigger : MonoBehaviour
         Vector3 c = hole.transform.position;
         Vector3 p = item.Rb.worldCenterOfMass;
         float distXZ = Vector2.Distance(new Vector2(c.x, c.z), new Vector2(p.x, p.z));
+
         float gateRadius = hole.HoleRadius * centerGateFactor;
         bool inCenterGate = distXZ <= gateRadius;
 
@@ -116,7 +129,9 @@ public class HoleMouthTrigger : MonoBehaviour
 
         // 5) Pass-through включаем только если реально над центром и прожил чуть-чуть
         bool allowed = inCenterGate && (tInside >= dwellTimeToPass);
-        item.SetPassThroughGround(allowed, _passLayer);
+
+        if (_passLayer >= 0)
+            item.SetPassThroughGround(allowed, _passLayer);
 
         if (!allowed)
             RecoverToGround(item);
@@ -127,7 +142,9 @@ public class HoleMouthTrigger : MonoBehaviour
         var item = other.GetComponentInParent<AbsorbablePhysicsItem>();
         if (item == null) return;
 
-        item.SetPassThroughGround(false, _passLayer);
+        if (_passLayer >= 0)
+            item.SetPassThroughGround(false, _passLayer);
+
         RecoverToGround(item);
 
         _insideTime.Remove(item);
@@ -163,7 +180,7 @@ public class HoleMouthTrigger : MonoBehaviour
                 float lift = (groundY + recoverOffset) - bottomY;
                 item.transform.position += new Vector3(0f, lift, 0f);
 
-                var v = item.Rb.linearVelocity;
+                var v = item.Rb.linearVelocity; // Unity 6 / 6000.x
                 if (v.y < 0f) v.y = 0f;
                 item.Rb.linearVelocity = v;
 

@@ -5,78 +5,110 @@ using UnityEngine.UI;
 public class FlyToUiIconSpawner : MonoBehaviour
 {
     [Header("Canvas")]
-    [SerializeField] private Canvas canvas;                 // твой HUD canvas
-    [SerializeField] private RectTransform root;            // контейнер для летающих иконок
-    [SerializeField] private Image iconPrefab;              // prefab Image
+    [SerializeField] private Canvas canvas;          // HUD canvas
+    [SerializeField] private RectTransform root;     // FlyLayer (full-screen)
+    [SerializeField] private Image iconPrefab;       // prefab Image
 
     [Header("Camera")]
-    [SerializeField] private Camera worldCamera;            // обычно MainCamera
+    [SerializeField] private Camera worldCamera;     // MainCamera (для ScreenSpace-Camera/World)
 
     [Header("Anim")]
     [SerializeField] private float duration = 0.35f;
     [SerializeField] private AnimationCurve ease = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [SerializeField] private float startScale = 1.0f;
+    [SerializeField] private float startScale = 1f;
     [SerializeField] private float endScale = 0.4f;
+
+    [Header("Icon Size")]
+    [SerializeField] private bool useNativeSize = true;
+    [Range(0.2f, 2f)]
+    [SerializeField] private float nativeScale = 1f;
 
     private void Reset()
     {
+        canvas = GetComponentInParent<Canvas>();
         worldCamera = Camera.main;
     }
 
-    public void Spawn(Vector3 worldPos, Sprite sprite, RectTransform target)
+public void Spawn(Vector3 worldPos, Sprite sprite, RectTransform target, System.Action onArrived = null)
     {
-        if (sprite == null || target == null || iconPrefab == null || canvas == null || root == null) return;
-        StartCoroutine(FlyRoutine(worldPos, sprite, target));
+        if (sprite == null || target == null) return;
+        if (canvas == null || root == null || iconPrefab == null)
+        {
+            Debug.LogWarning("[FlyToUiIconSpawner] Missing refs (canvas/root/iconPrefab).");
+            return;
+        }
+
+    StartCoroutine(FlyRoutine(worldPos, sprite, target, onArrived));
     }
 
-    private IEnumerator FlyRoutine(Vector3 worldPos, Sprite sprite, RectTransform target)
+private IEnumerator FlyRoutine(Vector3 worldPos, Sprite sprite, RectTransform target, System.Action onArrived)
+{
     {
         var img = Instantiate(iconPrefab, root);
         img.sprite = sprite;
+
+        if (useNativeSize)
+        {
+            img.SetNativeSize();
+            img.rectTransform.sizeDelta *= nativeScale;
+        }
+
         var rt = img.rectTransform;
 
-        // старт: world -> screen
-        Vector3 screenPos = (worldCamera != null)
-            ? worldCamera.WorldToScreenPoint(worldPos)
-            : RectTransformUtility.WorldToScreenPoint(null, worldPos);
+        // 1) WORLD -> SCREEN
+        Vector3 startScreen = GetScreenPointFromWorld(worldPos);
 
-        // screen -> local point в root
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            root, screenPos,
-            canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : worldCamera,
-            out Vector2 startLocal
-        );
+        // 2) SCREEN -> ROOT LOCAL
+        Vector2 startLocal = ScreenToLocal(root, startScreen);
+
+        // 3) TARGET WORLD(UI) -> SCREEN -> ROOT LOCAL
+        Vector3 targetScreen = RectTransformUtility.WorldToScreenPoint(GetUiCamera(), target.position);
+        Vector2 endLocal = ScreenToLocal(root, targetScreen);
 
         rt.anchoredPosition = startLocal;
         rt.localScale = Vector3.one * startScale;
 
-        // цель: target world -> screen -> local (в root)
-        Vector3 targetScreen = RectTransformUtility.WorldToScreenPoint(
-            canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : worldCamera,
-            target.position
-        );
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            root, targetScreen,
-            canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : worldCamera,
-            out Vector2 endLocal
-        );
-
         float t = 0f;
-        Vector2 a = startLocal;
-        Vector2 b = endLocal;
-
         while (t < duration)
         {
             t += Time.unscaledDeltaTime;
             float k = ease.Evaluate(Mathf.Clamp01(t / duration));
 
-            rt.anchoredPosition = Vector2.Lerp(a, b, k);
+            rt.anchoredPosition = Vector2.Lerp(startLocal, endLocal, k);
             rt.localScale = Vector3.one * Mathf.Lerp(startScale, endScale, k);
 
             yield return null;
         }
+    onArrived?.Invoke();
+    Destroy(img.gameObject);
+    }
+    }
 
-        Destroy(img.gameObject);
+    private Camera GetUiCamera()
+    {
+        // Для Overlay камера не нужна
+        if (canvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
+
+        // Для ScreenSpace-Camera/World Space нужна камера
+        return canvas.worldCamera != null ? canvas.worldCamera : worldCamera;
+    }
+
+    private Vector3 GetScreenPointFromWorld(Vector3 worldPos)
+    {
+        // обычно worldPos в 3D мире -> MainCamera
+        var cam = worldCamera != null ? worldCamera : Camera.main;
+        if (cam == null) return new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
+        return cam.WorldToScreenPoint(worldPos);
+    }
+
+    private Vector2 ScreenToLocal(RectTransform rect, Vector3 screenPoint)
+    {
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            rect,
+            screenPoint,
+            GetUiCamera(),
+            out Vector2 local
+        );
+        return local;
     }
 }
