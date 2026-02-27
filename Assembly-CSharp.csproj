@@ -65,7 +65,6 @@
     <Compile Include="Assets\Scripts\Boost\Find\GoalFinderBoostButtonUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Events\EventBus.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelSpawnConfig.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\AnalyticsEvents.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Time\DeviceTimeProvider.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\SceneFlow\SceneFlow.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\BattlepassState.cs" />
@@ -79,7 +78,6 @@
     <Compile Include="Assets\Scripts\YarickScripts\Core\Time\ITimeProvider.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\ItemCatalog.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\UnlockConfig.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\Sdk.cs" />
     <Compile Include="Assets\Scripts\Core\HoleController.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\LevelOutcome.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\WalletService.cs" />
@@ -91,7 +89,6 @@
     <Compile Include="Assets\Scripts\Core\VelocityLimiter.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\DynamicJoystick.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\MetaFacade.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\IIapService.cs" />
     <Compile Include="Assets\Scripts\Core\HoleDirectionArrow.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\ISaveStorage.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Base\Joystick.cs" />
@@ -100,21 +97,17 @@
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\ProgressState.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\Reward.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelItemSpawner.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\IAnalyticsService.cs" />
     <Compile Include="Assets\Joystick Pack\Examples\JoystickPlayerExample.cs" />
     <Compile Include="Assets\Scripts\Core\HolePhysics.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\RemoteKeys.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\GoalUIBuilder.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\GoalFinderBoost.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\BattlepassTier.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\BuffType.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\BoostType.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\RemoteConfigServiceStub.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\MenuRoot.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\VariableJoystick.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\GoalSlotUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\PlayerPrefsJsonStorage.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\IRemoteConfigService.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectiveTracker.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\LivesState.cs" />
     <Compile Include="Assets\Scripts\Core\HoleMouthTrigger.cs" />
@@ -144,7 +137,6 @@
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\WinStreakState.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\PlayerSave.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\LevelGoals.cs" />
-    <Compile Include="Assets\Scripts\Anlytic\AdsServiceStub.cs" />
     <Compile Include="Assets\Scripts\Core\TimerUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\InventoryState.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\BankState.cs" />

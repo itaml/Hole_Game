@@ -45,13 +45,6 @@ public class RunController : MonoBehaviour
 [SerializeField] private LevelItemSpawner levelSpawner;
 [SerializeField] private int debugLevelIndex = 0; // в
 
-    private const string CHEST_LAST_TIME_KEY = "chest_last_time_utc";
-
-    private void Awake()
-    {
-        Sdk.EnsureInitialized();
-    }
-
     private void OnEnable()
     {
         if (objectives != null)
@@ -72,13 +65,6 @@ public class RunController : MonoBehaviour
 
     private void Start()
     {
-        // RC (stub сейчас)
-        _iapDisable = Sdk.RemoteConfig.GetBool(RemoteKeys.IAP_DISABLE, false);
-        _reviveMax = Sdk.RemoteConfig.GetInt(RemoteKeys.REVIVE_MAX_PER_RUN, 2);
-        _winMultValue = Sdk.RemoteConfig.GetInt(RemoteKeys.WIN_MULT_VALUE, 2);
-        _chestCooldownSec = Sdk.RemoteConfig.GetInt(RemoteKeys.CHEST_COOLDOWN_SEC, 300);
-        _chestRewardValue = Sdk.RemoteConfig.GetInt(RemoteKeys.CHEST_REWARD_VALUE, 50);
-
         StartRun();
     }
 
@@ -107,8 +93,6 @@ public void StartRun()
 
     timerUI?.Set(_timeLeft, _timeTotal);
     UpdateDebugTimerText();
-
-    Sdk.Analytics.LogEvent(AnalyticsEvents.RUN_START);
 }
 
     private void Update()
@@ -197,8 +181,6 @@ public void StartRun()
 
         HideAllScreens();
         if (winScreen) winScreen.SetActive(true);
-
-        ShowMultiplierOffer();
     }
 
     private void GameOverByTime()
@@ -231,26 +213,11 @@ public void StartRun()
     {
         HideAllScreens();
         if (reviveOfferScreen) reviveOfferScreen.SetActive(true);
-
-        Sdk.Analytics.LogEvent(AnalyticsEvents.REVIVE_OFFER_SHOWN);
     }
 
     public void ReviveClicked()
     {
         if (_revivesUsed >= _reviveMax) return;
-
-        Sdk.Analytics.LogEvent(AnalyticsEvents.REVIVE_CLICKED);
-
-        Sdk.Ads.ShowRewarded(
-            placement: "revive",
-            onStarted: () => Sdk.Analytics.LogEvent(AnalyticsEvents.REVIVE_AD_STARTED),
-            onCompleted: () => Sdk.Analytics.LogEvent(AnalyticsEvents.REVIVE_AD_COMPLETED),
-            onRewardGranted: () =>
-            {
-                Sdk.Analytics.LogEvent(AnalyticsEvents.REVIVE_REWARD_GRANTED);
-                ApplyRevive();
-            }
-        );
     }
 
     public void ReviveDeclined()
@@ -266,126 +233,6 @@ public void StartRun()
 
         HideAllScreens();
         IsRunning = true;
-    }
-
-    // -------- Multiplier Flow --------
-
-    private void ShowMultiplierOffer()
-    {
-        if (!multiplierOfferScreen) return;
-
-        multiplierOfferScreen.SetActive(true);
-        Sdk.Analytics.LogEvent(AnalyticsEvents.MULTIPLIER_OFFER_SHOWN);
-    }
-
-    public void MultiplierClicked()
-    {
-        Sdk.Analytics.LogEvent(AnalyticsEvents.MULTIPLIER_CLICKED);
-
-        Sdk.Ads.ShowRewarded(
-            placement: "multiplier",
-            onStarted: () => Sdk.Analytics.LogEvent(AnalyticsEvents.MULTIPLIER_AD_STARTED),
-            onCompleted: () => Sdk.Analytics.LogEvent(AnalyticsEvents.MULTIPLIER_AD_COMPLETED),
-            onRewardGranted: () =>
-            {
-                Sdk.Analytics.LogEvent(AnalyticsEvents.MULTIPLIER_REWARD_GRANTED);
-                // применяешь _winMultValue
-                if (multiplierOfferScreen) multiplierOfferScreen.SetActive(false);
-            }
-        );
-    }
-
-    public void MultiplierDeclined()
-    {
-        if (multiplierOfferScreen) multiplierOfferScreen.SetActive(false);
-    }
-
-    // -------- Chest Flow --------
-
-    public void TryShowChestOffer()
-    {
-        if (!chestOfferScreen) return;
-        if (!IsChestAvailable()) return;
-
-        chestOfferScreen.SetActive(true);
-        Sdk.Analytics.LogEvent(AnalyticsEvents.CHEST_OFFER_SHOWN);
-    }
-
-    public void ChestClicked()
-    {
-        if (!IsChestAvailable()) return;
-
-        Sdk.Analytics.LogEvent(AnalyticsEvents.CHEST_CLICKED);
-
-        Sdk.Ads.ShowRewarded(
-            placement: "chest",
-            onStarted: () => Sdk.Analytics.LogEvent(AnalyticsEvents.CHEST_AD_STARTED),
-            onCompleted: () => Sdk.Analytics.LogEvent(AnalyticsEvents.CHEST_AD_COMPLETED),
-            onRewardGranted: () =>
-            {
-                Sdk.Analytics.LogEvent(AnalyticsEvents.CHEST_REWARD_GRANTED);
-
-                GrantChestReward(_chestRewardValue);
-                MarkChestClaimedNow();
-
-                if (chestOfferScreen) chestOfferScreen.SetActive(false);
-            }
-        );
-    }
-
-    public void ChestDeclined()
-    {
-        if (chestOfferScreen) chestOfferScreen.SetActive(false);
-    }
-
-    private bool IsChestAvailable()
-    {
-        long last = (long)PlayerPrefs.GetFloat(CHEST_LAST_TIME_KEY, 0f);
-        long now = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-        if (last <= 0) return true;
-
-        long diff = now - last;
-        return diff >= _chestCooldownSec;
-    }
-
-    private void MarkChestClaimedNow()
-    {
-        long now = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        PlayerPrefs.SetFloat(CHEST_LAST_TIME_KEY, now);
-        PlayerPrefs.Save();
-    }
-
-    private void GrantChestReward(int value)
-    {
-        Debug.Log($"[CHEST] Reward granted: {value}");
-    }
-
-    // -------- IAP Disable Ads (stub) --------
-
-    public bool IsIapDisabledByRemoteConfig() => _iapDisable;
-
-    public void PurchaseDisableAds()
-    {
-        if (_iapDisable)
-        {
-            Debug.Log("[IAP] Disabled by RemoteConfig (iap_disable=true).");
-            return;
-        }
-
-        Sdk.Analytics.LogEvent(AnalyticsEvents.IAP_DISABLE_ADS_START);
-
-        Sdk.Iap.PurchaseDisableAds(
-            onSuccess: () =>
-            {
-                Sdk.Analytics.LogEvent(AnalyticsEvents.IAP_DISABLE_ADS_SUCCESS);
-                Debug.Log("[IAP] Disable Ads purchased (stub).");
-            },
-            onFail: (err) =>
-            {
-                Debug.Log($"[IAP] Purchase failed: {err}");
-            }
-        );
     }
 
     // -------- Helpers --------
