@@ -119,7 +119,6 @@
     <Compile Include="Assets/GameEntry.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/GameBridge/Contracts/LevelResult.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Meta/State/LevelsChestState.cs" />
-    <Compile Include="Assets/Scripts/LevelResultReceiverDebug.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Core/Configs/BankConfig.cs" />
     <Compile Include="Assets/Scripts/Core/HoleBoundsLimiter.cs" />
     <Compile Include="Assets/Scripts/Core/FloatingXpTextSpawner.cs" />

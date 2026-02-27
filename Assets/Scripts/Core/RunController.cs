@@ -1,18 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using GameBridge.Contracts;
-
-public interface ILevelResultReceiver
-{
-    void SubmitLevelResult(LevelResult result);
-}
+using Game; // GameEntry namespace
 
 public class RunController : MonoBehaviour
 {
     public enum LoseReason { TimeUp, Kaboom }
-
-    private const string PREF_LEVEL_INDEX = "current_level_index";
 
     [Header("Run Time (minutes)")]
     [SerializeField] private float levelDurationMinutes = 2.3f;
@@ -36,9 +29,8 @@ public class RunController : MonoBehaviour
     [SerializeField] private WinIntroPopup winIntroPopup;
     [SerializeField] private FreezeTimeBoost freezeTimeBoost;
 
-    [Header("Bridge (Menu will process LevelResult)")]
-    [Tooltip("Объект (обычно живущий через DontDestroyOnLoad), который примет LevelResult.")]
-    [SerializeField] private MonoBehaviour levelResultReceiverBehaviour;
+    [Header("Bridge")]
+    [SerializeField] private GameEntry gameEntry;
 
     [Header("UI")]
     [SerializeField] private WinScreenUI winUI;
@@ -55,26 +47,23 @@ public class RunController : MonoBehaviour
     private int _revivesUsed;
     private int _freeRevivesUsed;
 
-    // Result tracking
-    private ILevelResultReceiver _receiver;
-    private bool _resultSent;
-
-    // Lose is pending until player chooses Retry (because revive exists)
-    private bool _losePending;
-
-    // Spending/usage for LevelResult
+    // Per-run usage/spending for LevelResult
     private int _coinsSpentInGame;
-
     private int _buff1Used; // GrowTemp
     private int _buff2Used; // Radar
     private int _buff3Used; // Magnet
     private int _buff4Used; // FreezeTime
 
+    // Lose pending because revive exists
+    private bool _losePending;
+
     private void Awake()
     {
-        _receiver = levelResultReceiverBehaviour as ILevelResultReceiver;
-        if (_receiver == null && levelResultReceiverBehaviour != null)
-            Debug.LogError("[RunController] levelResultReceiverBehaviour does not implement ILevelResultReceiver.");
+        if (gameEntry == null)
+            gameEntry = FindFirstObjectByType<GameEntry>();
+
+        // ОБЯЗАТЕЛЬНО: подтянуть RunConfig из SceneFlow.PendingRunConfig
+        gameEntry?.Init();
     }
 
     private void OnEnable()
@@ -95,7 +84,6 @@ public class RunController : MonoBehaviour
         }
     }
 
-    // Called by LevelDirector after LoadLevel() (duration override already applied)
     public void StartRun()
     {
         HideScreens();
@@ -106,11 +94,10 @@ public class RunController : MonoBehaviour
         _revivesUsed = 0;
         _freeRevivesUsed = 0;
 
-        _resultSent = false;
-        _losePending = false;
-
         _coinsSpentInGame = 0;
         _buff1Used = _buff2Used = _buff3Used = _buff4Used = 0;
+
+        _losePending = false;
 
         IsRunning = true;
 
@@ -124,7 +111,6 @@ public class RunController : MonoBehaviour
     {
         if (!IsRunning) return;
 
-        // FreezeTimeBoost freezes only the run timer
         if (freezeTimeBoost == null || !freezeTimeBoost.IsActive)
         {
             _timeLeft -= Time.deltaTime;
@@ -138,6 +124,12 @@ public class RunController : MonoBehaviour
             Lose(LoseReason.TimeUp);
     }
 
+    public void ApplyLevelDuration(float minutesOverride)
+    {
+        if (minutesOverride > 0f)
+            levelDurationMinutes = minutesOverride;
+    }
+
     private void UpdateDebugTimerText()
     {
         if (!debugTimerText) return;
@@ -146,14 +138,6 @@ public class RunController : MonoBehaviour
         int m = sec / 60;
         int s = sec % 60;
         debugTimerText.text = $"{m:00}:{s:00}";
-    }
-
-    // ---------- Level duration override (from LevelDefinition) ----------
-    public void ApplyLevelDuration(float minutesOverride)
-    {
-        if (minutesOverride > 0f)
-            levelDurationMinutes = minutesOverride;
-        // if 0 -> keep default
     }
 
     // ---------- External loses ----------
@@ -168,10 +152,8 @@ public class RunController : MonoBehaviour
     {
         if (!IsRunning || item == null) return;
 
-        // XP always
         holeGrowth?.AddXp(item.XpValue);
 
-        // goals only for goal-item
         if (objectives != null && objectives.IsGoalItem(item.Type))
         {
             objectives.Add(item.Type, 1);
@@ -195,7 +177,6 @@ public class RunController : MonoBehaviour
         }
     }
 
-    public bool IsGoalItem(ItemType t) => objectives != null && objectives.IsGoalItem(t);
     public RectTransform GetGoalIconTarget(ItemType t) => goalUI ? goalUI.GetTarget(t) : null;
     public GoalSlotUI GetGoalSlotUI(ItemType t) => goalUI ? goalUI.GetSlotUI(t) : null;
 
@@ -211,7 +192,6 @@ public class RunController : MonoBehaviour
     }
 
     // ---------- Buff usage reporting ----------
-    // Call this from boost buttons AFTER successful TryConsume(...)
     public void RegisterBuffUsed(BuffType type)
     {
         switch (type)
@@ -223,7 +203,6 @@ public class RunController : MonoBehaviour
         }
     }
 
-    // Optional: call when player spends coins in game (paid continue)
     public void AddCoinsSpentInGame(int amount)
     {
         if (amount <= 0) return;
@@ -241,30 +220,48 @@ public class RunController : MonoBehaviour
         float timeSpent = _timeTotal - _timeLeft;
         int stars = CalculateStars();
 
-        // WIN is final -> send result immediately
-        SubmitLevelResult(LevelOutcome.Win, stars);
-
-        // keep your scene reload flow
-        SaveCurrentLevelIndex();
+        // ВАЖНО: результат НЕ отправляем сразу.
+        // Отправим по кнопке Continue, потому что ты так хочешь.
 
         if (winIntroPopup != null)
         {
             winIntroPopup.Show(() =>
             {
-                winUI?.Show(stars, timeSpent, onNext: ContinueNextLevel);
+                winUI?.Show(stars, timeSpent, onNext: () => ContinueAfterWin(stars));
             });
         }
         else
         {
-            winUI?.Show(stars, timeSpent, onNext: ContinueNextLevel);
+            winUI?.Show(stars, timeSpent, onNext: () => ContinueAfterWin(stars));
         }
+    }
+
+    private void ContinueAfterWin(int stars)
+    {
+        // Здесь возвращаемся в меню через SceneFlow
+        if (gameEntry == null)
+        {
+            Debug.LogError("[RunController] GameEntry is NULL. Can't return to menu.");
+            return;
+        }
+
+        gameEntry.OnWin(
+            starsEarned: stars,
+            coinsToWallet: 0,
+            coinsToBank: 0,
+            battlepassItems: 0,
+            coinsSpent: _coinsSpentInGame,
+            buff1Used: _buff1Used,
+            buff2Used: _buff2Used,
+            buff3Used: _buff3Used,
+            buff4Used: _buff4Used
+        );
     }
 
     private void Lose(LoseReason reason)
     {
         if (!IsRunning) return;
 
-        // Do NOT send result here (revive exists)
         IsRunning = false;
         HideScreens();
 
@@ -285,19 +282,22 @@ public class RunController : MonoBehaviour
             canRevive,
             reviveText,
             onRevive: () => TryRevive(isFree),
-            onRetry: FinalizeLoseAndReload
+            onRetry: ContinueAfterLose
         );
     }
 
-    private void FinalizeLoseAndReload()
+    private void ContinueAfterLose()
     {
-        if (_losePending)
+        if (!_losePending) return;
+        _losePending = false;
+
+        if (gameEntry == null)
         {
-            SubmitLevelResult(LevelOutcome.Lose, 0);
-            _losePending = false;
+            Debug.LogError("[RunController] GameEntry is NULL. Can't return to menu.");
+            return;
         }
 
-        ReloadCurrentLevelScene();
+        gameEntry.OnLose();
     }
 
     private int CalculateStars()
@@ -332,70 +332,8 @@ public class RunController : MonoBehaviour
         _timeLeft = Mathf.Clamp(_timeLeft + reviveAddTimeSeconds, 0f, _timeTotal);
         HideScreens();
 
-        _losePending = false; // revive cancels final lose
+        _losePending = false;
         IsRunning = true;
-    }
-
-    // ---------- Scene reload / next level ----------
-    private void ContinueNextLevel()
-    {
-        LevelProgress.NextLevel(); // your system (likely 1-based)
-        SaveCurrentLevelIndex();   // store 0-based for LevelDirector
-        ReloadScene();
-    }
-
-    private void ReloadCurrentLevelScene()
-    {
-        SaveCurrentLevelIndex();
-        ReloadScene();
-    }
-
-    private void ReloadScene()
-    {
-        var scene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(scene.buildIndex);
-    }
-
-    private void SaveCurrentLevelIndex()
-    {
-        // Your LevelDirector loads 0-based index
-        int zeroBased = Mathf.Max(0, LevelProgress.CurrentLevelIndex - 1);
-        PlayerPrefs.SetInt(PREF_LEVEL_INDEX, zeroBased);
-        PlayerPrefs.Save();
-    }
-
-    // ---------- LevelResult submit ----------
-    private void SubmitLevelResult(LevelOutcome outcome, int starsEarned)
-    {
-        if (_resultSent) return;
-        _resultSent = true;
-
-        var result = new LevelResult();
-
-        // levelIndex must match menu logic. We use 0-based, same as LevelDirector.
-        result.levelIndex = PlayerPrefs.GetInt(PREF_LEVEL_INDEX, 0);
-
-        result.outcome = outcome;
-
-        result.starsEarned = Mathf.Clamp(starsEarned, 0, 3);
-        result.coinsEarnedToWallet = 0;
-        result.coinsEarnedToBank = 0;
-        result.battlepassItemsCollected = 0;
-
-        result.coinsSpentInGame = Mathf.Max(0, _coinsSpentInGame);
-
-        result.buff1Used = Mathf.Max(0, _buff1Used);
-        result.buff2Used = Mathf.Max(0, _buff2Used);
-        result.buff3Used = Mathf.Max(0, _buff3Used);
-        result.buff4Used = Mathf.Max(0, _buff4Used);
-
-        if (_receiver == null)
-        {
-            Debug.LogWarning("[RunController] No ILevelResultReceiver assigned. LevelResult not sent.");
-            return;
-        }
-
-        _receiver.SubmitLevelResult(result);
     }
 
     private void HideScreens()

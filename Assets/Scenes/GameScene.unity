@@ -1048,9 +1048,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 379487406}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f41e1a9b408e4565a3aee6531a84939, type: 3}
+  m_Script: {fileID: 11500000, guid: 75403f55e047a574584e7a659524a65a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelResultReceiverDebug
+  m_EditorClassIdentifier: Assembly-CSharp::Game.GameEntry
 --- !u!1 &400239270
 GameObject:
   m_ObjectHideFlags: 0
@@ -5633,7 +5633,7 @@ MonoBehaviour:
   goalFinderBoost: {fileID: 1745840904}
   winIntroPopup: {fileID: 1431604029}
   freezeTimeBoost: {fileID: 1745840907}
-  levelResultReceiverBehaviour: {fileID: 0}
+  gameEntry: {fileID: 379487409}
   winUI: {fileID: 1431604028}
   loseUI: {fileID: 1431604027}
   debugTimerText: {fileID: 0}
