@@ -233,5 +233,29 @@ namespace Meta.Services
             Save.inventory.boostExtraTime--;
             return true;
         }
+        // ---------------- IAP hooks (call from Menu UI) ----------------
+
+        /// <summary>
+        /// Claim bank via IAP. Adds bank coins + bonus coins to wallet, then clears the bank.
+        /// </summary>
+        public void ClaimBankIap(int iapBonusCoins)
+        {
+            int amount = _bank.ClaimBank(Save, iapBonusCoins);
+            _wallet.AddCoins(Save, amount);
+            _saveSystem.Save();
+        }
+
+        /// <summary>
+        /// Grant infinite lives for given duration (e.g. from IAP / reward).
+        /// If already active, extends from the max(currentUntil, now).
+        /// </summary>
+        public void GrantInfiniteLives(System.TimeSpan duration)
+        {
+            long now = _time.UtcNow.Ticks;
+            long baseTicks = System.Math.Max(now, Save.timeBonuses.infiniteLivesUntilUtcTicks);
+            Save.timeBonuses.infiniteLivesUntilUtcTicks = baseTicks + duration.Ticks;
+            _saveSystem.Save();
+        }
+
     }
 }

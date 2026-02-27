@@ -1,4 +1,5 @@
 using UnityEngine;
+using Core.Bootstrap;
 using Core.Configs;
 using Core.Save;
 using Core.Time;
@@ -26,6 +27,8 @@ namespace Menu.UI
 
         private void Awake()
         {
+            AppServices.EnsureExists();
+
             _time = new DeviceTimeProvider();
 
             _saveSystem = new SaveSystem(new PlayerPrefsJsonStorage());
@@ -45,14 +48,27 @@ namespace Menu.UI
             // Apply pending level result if returned from Game
             if (SceneFlow.PendingLevelResult != null)
             {
-                _meta.ApplyLevelResult(SceneFlow.PendingLevelResult);
+                var r = SceneFlow.PendingLevelResult;
+                _meta.ApplyLevelResult(r);
 
-                // Example: show interstitial after win (your ad system later)
-                // if (SceneFlow.PendingLevelResult.outcome == LevelOutcome.Win &&
-                //     _meta.ShouldShowInterstitialAfterWin(SceneFlow.PendingLevelResult.levelIndex))
-                // {
-                //     // Show interstitial here
-                // }
+                // Analytics: level outcome
+                AnalyticsService.LogEvent("level_complete", ("level", r.levelIndex), ("result", r.outcome == LevelOutcome.Win),("stars", r.starsEarned));
+                // Interstitial (LevelPlay/IronSource): show after win when player returns to menu,
+                // starting from unlock level (default 10) controlled by your UnlockConfig / policy.
+                if (r.outcome == LevelOutcome.Win && _meta.ShouldShowInterstitialAfterWin(r.levelIndex))
+                {
+                    // Optional RC switch
+                    if (AppServices.RemoteConfig.GetBool("ads_interstitial_after_win", true))
+                    {
+                        AnalyticsService.LogEvent("ad_interstitial_request_after_win");
+
+                        // Requires LevelPlayInterstitialController in your bootstrap scene (DontDestroyOnLoad)
+                        if (LevelPlayInterstitialController.Instance != null)
+                            LevelPlayInterstitialController.Instance.Show("after_win_menu");
+                        else
+                            Debug.LogWarning("[Menu] LevelPlayInterstitialController.Instance is null (no interstitial)");
+                    }
+                }
             }
 
             _meta.Tick();
@@ -67,6 +83,7 @@ namespace Menu.UI
             }
 
             var cfg = _meta.BuildRunConfig(boost1Selected, boost2Selected);
+            AnalyticsService.LogEvent("level_started", ("level", cfg.levelIndex));
             SceneFlow.StartGame(cfg);
         }
 
