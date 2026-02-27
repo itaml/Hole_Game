@@ -29,6 +29,8 @@ public class HoleGrowth : MonoBehaviour
     [SerializeField] private float punchUpTime = 0.08f;
     [SerializeField] private float punchDownTime = 0.15f;
 
+    private float _tempScaleMultiplier = 1f;
+
     private int _size;
     private int _xp;
     private Coroutine _punchRoutine;
@@ -73,6 +75,18 @@ public class HoleGrowth : MonoBehaviour
         if (!leveledUp)
             UpdateSlider();
     }
+
+    public void SetTempScaleMultiplier(float multiplier)
+{
+    _tempScaleMultiplier = Mathf.Clamp(multiplier, 0.01f, 10f);
+    ApplyScaleAndRadius();
+}
+
+public void ClearTempScaleMultiplier()
+{
+    _tempScaleMultiplier = 1f;
+    ApplyScaleAndRadius();
+}
 
     // ---------------- Internal ----------------
 
@@ -149,7 +163,7 @@ public class HoleGrowth : MonoBehaviour
 
 private void ApplyScaleAndRadius()
 {
-    float s = GetVisualScaleFactor();
+    float s = GetVisualScaleFactor() * _tempScaleMultiplier;
 
     holeVisualRoot.localScale = new Vector3(s, 1f, s);
 

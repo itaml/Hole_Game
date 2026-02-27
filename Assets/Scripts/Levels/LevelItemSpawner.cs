@@ -48,71 +48,73 @@ public class LevelItemSpawner : MonoBehaviour
             Destroy(itemsParent.GetChild(i).gameObject);
     }
 
-    public void Spawn(LevelSpawnConfig config)
+public void Spawn(LevelSpawnConfig config, ItemCatalog catalogOverride = null)
+{
+    if (config == null)
     {
-        if (config == null)
-        {
-            Debug.LogWarning("LevelItemSpawner: config is null");
-            return;
-        }
-        if (itemCatalog == null)
-        {
-            Debug.LogError("LevelItemSpawner: ItemCatalog not set");
-            return;
-        }
-        if (itemsParent == null)
-        {
-            Debug.LogError("LevelItemSpawner: itemsParent not set");
-            return;
-        }
-
-        _lastSpawnedConfig = config;
-
-        if (clearBeforeSpawn)
-            Clear();
-
-        // очистка кешей
-        _frozenBodies.Clear();
-        _frozenBodiesPrevGravity.Clear();
-        _disabledColliders.Clear();
-
-        // спавним группы
-        foreach (var g in config.groups)
-        {
-            var prefab = itemCatalog.GetWorldPrefab(g.type);
-            if (prefab == null)
-            {
-                Debug.LogWarning($"LevelItemSpawner: No worldPrefab for {g.type}");
-                continue;
-            }
-
-            var points = BuildPoints(g);
-
-            var rot = Quaternion.Euler(0f, g.rotationY, 0f);
-            var rng = (g.seed != 0) ? new System.Random(g.seed) : null;
-
-            foreach (var localPoint in points)
-            {
-                var pos = g.center + rot * localPoint;
-                pos.y = spawnY;
-
-                if (g.jitter > 0f)
-                {
-                    pos.x += Rand(rng, -g.jitter, g.jitter);
-                    pos.z += Rand(rng, -g.jitter, g.jitter);
-                }
-
-                var go = Instantiate(prefab, pos, Quaternion.identity, itemsParent);
-
-                ApplyStabilization(go);
-            }
-        }
-
-        if (stabilization != SpawnStabilizationMode.None && unfreezeDelay > 0f)
-            StartCoroutine(UnfreezeRoutine());
-        else
-            FinishStabilizationImmediately();
+        Debug.LogWarning("LevelItemSpawner: config is null");
+        return;
     }
+
+    // ✅ берём override, если задан, иначе дефолтный из инспектора
+    var catalog = catalogOverride != null ? catalogOverride : itemCatalog;
+    if (catalog == null)
+    {
+        Debug.LogError("LevelItemSpawner: ItemCatalog not set (override and default are null)");
+        return;
+    }
+
+    if (itemsParent == null)
+    {
+        Debug.LogError("LevelItemSpawner: itemsParent not set");
+        return;
+    }
+
+    _lastSpawnedConfig = config;
+
+    if (clearBeforeSpawn)
+        Clear();
+
+    _frozenBodies.Clear();
+    _frozenBodiesPrevGravity.Clear();
+    _disabledColliders.Clear();
+
+    foreach (var g in config.groups)
+    {
+        // ✅ ВАЖНО: берём prefab из выбранного catalog, а не из itemCatalog
+        var prefab = catalog.GetWorldPrefab(g.type);
+        if (prefab == null)
+        {
+            Debug.LogWarning($"LevelItemSpawner: No worldPrefab for {g.type}");
+            continue;
+        }
+
+        var points = BuildPoints(g);
+
+        var rot = Quaternion.Euler(0f, g.rotationY, 0f);
+        var rng = (g.seed != 0) ? new System.Random(g.seed) : null;
+
+        foreach (var localPoint in points)
+        {
+            var pos = g.center + rot * localPoint;
+            pos.y = spawnY;
+
+            if (g.jitter > 0f)
+            {
+                pos.x += Rand(rng, -g.jitter, g.jitter);
+                pos.z += Rand(rng, -g.jitter, g.jitter);
+            }
+
+            var go = Instantiate(prefab, pos, Quaternion.identity, itemsParent);
+            ApplyStabilization(go);
+        }
+    }
+
+    if (stabilization != SpawnStabilizationMode.None && unfreezeDelay > 0f)
+        StartCoroutine(UnfreezeRoutine());
+    else
+        FinishStabilizationImmediately();
+}
 
     private void ApplyStabilization(GameObject go)
     {

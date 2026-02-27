@@ -6,7 +6,6 @@ public class HoleCountTrigger : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private RunController run;
     [SerializeField] private FloatingXpTextSpawner xpText;
-    [SerializeField] private FlyToUiIconSpawner flyToUi;
 
     [Header("Swallow rule")]
     [Tooltip("Насколько ниже центра CountTrigger должен быть ВЕРХ объекта, чтобы считалось 'полностью проглочен'.")]
@@ -36,29 +35,18 @@ public class HoleCountTrigger : MonoBehaviour
 
         // объект считается проглоченным, когда его верхняя граница ниже swallowY
         float topY = item.Col.bounds.max.y;
-
         if (topY > swallowY) return;
 
-        // ✅ полностью проглочен -> засчитываем
+        // ✅ полностью проглочен -> засчитываем один раз
         _counted.Add(item);
 
+        // ✅ ВСЕГДА: сбор + XP/рост/цели решает RunController
         run.OnItemCollected(item);
+
+        // ✅ локальная визуалка XP (можно показывать для всех)
         xpText?.Spawn(item.transform.position, item.XpValue);
 
-        if (run.IsGoalItem(item.Type))
-        {
-            var target = run.GetGoalIconTarget(item.Type);
-            if (target != null && item.UiIcon != null)
-                flyToUi?.Spawn(item.transform.position, item.UiIcon, target);
-        }
-
-        if (run.IsGoalItem(item.Type))
-{
-    var target = run.GetGoalIconTarget(item.Type);
-    if (target != null && item.UiIcon != null)
-        flyToUi.Spawn(item.transform.position, item.UiIcon, target);
-}
-
+        // ✅ дальше предмет удаляем
         Destroy(item.gameObject);
     }
 

@@ -3,10 +3,6 @@ using UnityEngine;
 
 public class GoalUIBuilder : MonoBehaviour
 {
-    [Header("Data")]
-    [SerializeField] private LevelGoals levelGoals;
-    [SerializeField] private ItemCatalog catalog;
-
     [Header("UI")]
     [SerializeField] private Transform slotsParent;
     [SerializeField] private GoalSlotUI slotPrefab;
@@ -17,50 +13,44 @@ public class GoalUIBuilder : MonoBehaviour
 
     private readonly List<GameObject> _spawned = new();
 
-    public void Build()
+public void Build(LevelGoals goals, ItemCatalog catalog)
+{
+    if (goals == null) { Debug.LogError("GoalUIBuilder: goals is NULL"); return; }
+    if (catalog == null) { Debug.LogError("GoalUIBuilder: catalog is NULL"); return; }
+
+    Clear();
+
+    var uiSlots = new List<GoalUI.Slot>(goals.goals.Count);
+    var trackerGoals = new List<ObjectiveTracker.Goal>(goals.goals.Count);
+
+    foreach (var g in goals.goals)
     {
-        if (levelGoals == null) { Debug.LogError("GoalUIBuilder: levelGoals is NULL"); return; }
-        if (catalog == null) { Debug.LogError("GoalUIBuilder: catalog is NULL"); return; }
-        if (slotsParent == null) { Debug.LogError("GoalUIBuilder: slotsParent is NULL"); return; }
-        if (slotPrefab == null) { Debug.LogError("GoalUIBuilder: slotPrefab is NULL"); return; }
-        if (goalUI == null) { Debug.LogError("GoalUIBuilder: goalUI is NULL"); return; }
-        if (objectives == null) { Debug.LogError("GoalUIBuilder: objectives is NULL"); return; }
+        if (g == null) continue;
 
-        Clear();
+        var slot = Instantiate(slotPrefab, slotsParent);
+        _spawned.Add(slot.gameObject);
 
-        var uiSlots = new List<GoalUI.Slot>(levelGoals.goals.Count);
-        var trackerGoals = new List<ObjectiveTracker.Goal>(levelGoals.goals.Count);
+        var icon = catalog.GetIcon(g.type);
+        slot.Setup(icon, g.required);
+        slot.SetRemaining(g.required);
 
-        foreach (var g in levelGoals.goals)
+        uiSlots.Add(new GoalUI.Slot
         {
-            if (g == null) continue;
+            type = g.type,
+            target = slot.Target,
+            slotUI = slot
+        });
 
-            var slot = Instantiate(slotPrefab, slotsParent);
-            _spawned.Add(slot.gameObject);
-
-            var icon = catalog.GetIcon(g.type);
-            slot.Setup(icon, g.required);
-
-            // ✅ теперь показываем “оставшееся”, старт = required
-            slot.SetRemaining(g.required);
-
-            uiSlots.Add(new GoalUI.Slot
-            {
-                type = g.type,
-                target = slot.Target,
-                slotUI = slot
-            });
-
-            trackerGoals.Add(new ObjectiveTracker.Goal
-            {
-                type = g.type,
-                required = g.required
-            });
-        }
-
-        goalUI.SetSlots(uiSlots);
-        objectives.SetGoals(trackerGoals);
+        trackerGoals.Add(new ObjectiveTracker.Goal
+        {
+            type = g.type,
+            required = g.required
+        });
     }
+
+    goalUI.SetSlots(uiSlots);
+    objectives.SetGoals(trackerGoals);
+}
 
     public void Clear()
     {
