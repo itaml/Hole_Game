@@ -290,6 +290,7 @@ GameObject:
   m_Component:
   - component: {fileID: 765405736}
   - component: {fileID: 765405737}
+  - component: {fileID: 765405738}
   m_Layer: 0
   m_Name: MenuManager
   m_TagString: Untagged
@@ -330,6 +331,23 @@ MonoBehaviour:
   levelsChestConfig: {fileID: 11400000, guid: 133754d8fadc56e4782afd6e5918a357, type: 2}
   bankConfig: {fileID: 11400000, guid: a555542adee3fe841b97bb1d1bc14877, type: 2}
   battlepassConfig: {fileID: 11400000, guid: 7a4064b91f89fbf4bbeb7ddccbdcac4f, type: 2}
+--- !u!114 &765405738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765405735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff390fb19e9d5e84bb2ffa6356cb7585, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Menu.UI.MetaDebugPanel
+  root: {fileID: 765405737}
+  stars: 3
+  coinsWallet: 50
+  coinsBank: 25
+  bpItems: 5
 --- !u!1 &775341184
 GameObject:
   m_ObjectHideFlags: 0
