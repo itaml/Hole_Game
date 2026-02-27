@@ -1,3 +1,4 @@
+using Core.Configs;
 using Core.Save;
 using Core.Time;
 using GameBridge.Contracts;
@@ -73,10 +74,7 @@ namespace Meta.Services
         public bool ShouldShowInterstitialAfterWin(int levelIndexJustWon)
             => _ads.ShouldShowInterstitial(_unlocks, levelIndexJustWon);
 
-        /// <summary>
-        /// Apply final level outcome (called when Menu loads after Game).
-        /// IMPORTANT: Game sends final result only once (after win or final lose).
-        /// </summary>
+
         public void ApplyLevelResult(LevelResult r)
         {
             if (r == null) return;
@@ -84,23 +82,19 @@ namespace Meta.Services
             // Keep timers up to date first
             _lives.TickRegen(Save);
 
-            // 0) Spend coins used inside Game (continue, etc.)
-            if (r.coinsSpentInGame > 0)
-            {
-                // If for some reason not enough coins (desync), clamp and don't go negative.
-                if (!_wallet.TrySpend(Save, r.coinsSpentInGame))
-                    Save.wallet.coins = System.Math.Max(0, Save.wallet.coins - r.coinsSpentInGame);
-            }
+            // 0) Sanity: result должен относиться к текущему уровню (или хотя бы к ожидаемому)
+            // Можно убрать если не нужно
+            // if (r.levelIndex != Save.progress.currentLevel) ...
 
-            // 1) Deduct used buffs from inventory (clamped)
-            DeductBuffsFromInventory(r);
+            // 1) Применяем итоговые значения (coins + buffs)
+            ApplyFinalCoinsFromGame(r);
+            ApplyFinalBuffCountsFromGame(r);
 
             // 2) Outcome handling: lives + streak
             if (r.outcome == LevelOutcome.Lose)
             {
                 _lives.ConsumeLifeOnLose(Save);
 
-                // streak only after unlock
                 if (_unlocks.IsWinStreakUnlocked(r.levelIndex))
                     _streak.OnLose(Save);
             }
@@ -108,33 +102,29 @@ namespace Meta.Services
             {
                 if (_unlocks.IsWinStreakUnlocked(r.levelIndex))
                     _streak.OnWin(Save);
+
+                if (_unlocks.IsBankUnlocked(r.levelIndex))
+                    _bank.AddWinDeposit(Save);
             }
 
-            // 3) Wallet / Bank earnings
-            _wallet.AddCoins(Save, r.coinsEarnedToWallet);
-
-            if (_unlocks.IsBankUnlocked(r.levelIndex))
-                _bank.AddToBank(Save, r.coinsEarnedToBank);
-
-            // 4) Star chest
+            // 3) Star chest
             if (_unlocks.IsStarsChestUnlocked(r.levelIndex))
                 _chests.AddStarsAndOpenIfReady(Save, r.starsEarned);
 
-            // 5) Level chest (only on win)
+            // 4) Level chest (only on win)
             if (r.outcome == LevelOutcome.Win && _unlocks.IsLevelsChestUnlocked(r.levelIndex))
                 _chests.AddLevelWinAndOpenIfReady(Save);
 
-            // 6) Battlepass
+            // 5) Battlepass
             if (_unlocks.IsBattlepassUnlocked(r.levelIndex))
             {
                 _battlepass.EnsureSeason(Save);
                 _battlepass.AddItems(Save, r.battlepassItemsCollected);
             }
 
-            // 7) Progression: advance only on win
+            // 6) Progression: advance only on win
             if (r.outcome == LevelOutcome.Win)
             {
-                // Save.progress.currentLevel is the next playable level
                 if (Save.progress.currentLevel <= r.levelIndex)
                     Save.progress.currentLevel = r.levelIndex + 1;
             }
@@ -142,24 +132,19 @@ namespace Meta.Services
             _saveSystem.Save();
         }
 
-        private void DeductBuffsFromInventory(LevelResult r)
+        private void ApplyFinalCoinsFromGame(LevelResult r)
         {
-            // If buff not unlocked at this level, we still clamp (should be 0 anyway).
-            int used1 = System.Math.Max(0, r.buff1Used);
-            int used2 = System.Math.Max(0, r.buff2Used);
-            int used3 = System.Math.Max(0, r.buff3Used);
-            int used4 = System.Math.Max(0, r.buff4Used);
-
-            Save.inventory.buffGrowTemp = System.Math.Max(0, Save.inventory.buffGrowTemp - used1);
-            Save.inventory.buffRadar = System.Math.Max(0, Save.inventory.buffRadar - used2);
-            Save.inventory.buffMagnet = System.Math.Max(0, Save.inventory.buffMagnet - used3);
-            Save.inventory.buffFreezeTime = System.Math.Max(0, Save.inventory.buffFreezeTime - used4);
+            Save.wallet.coins = System.Math.Max(0, r.coinsResult);
         }
 
-        /// <summary>
-        /// Build run config for Game.
-        /// boost1Selected/boost2Selected come from Menu selection (player choice).
-        /// </summary>
+        private void ApplyFinalBuffCountsFromGame(LevelResult r)
+        {
+            Save.inventory.buffGrowTemp = System.Math.Max(0, r.buff1Count);
+            Save.inventory.buffRadar = System.Math.Max(0, r.buff2Count);
+            Save.inventory.buffMagnet = System.Math.Max(0, r.buff3Count);
+            Save.inventory.buffFreezeTime = System.Math.Max(0, r.buff4Count);
+        }
+
         public RunConfig BuildRunConfig(bool boost1Selected, bool boost2Selected)
         {
             int level = Save.progress.currentLevel;
@@ -199,7 +184,6 @@ namespace Meta.Services
                 buff4Count = buff4Count,
 
                 walletCoinsSnapshot = Save.wallet.coins,
-                infiniteLivesActive = _lives.IsInfiniteLivesActive(Save)
             };
 
             _saveSystem.Save(); // consumes bonusBagArmed + potentially consumes boosts

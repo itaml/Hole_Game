@@ -1,3 +1,4 @@
+using System;
 using Core.Configs;
 using Meta.State;
 
@@ -5,27 +6,40 @@ namespace Meta.Services
 {
     public sealed class BankService
     {
-        private readonly BankConfig _cfg;
+        private readonly BankConfig _config;
 
-        public BankService(BankConfig cfg) { _cfg = cfg; }
-
-        public void AddToBank(PlayerSave save, int amount)
+        public BankService(BankConfig config)
         {
-            if (amount <= 0) return;
-
-            save.bank.bankCoins += amount;
-            if (_cfg.capacity > 0)
-                save.bank.bankCoins = System.Math.Min(save.bank.bankCoins, _cfg.capacity);
+            _config = config;
         }
 
         /// <summary>
-        /// IAP flow should call this: returns amount to add to wallet, resets bank to 0.
+        /// Начисляет монеты в банк при победе (НЕ забирая из wallet).
+        /// Возвращает сколько реально начислили (с учётом capacity).
         /// </summary>
-        public int ClaimBank(PlayerSave save, int iapBonusCoins)
+        public int AddWinDeposit(PlayerSave save)
         {
-            int total = save.bank.bankCoins + iapBonusCoins;
-            save.bank.bankCoins = 0;
-            return total;
+            if (save == null) return 0;
+
+            int deposit = Math.Max(0, _config.depositOnWin);
+            if (deposit <= 0) return 0;
+
+            // Capacity (0 = unlimited)
+            if (_config.capacity > 0)
+            {
+                int spaceLeft = _config.capacity - save.bank.bankCoins;
+                if (spaceLeft <= 0) return 0;
+
+                deposit = Math.Min(deposit, spaceLeft);
+                if (deposit <= 0) return 0;
+            }
+
+            save.bank.bankCoins += deposit;
+
+            // safety
+            if (save.bank.bankCoins < 0) save.bank.bankCoins = 0;
+
+            return deposit;
         }
     }
 }

@@ -10,16 +10,13 @@ namespace GameBridge.Contracts
 
         // Earnings (Game -> Menu)
         public int starsEarned;
-        public int coinsEarnedToWallet;
-        public int coinsEarnedToBank;
         public int battlepassItemsCollected;
 
-        // Spending/usage (Game -> Menu)
-        public int coinsSpentInGame; // continue, etc.
+        public int coinsResult;
 
-        public int buff1Used; // GrowTemp
-        public int buff2Used; // Radar
-        public int buff3Used; // Magnet
-        public int buff4Used; // FreezeTime
+        public int buff1Count; // GrowTemp
+        public int buff2Count; // Radar
+        public int buff3Count; // Magnet
+        public int buff4Count; // FreezeTime
     }
 }

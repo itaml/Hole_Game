@@ -5,8 +5,6 @@ namespace Meta.State
     [Serializable]
     public sealed class PlayerSave
     {
-        public int version = 1;
-
         public ProgressState progress = new ProgressState();
         public WalletState wallet = new WalletState();
         public LivesState lives = new LivesState();

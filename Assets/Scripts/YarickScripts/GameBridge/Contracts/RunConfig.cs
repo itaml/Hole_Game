@@ -7,7 +7,6 @@ namespace GameBridge.Contracts
     {
         public int levelIndex;
 
-        // Boosts chosen in Menu for this run
         public bool boost1Activated; // BoostType.GrowWholeLevel
         public bool boost2Activated; // BoostType.ExtraLevelTime
 
@@ -24,8 +23,5 @@ namespace GameBridge.Contracts
 
         // Convenience for "continue" offer logic in Game
         public int walletCoinsSnapshot;
-
-        // Optional convenience
-        public bool infiniteLivesActive;
     }
 }

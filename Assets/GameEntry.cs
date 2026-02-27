@@ -27,19 +27,19 @@ namespace Game
             _initialized = true;
         }
 
-        public void OnWin(int starsEarned, int coinsToWallet, int coinsToBank, int battlepassItems, int coinsSpent, int buff1Used, int buff2Used, int buff3Used, int buff4Used)
+        public void OnWin(int starsEarned, int coins, int battlepassItems, int buff1, int buff2, int buff3, int buff4)
         {
             if (!_initialized || _ended) return;
-            ReturnToMenu(LevelOutcome.Win, starsEarned, coinsToWallet, coinsToBank, battlepassItems, coinsSpent, buff1Used, buff2Used, buff3Used, buff4Used);
+            ReturnToMenu(LevelOutcome.Win, starsEarned, coins, battlepassItems, buff1, buff2, buff3, buff4);
         }
 
-        public void OnLose()
+        public void OnLose(int coins, int buff1, int buff2, int buff3, int buff4)
         {
             if (!_initialized || _ended) return;
-            ReturnToMenu(LevelOutcome.Lose, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            ReturnToMenu(LevelOutcome.Lose, 0, coins, 0, buff1, buff2, buff3, buff4);
         }
 
-        private void ReturnToMenu(LevelOutcome outcome, int stars, int coinsWallet, int coinsBank, int bpItems, int coinsSpent, int buff1Used, int buff2Used, int buff3Used, int buff4Used)
+        private void ReturnToMenu(LevelOutcome outcome, int stars, int coins, int bpItems, int buff1, int buff2, int buff3, int buff4)
         {
             _ended = true;
 
@@ -49,20 +49,18 @@ namespace Game
                 outcome = outcome,
 
                 starsEarned = (outcome == LevelOutcome.Win) ? Mathf.Max(0, stars) : 0,
-                coinsEarnedToWallet = Mathf.Max(0, coinsWallet),
-                coinsEarnedToBank = Mathf.Max(0, coinsBank),
+                coinsResult = Mathf.Max(0, coins),
                 battlepassItemsCollected = Mathf.Max(0, bpItems),
-                coinsSpentInGame = Mathf.Max(0, coinsSpent),
-                buff1Used = Mathf.Max(0, buff1Used),
-                buff2Used = Mathf.Max(0, buff2Used),
-                buff3Used = Mathf.Max(0, buff3Used),
-                buff4Used = Mathf.Max(0, buff4Used),
+                buff1Count = Mathf.Max(0, buff1),
+                buff2Count = Mathf.Max(0, buff2),
+                buff3Count = Mathf.Max(0, buff3),
+                buff4Count = Mathf.Max(0, buff4),
             };
 
             Debug.Log(
                 $"ReturnToMenu: outcome={outcome} level={result.levelIndex} " +
-                $"stars={result.starsEarned} wallet+={result.coinsEarnedToWallet} bank+={result.coinsEarnedToBank} bpItems={result.battlepassItemsCollected} " +
-                $"spent={result.coinsSpentInGame} buffsUsed=({result.buff1Used},{result.buff2Used},{result.buff3Used},{result.buff4Used})"
+                $"stars={result.starsEarned} wallet+={result.coinsResult} bpItems={result.battlepassItemsCollected} " +
+                $"buffsCount=({result.buff1Count},{result.buff1Count},{result.buff1Count},{result.buff1Count})"
             );
 
             SceneFlow.ReturnToMenu(result);

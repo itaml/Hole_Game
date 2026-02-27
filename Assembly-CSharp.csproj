@@ -712,6 +712,22 @@
       <HintPath>Library/PackageCache/com.google.firebase.analytics@d41be48e28a7/Firebase/Plugins/Firebase.Analytics.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Firebase.Analytics">
+      <HintPath>Library\PackageCache\com.google.firebase.analytics@d41be48e28a7\Firebase\Plugins\Firebase.Analytics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.Analytics">
+      <HintPath>Library\PackageCache\com.google.firebase.analytics@d41be48e28a7\Firebase\Plugins\Firebase.Analytics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.Analytics">
+      <HintPath>Library\PackageCache\com.google.firebase.analytics@d41be48e28a7\Firebase\Plugins\Firebase.Analytics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.Analytics">
+      <HintPath>Library\PackageCache\com.google.firebase.analytics@d41be48e28a7\Firebase\Plugins\Firebase.Analytics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>Library/PackageCache/com.unity.ext.nunit@d8c07649098d/net40/unity-custom/nunit.framework.dll</HintPath>
       <Private>False</Private>
@@ -736,6 +752,54 @@
       <HintPath>Library/PackageCache/com.google.firebase.app@bd8ef756bb03/Firebase/Plugins/Firebase.TaskExtension.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Firebase.App">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.App.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.RemoteConfig">
+      <HintPath>Library\PackageCache\com.google.firebase.remote-config@684fe731e390\Firebase\Plugins\Firebase.RemoteConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.TaskExtension">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.TaskExtension.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.App">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.App.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.RemoteConfig">
+      <HintPath>Library\PackageCache\com.google.firebase.remote-config@684fe731e390\Firebase\Plugins\Firebase.RemoteConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.TaskExtension">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.TaskExtension.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.App">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.App.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.RemoteConfig">
+      <HintPath>Library\PackageCache\com.google.firebase.remote-config@684fe731e390\Firebase\Plugins\Firebase.RemoteConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.TaskExtension">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.TaskExtension.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.App">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.App.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.RemoteConfig">
+      <HintPath>Library\PackageCache\com.google.firebase.remote-config@684fe731e390\Firebase\Plugins\Firebase.RemoteConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.TaskExtension">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.TaskExtension.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library/PackageCache/com.unity.nuget.newtonsoft-json@4dfd81071c64/Runtime/Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
@@ -746,6 +810,38 @@
     </Reference>
     <Reference Include="Google.MiniJson">
       <HintPath>Library/PackageCache/com.google.firebase.app@bd8ef756bb03/Firebase/Plugins/Google.MiniJson.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.Platform">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.Platform.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Google.MiniJson">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Google.MiniJson.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.Platform">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.Platform.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Google.MiniJson">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Google.MiniJson.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.Platform">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.Platform.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Google.MiniJson">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Google.MiniJson.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Firebase.Platform">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Firebase.Platform.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Google.MiniJson">
+      <HintPath>Library\PackageCache\com.google.firebase.app@bd8ef756bb03\Firebase\Plugins\Google.MiniJson.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Analytics.StandardEvents">
