@@ -16,27 +16,8 @@ MonoBehaviour:
   tiers:
   - needItems: 5
     reward:
-      coins: 100
+      coins: 0
       infiniteLivesMinutes: 0
       infiniteBoostsMinutes: 0
-      infiniteBoost1Minutes: 0
-      infiniteBoost2Minutes: 0
       boost1Amount: 0
       boost2Amount: 0
-      buff1Amount: 0
-      buff2Amount: 0
-      buff3Amount: 0
-      buff4Amount: 0
-  - needItems: 15
-    reward:
-      coins: 0
-      infiniteLivesMinutes: 15
-      infiniteBoostsMinutes: 0
-      infiniteBoost1Minutes: 0
-      infiniteBoost2Minutes: 0
-      boost1Amount: 0
-      boost2Amount: 0
-      buff1Amount: 0
-      buff2Amount: 0
-      buff3Amount: 0
-      buff4Amount: 0

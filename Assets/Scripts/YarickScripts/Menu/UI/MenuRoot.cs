@@ -22,6 +22,9 @@ namespace Menu.UI
         private SaveSystem _saveSystem;
         private MetaFacade _meta;
 
+        public bool boost1Selected = false;
+        public bool boost2Selected = false;
+
         public MetaFacade Meta => _meta;
 
         private void Awake()
@@ -58,7 +61,7 @@ namespace Menu.UI
             _meta.Tick();
         }
 
-        public void OnClickStart(bool boost1Selected, bool boost2Selected)
+        public void OnClickStart()
         {
             if (!_meta.CanStartGame())
             {

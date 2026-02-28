@@ -12,5 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c1cf03543a559d4a9343c10678573a6, type: 3}
   m_Name: BankConfig
   m_EditorClassIdentifier: Assembly-CSharp::Core.Configs.BankConfig
-  capacity: 6000
-  depositOnWin: 50
+  capacity: 3000
