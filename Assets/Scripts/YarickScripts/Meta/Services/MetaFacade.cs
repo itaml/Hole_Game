@@ -3,6 +3,7 @@ using Core.Save;
 using Core.Time;
 using GameBridge.Contracts;
 using Meta.State;
+using System.Collections.Generic;
 
 namespace Meta.Services
 {
@@ -48,6 +49,16 @@ namespace Meta.Services
         }
 
         public PlayerSave Save => _saveSystem.Current;
+
+        private readonly List<Reward> _grantedRewards = new();
+
+        public Reward[] ConsumeGrantedRewards()
+        {
+            if (_grantedRewards.Count == 0) return System.Array.Empty<Reward>();
+            var arr = _grantedRewards.ToArray();
+            _grantedRewards.Clear();
+            return arr;
+        }
 
         public void Tick()
         {
@@ -107,13 +118,15 @@ namespace Meta.Services
                     _bank.AddWinDeposit(Save);
             }
 
-            // 3) Star chest
-            if (_unlocks.IsStarsChestUnlocked(r.levelIndex))
-                _chests.AddStarsAndOpenIfReady(Save, r.starsEarned);
+            _grantedRewards.Clear();
 
-            // 4) Level chest (only on win)
+            // 3) Star chest (auto-open inside ChestService)
+            if (_unlocks.IsStarsChestUnlocked(r.levelIndex))
+                _chests.AddStarsAndOpenIfReady(Save, r.starsEarned, _grantedRewards);
+
+            // 4) Level chest (auto-open inside ChestService)
             if (r.outcome == LevelOutcome.Win && _unlocks.IsLevelsChestUnlocked(r.levelIndex))
-                _chests.AddLevelWinAndOpenIfReady(Save);
+                _chests.AddLevelWinAndOpenIfReady(Save, _grantedRewards);
 
             // 5) Battlepass
             if (_unlocks.IsBattlepassUnlocked(r.levelIndex))

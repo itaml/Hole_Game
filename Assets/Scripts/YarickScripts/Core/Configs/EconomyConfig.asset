@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: EconomyConfig
   m_EditorClassIdentifier: Assembly-CSharp::Core.Configs.EconomyConfig
   lifeRestoreSeconds: 900
-  buyLifeCostCoins: 100
+  buyLifeCostCoins: 250

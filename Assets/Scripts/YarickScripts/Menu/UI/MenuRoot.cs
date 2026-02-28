@@ -78,5 +78,35 @@ namespace Menu.UI
             _saveSystem.HardReset();
             _meta.Tick();
         }
+
+        public ITimeProvider Time => _time;
+
+        /// <summary>
+        /// UI helper: buy 1 life for coins.
+        /// </summary>
+        public bool TryBuyLife()
+        {
+            // Keep regen consistent before purchase decision.
+            _meta.Tick();
+
+            var save = _meta.Save;
+            if (save.lives.currentLives >= save.lives.maxLives)
+                return false;
+
+            int cost = economyConfig != null ? economyConfig.buyLifeCostCoins : 0;
+            if (cost <= 0) return false;
+
+            if (save.wallet.coins < cost)
+                return false;
+
+            save.wallet.coins -= cost;
+            save.lives.currentLives++;
+
+            if (save.lives.currentLives >= save.lives.maxLives)
+                save.lives.nextLifeReadyAtUtcTicks = 0;
+
+            _saveSystem.Save();
+            return true;
+        }
     }
 }

@@ -18,6 +18,12 @@ MonoBehaviour:
     reward:
       coins: 0
       infiniteLivesMinutes: 0
-      infiniteBoostsMinutes: 0
+      infiniteBoostsMinutes: 15
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
       boost1Amount: 0
       boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0

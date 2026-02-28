@@ -67,10 +67,12 @@
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\FixedJoystick.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\GoalFinderBoostButtonUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Events\EventBus.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BuffRewardPopupUi.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelSpawnConfig.cs" />
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\FireworkSpriteAnimUI.cs" />
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\WinIntroPopupView.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Time\DeviceTimeProvider.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\RewardPopupQueue.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\SceneFlow\SceneFlow.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\BattlepassState.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\StarsChestState.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="Assets\Scripts\Boost\MagnetBoostButtonUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\BattlepassConfig.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\WinStreakService.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\LevelsChestAutoOpenUi.cs" />
     <Compile Include="Assets\Scripts\Core\RunController.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\UnlockService.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\FinderTargetIconUI.cs" />
@@ -93,6 +96,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\ChestConfig.cs" />
     <Compile Include="Assets\Scripts\Core\FixedCameraFollowLocalOffset.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelSequence.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\RewardPopupRouter.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\FloatingJoystick.cs" />
     <Compile Include="Assets\Scripts\Core\VelocityLimiter.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\DynamicJoystick.cs" />
@@ -104,16 +108,20 @@
     <Compile Include="Assets\Scripts\Levels\LevelDirector.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Base\Joystick.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\AdsPolicyService.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\CoinsRewardPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\EconomyConfig.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\MainMenuHud.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\ProgressState.cs" />
     <Compile Include="Assets\Scripts\Boost\FreezeTimeBoostButtonUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\Reward.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelItemSpawner.cs" />
     <Compile Include="Assets\Joystick Pack\Examples\JoystickPlayerExample.cs" />
     <Compile Include="Assets\Scripts\Core\HolePhysics.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\StarsChestAutoOpenUi.cs" />
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\LoseScreenUI.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\GoalUIBuilder.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\GoalFinderBoost.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\StartPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\BattlepassTier.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\BuffType.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\BoostType.cs" />
@@ -131,6 +139,8 @@
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\LevelResult.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\LevelsChestState.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\BankConfig.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\UiTimeFormat.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BankPopupUi.cs" />
     <Compile Include="Assets\Scripts\Core\HoleBoundsLimiter.cs" />
     <Compile Include="Assets\Scripts\Core\FloatingXpTextSpawner.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\WalletState.cs" />
@@ -145,6 +155,7 @@
     <Compile Include="Assets\Scripts\Boost\Find\FinderArrowUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\JsonUtil.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\BattlepassService.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\LivesPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\SaveSystem.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\SaveMigration.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\BankService.cs" />
