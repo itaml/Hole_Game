@@ -15,12 +15,16 @@ namespace Menu.UI
         [SerializeField] private TMP_Text buyLifePriceText; // optional
         [SerializeField] private Button closeButton;
 
+        [SerializeField] private PopupTween tween;
+
         private MenuRoot _menu;
 
         private void Awake()
         {
             if (buyLifeButton != null) buyLifeButton.onClick.AddListener(OnClickBuyLife);
             if (closeButton != null) closeButton.onClick.AddListener(Hide);
+
+            if (tween == null) tween = GetComponent<PopupTween>();
 
             if (rootObject == null)
                 rootObject = gameObject;
@@ -41,13 +45,27 @@ namespace Menu.UI
 
             if (rootObject != null) rootObject.SetActive(true);
             else gameObject.SetActive(true);
+
+            tween?.PlayShow(); // добавить
         }
 
         public void Hide()
         {
             _menu = null;
-            if (rootObject != null) rootObject.SetActive(false);
-            else gameObject.SetActive(false);
+
+            if (tween != null)
+            {
+                tween.PlayHide(() =>
+                {
+                    if (rootObject != null) rootObject.SetActive(false);
+                    else gameObject.SetActive(false);
+                });
+            }
+            else
+            {
+                if (rootObject != null) rootObject.SetActive(false);
+                else gameObject.SetActive(false);
+            }
         }
 
         private void Update()

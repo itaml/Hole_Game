@@ -30,6 +30,18 @@ namespace Menu.UI
 
         public MetaFacade Meta => _meta;
 
+        public LevelResult AppliedLevelResult { get; private set; }
+
+        public int PreLevelsChestProgress { get; private set; }
+        public int PreStarsChestProgress { get; private set; }
+
+        public int PreBattlepassTier { get; private set; }
+        public int PreBattlepassTierProgress { get; private set; }
+
+        // Флаг для отключения авто-попапов во время синематика
+        public bool SuppressAutoRewardPopups { get; set; }
+
+
         private void Awake()
         {
             _time = new DeviceTimeProvider();
@@ -48,7 +60,18 @@ namespace Menu.UI
 
             _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, _time);
 
-            
+            if (SceneFlow.PendingLevelResult != null)
+            {
+                // snapshot BEFORE apply
+                var s = _saveSystem.Current;
+                PreLevelsChestProgress = s.levelsChest.progress;
+                PreStarsChestProgress = s.starsChest.progress;
+                PreBattlepassTier = s.battlepass.tier;
+                PreBattlepassTierProgress = s.battlepass.tierProgress;
+
+                AppliedLevelResult = SceneFlow.PendingLevelResult;
+            }
+
             //if (remoteConfig != null) _ = remoteConfig.FetchAndApplySafe();
 
             // Apply pending level result if returned from Game

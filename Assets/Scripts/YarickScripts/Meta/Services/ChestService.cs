@@ -44,13 +44,13 @@ namespace Meta.Services
             {
                 progress -= cfg.threshold;
 
-                var reward = PickReward(cfg);
+                var template = PickReward(cfg);
 
-                // 🔥 ВОТ ТУТ МОМЕНТ ВЫДАЧИ НАГРАДЫ: сохраняем reward для UI
-                if (reward != null)
-                    grantedRewards?.Add(reward);
+                // ВЫДАЕМ и получаем снапшот того, что реально начислили
+                var granted = GrantReward(save, template);
 
-                GrantReward(save, reward);
+                if (granted != null)
+                    grantedRewards?.Add(granted);
             }
 
             if (isStars) save.starsChest.progress = progress;
@@ -86,13 +86,36 @@ namespace Meta.Services
             return cfg.possibleRewards[cfg.possibleRewards.Length - 1];
         }
 
-        private void GrantReward(PlayerSave save, Reward r)
+        private Reward GrantReward(PlayerSave save, Reward r)
         {
-            if (r == null) return;
+            if (r == null) return null;
+
+            // СНАПШОТ ДЛЯ UI (важно для coinsMin/coinsMax)
+            var granted = new Reward
+            {
+                coins = 0,
+                coinsMin = 0,
+                coinsMax = 0,
+
+                infiniteLivesMinutes = r.infiniteLivesMinutes,
+                infiniteBoost1Minutes = r.infiniteBoost1Minutes,
+                infiniteBoost2Minutes = r.infiniteBoost2Minutes,
+
+                boost1Amount = r.boost1Amount,
+                boost2Amount = r.boost2Amount,
+
+                buff1Amount = r.buff1Amount,
+                buff2Amount = r.buff2Amount,
+                buff3Amount = r.buff3Amount,
+                buff4Amount = r.buff4Amount,
+            };
 
             int coins = r.GetCoins();
             if (coins != 0)
+            {
                 _wallet.AddCoins(save, coins);
+                granted.coins = coins; // ВОТ ТУТ фикс для UI
+            }
 
             if (r.infiniteLivesMinutes > 0)
             {
@@ -132,6 +155,8 @@ namespace Meta.Services
 
             if (r.buff4Amount > 0)
                 save.inventory.buffFreezeTime += r.buff4Amount;
+
+            return granted;
         }
     }
 }

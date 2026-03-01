@@ -1,3 +1,4 @@
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,11 @@ namespace Menu.UI
 
         private RewardPopupQueue _queue;
 
+        [SerializeField] private CanvasGroup cg;
+        [SerializeField] private RectTransform panel;
+
+        [SerializeField] PopupTween tween;
+
         private void Awake()
         {
             if (rootObject == null) rootObject = gameObject;
@@ -24,12 +30,14 @@ namespace Menu.UI
         {
             if (amountText != null) amountText.text = $"+{coins}";
             rootObject.SetActive(true);
+
+            tween.PlayShow();
+
         }
 
         private void Close()
         {
-            rootObject.SetActive(false);
-            _queue?.NotifyClosed();
+            tween.PlayHide(() => { rootObject.SetActive(false); _queue.NotifyClosed(); });
         }
     }
 }

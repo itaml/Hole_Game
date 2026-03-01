@@ -34,6 +34,14 @@ namespace Menu.UI
         [SerializeField] private Button startGameButton;
         [SerializeField] private Button closeButton;
 
+        [SerializeField] private Button infoBtn;
+        [SerializeField] private Button infoCloseBtn;
+        [SerializeField] private Button infoClose2Btn;
+        [SerializeField] private GameObject infoLabel;
+
+        [SerializeField] private PopupTween tween;
+        [SerializeField] private PopupTween tweenInfo;
+
         private MenuRoot _menu;
 
         private void Awake()
@@ -42,6 +50,11 @@ namespace Menu.UI
             if (boost2Button != null) boost2Button.onClick.AddListener(ToggleBoost2);
             if (startGameButton != null) startGameButton.onClick.AddListener(OnClickStartGame);
             if (closeButton != null) closeButton.onClick.AddListener(Hide);
+            if (infoBtn != null) infoBtn.onClick.AddListener(ShowInfo);
+            if (infoCloseBtn != null) infoCloseBtn.onClick.AddListener(HideInfo);
+            if (infoClose2Btn != null) infoClose2Btn.onClick.AddListener(HideInfo);
+
+            if (tween == null) tween = GetComponent<PopupTween>();
 
             if (rootObject == null) rootObject = gameObject;
         }
@@ -52,21 +65,85 @@ namespace Menu.UI
             if (boost2Button != null) boost2Button.onClick.RemoveListener(ToggleBoost2);
             if (startGameButton != null) startGameButton.onClick.RemoveListener(OnClickStartGame);
             if (closeButton != null) closeButton.onClick.RemoveListener(Hide);
+            if (infoBtn != null) infoBtn.onClick.RemoveListener(ShowInfo);
+            if (infoCloseBtn != null) infoCloseBtn.onClick.RemoveListener(HideInfo);
+            if (infoClose2Btn != null) infoClose2Btn.onClick.RemoveListener(HideInfo);
+        }
+
+        private GameObject StartGo => rootObject != null ? rootObject : gameObject;
+
+        private void SetStartActive(bool active) => StartGo.SetActive(active);
+
+        private void SetInfoActive(bool active)
+        {
+            if (infoLabel != null) infoLabel.SetActive(active);
+        }
+
+        public void ShowInfo()
+        {
+            // включаем инфо заранее, иначе твины не сыграют
+            SetInfoActive(true);
+
+            // пр€чем start, а потом выключаем его GO
+            if (tween != null)
+            {
+                tween.PlayHide(() => SetStartActive(false));
+            }
+            else
+            {
+                SetStartActive(false);
+            }
+
+            // показываем инфо
+            tweenInfo?.PlayShow();
+        }
+
+        public void HideInfo()
+        {
+            // пр€чем инфо и выключаем его GO
+            if (tweenInfo != null)
+            {
+                tweenInfo.PlayHide(() => SetInfoActive(false));
+            }
+            else
+            {
+                SetInfoActive(false);
+            }
+
+            // включаем start GO и показываем
+            SetStartActive(true);
+            tween?.PlayShow();
         }
 
         public void Show(MenuRoot menu)
         {
             _menu = menu;
+
             if (rootObject != null) rootObject.SetActive(true);
             else gameObject.SetActive(true);
+
+            tween?.PlayShow(); // добавить
+
             Render();
         }
 
         public void Hide()
         {
             _menu = null;
-            if (rootObject != null) rootObject.SetActive(false);
-            else gameObject.SetActive(false);
+
+            if (tween != null)
+            {
+                tween.PlayHide(() =>
+                {
+                    if (rootObject != null) rootObject.SetActive(false);
+                    else gameObject.SetActive(false);
+                });
+            }
+            else
+            {
+                if (rootObject != null) rootObject.SetActive(false);
+                else gameObject.SetActive(false);
+            }
         }
 
         private void Update()
@@ -132,7 +209,7 @@ namespace Menu.UI
             {
                 boost2SelectedMark.SetActive(_menu.boost2Selected);
                 boost2CountText.transform.parent.gameObject.SetActive(!_menu.boost2Selected);
-                if (_menu.boost1Selected) boost2Button.GetComponent<Image>().sprite = selectedBoostActive;
+                if (_menu.boost2Selected) boost2Button.GetComponent<Image>().sprite = selectedBoostActive;
                 else boost2Button.GetComponent<Image>().sprite = unSelectedBoostActive;
             }
 
@@ -159,8 +236,7 @@ namespace Menu.UI
 
         private TimeSpan GetBoost1TimeLeft()
         {
-            long until = Math.Max(_menu.Meta.Save.timeBonuses.infiniteBoost1UntilUtcTicks,
-                                 _menu.Meta.Save.timeBonuses.infiniteBoostsUntilUtcTicks);
+            long until = _menu.Meta.Save.timeBonuses.infiniteBoost1UntilUtcTicks;
             DateTime now = _menu.Time != null ? _menu.Time.UtcNow : DateTime.UtcNow;
             long dt = until - now.Ticks;
             if (dt <= 0) return TimeSpan.Zero;
@@ -169,8 +245,7 @@ namespace Menu.UI
 
         private TimeSpan GetBoost2TimeLeft()
         {
-            long until = Math.Max(_menu.Meta.Save.timeBonuses.infiniteBoost2UntilUtcTicks,
-                                 _menu.Meta.Save.timeBonuses.infiniteBoostsUntilUtcTicks);
+            long until = _menu.Meta.Save.timeBonuses.infiniteBoost2UntilUtcTicks;
             DateTime now = _menu.Time != null ? _menu.Time.UtcNow : DateTime.UtcNow;
             long dt = until - now.Ticks;
             if (dt <= 0) return TimeSpan.Zero;

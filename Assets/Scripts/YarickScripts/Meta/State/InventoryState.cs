@@ -6,13 +6,13 @@ namespace Meta.State
     public sealed class InventoryState
     {
         // Boosts
-        public int boostGrowWholeLevel = 0;
-        public int boostExtraTime = 0;
+        public int boostGrowWholeLevel = 5;
+        public int boostExtraTime = 5;
 
         // 🔥 Buffs (если они должны накапливаться)
-        public int buffGrowTemp = 0;
-        public int buffRadar = 0;
-        public int buffMagnet = 0;
-        public int buffFreezeTime = 0;
+        public int buffGrowTemp = 5;
+        public int buffRadar = 5;
+        public int buffMagnet = 5;
+        public int buffFreezeTime = 5;
     }
 }

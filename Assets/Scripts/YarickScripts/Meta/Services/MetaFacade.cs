@@ -249,10 +249,10 @@ namespace Meta.Services
                 bonusSpawnLevel = _streak.GetStreak(Save);
 
             // Buff availability: only if unlocked by level; otherwise send 0 to Game UI
-            bool buff1Unlocked = level >= 4;
-            bool buff2Unlocked = level >= 6;
-            bool buff3Unlocked = level >= 8;
-            bool buff4Unlocked = level >= 10;
+            bool buff1Unlocked = _unlocks.IsBuff1Unlocked(level);
+            bool buff2Unlocked = _unlocks.IsBuff2Unlocked(level);
+            bool buff3Unlocked = _unlocks.IsBuff3Unlocked(level);
+            bool buff4Unlocked = _unlocks.IsBuff4Unlocked(level);
 
             int buff1Count = buff1Unlocked ? Save.inventory.buffGrowTemp : 0;
             int buff2Count = buff2Unlocked ? Save.inventory.buffRadar : 0;

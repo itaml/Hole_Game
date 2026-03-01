@@ -85,10 +85,12 @@
     <Compile Include="Assets\Scripts\Core\RunController.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\UnlockService.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\FinderTargetIconUI.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\UIEntranceItem.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Time\ITimeProvider.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\ItemCatalog.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\UnlockConfig.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelProgress.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\MenuWinCinematicController.cs" />
     <Compile Include="Assets\Scripts\Core\HoleController.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\LevelOutcome.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\WalletService.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\ChestConfig.cs" />
     <Compile Include="Assets\Scripts\Core\FixedCameraFollowLocalOffset.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelSequence.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\UIIdleMotion.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\RewardPopupRouter.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\FloatingJoystick.cs" />
     <Compile Include="Assets\Scripts\Core\VelocityLimiter.cs" />
@@ -130,7 +133,9 @@
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\BoostType.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\MenuRoot.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\VariableJoystick.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\UIButtonTween.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\GoalSlotUI.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\HomePageEntranceController.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\PlayerPrefsJsonStorage.cs" />
     <Compile Include="Assets\Scripts\Boost\GrowTempBoost.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectiveTracker.cs" />
@@ -170,6 +175,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\ProfileUI.cs" />
     <Compile Include="Assets\Scripts\Boost\FreezeTimeBoost.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\PlayerSave.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\PopupTween.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\LevelGoals.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\RemoteConfig\FirebaseConfigsApplier.cs" />
     <Compile Include="Assets\Scripts\Core\TimerUI.cs" />
@@ -770,6 +776,18 @@
     </Reference>
     <Reference Include="Unity.Analytics.StandardEvents">
       <HintPath>Library\PackageCache\com.unity.analytics@c9d14a6bdec6\AnalyticsStandardEvents\Unity.Analytics.StandardEvents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DOTween">
+      <HintPath>Assets\Plugins\Demigiant\DOTween\DOTween.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DOTweenPro">
+      <HintPath>Assets\Plugins\Demigiant\DOTweenPro\DOTweenPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DemiLib">
+      <HintPath>Assets\Plugins\Demigiant\DemiLib\Core\DemiLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
@@ -1462,6 +1480,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
+      <Project>{FEC97247-80CA-C78E-6059-DF544EF6EA9F}</Project>
+      <Name>Assembly-CSharp-firstpass</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

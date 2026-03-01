@@ -11,13 +11,21 @@ namespace Menu.UI
         [SerializeField] private Image bar;
         [SerializeField] private Button iapButton;
         [SerializeField] private Button closeButton;
+        [SerializeField] private TMP_Text capacityText;
+        [SerializeField] private TMP_Text halfcapacityText;
+        [SerializeField] private TMP_Text text;
+
+        [SerializeField] private PopupTween tween; // добавить
 
         private MenuRoot _menu;
+
 
         private void Awake()
         {
             if (closeButton != null) closeButton.onClick.AddListener(Hide);
             if (rootObject == null) rootObject = gameObject;
+
+            if (tween == null) tween = GetComponent<PopupTween>(); // добавить
         }
 
         private void OnDestroy()
@@ -32,14 +40,28 @@ namespace Menu.UI
             if (rootObject != null) rootObject.SetActive(true);
             else gameObject.SetActive(true);
 
+            tween?.PlayShow(); // добавить
+
             Render();
         }
 
         public void Hide()
         {
             _menu = null;
-            if (rootObject != null) rootObject.SetActive(false);
-            else gameObject.SetActive(false);
+
+            if (tween != null)
+            {
+                tween.PlayHide(() =>
+                {
+                    if (rootObject != null) rootObject.SetActive(false);
+                    else gameObject.SetActive(false);
+                });
+            }
+            else
+            {
+                if (rootObject != null) rootObject.SetActive(false);
+                else gameObject.SetActive(false);
+            }
         }
 
         private void Update()
@@ -55,7 +77,16 @@ namespace Menu.UI
             int coins = save.bank.bankCoins;
             int cap = (_menu.bankConfig != null) ? _menu.bankConfig.capacity : 0;
 
-            float fill = 0f;
+            int half = _menu.bankConfig.capacity / 2;
+
+            capacityText.text = _menu.bankConfig.capacity.ToString();
+            halfcapacityText.text = half.ToString();
+
+            if (coins == _menu.bankConfig.capacity) text.text = "Hotel safe is full. Break it now for best deal!";
+            else if (coins >= half) text.text = "Hotel safe to collect golds or save more gold for best deal";
+            else text.text = "Add at least " + half.ToString() + " gold to the Hotel safe to buy it at a great deal";
+
+                float fill = 0f;
             if (cap > 0)
                 fill = Mathf.Clamp01(coins / (float)cap);
 

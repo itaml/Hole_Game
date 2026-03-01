@@ -43,6 +43,10 @@ namespace Menu.UI
         {
             // MetaFacade.ConsumeGrantedRewards() — ты должен был добавить (я писал выше).
             // Он возвращает массив Reward и очищает внутренний список.
+
+            if (root != null && root.SuppressAutoRewardPopups)
+                return;
+
             Reward[] rewards = root.Meta.ConsumeGrantedRewards();
             if (rewards == null || rewards.Length == 0) return;
 

@@ -19,17 +19,12 @@ namespace Meta.Services
         public bool IsBoost1Unlocked(int level) => level >= _cfg.boost1UnlockLevel;
         public bool IsBoost2Unlocked(int level) => level >= _cfg.boost2UnlockLevel;
 
+        public bool IsBuff1Unlocked(int level) => level >= _cfg.buff1UnlockLevel;
+        public bool IsBuff2Unlocked(int level) => level >= _cfg.buff2UnlockLevel;
+        public bool IsBuff3Unlocked(int level) => level >= _cfg.buff3UnlockLevel;
+        public bool IsBuff4Unlocked(int level) => level >= _cfg.buff4UnlockLevel;
+
         public bool IsWinStreakUnlocked(int level) => level >= _cfg.winStreakUnlockLevel;
         public bool IsInterstitialUnlocked(int level) => level >= _cfg.interstitialAdsUnlockLevel;
-
-        public BuffType[] GetEnabledBuffDrops(int level)
-        {
-            var list = new List<BuffType>(4);
-            if (level >= _cfg.buff1UnlockLevel) list.Add(BuffType.GrowTemp);
-            if (level >= _cfg.buff2UnlockLevel) list.Add(BuffType.Radar);
-            if (level >= _cfg.buff3UnlockLevel) list.Add(BuffType.Magnet);
-            if (level >= _cfg.buff4UnlockLevel) list.Add(BuffType.FreezeTime);
-            return list.ToArray();
-        }
     }
 }

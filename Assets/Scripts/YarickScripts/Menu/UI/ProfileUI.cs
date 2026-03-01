@@ -39,6 +39,9 @@ public class ProfileUI : MonoBehaviour
     [SerializeField] private Image[] avatarInFramesImgs;
     private int avatar, frame;
 
+    [SerializeField] private PopupTween profileTween;
+    [SerializeField] private PopupTween editTween;
+
     private void Start()
     {
         SetData();
@@ -56,7 +59,7 @@ public class ProfileUI : MonoBehaviour
         if (profileOpenBtn != null) profileOpenBtn.onClick.RemoveListener(OnClickProfileOpen);
         if (editOpenBtn != null) editOpenBtn.onClick.RemoveListener(OnClickEditOpen);
         if (profileCloseBtn != null) profileCloseBtn.onClick.RemoveListener(OnClickProfileClose);
-        if (editCloseBtn != null) editCloseBtn.onClick.AddListener(OnClickEditClose);
+        if (editCloseBtn != null) editCloseBtn.onClick.RemoveListener(OnClickEditClose);
         if (editSaveBtn != null) editSaveBtn.onClick.RemoveListener(OnClickEditSave);
         if (switchBtn != null) switchBtn.onClick.RemoveListener(OnClickSwitchBtn);
     }
@@ -113,32 +116,53 @@ public class ProfileUI : MonoBehaviour
         }
     }
 
+    private void ShowLabel(GameObject go, PopupTween tween)
+    {
+        if (go == null) return;
+        go.SetActive(true);
+        tween?.PlayShow();
+    }
+
+    private void HideLabel(GameObject go, PopupTween tween)
+    {
+        if (go == null) return;
+
+        if (tween != null)
+        {
+            tween.PlayHide(() => go.SetActive(false));
+        }
+        else
+        {
+            go.SetActive(false);
+        }
+    }
+
     private void OnClickProfileOpen()
     {
-        profileLabel.SetActive(true);
+        ShowLabel(profileLabel, profileTween);
     }
 
     private void OnClickProfileClose()
     {
-        profileLabel.SetActive(false);
+        HideLabel(profileLabel, profileTween);
     }
 
     private void OnClickEditOpen()
     {
-        profileLabel.SetActive(false);
-        editLabel.SetActive(true);
+        HideLabel(profileLabel, profileTween);
+        ShowLabel(editLabel, editTween);
     }
 
     private void OnClickEditClose()
     {
-        profileLabel.SetActive(true);
-        editLabel.SetActive(false);
+        HideLabel(editLabel, editTween);
+        ShowLabel(profileLabel, profileTween);
     }
 
     private void OnClickEditSave()
     {
-        profileLabel.SetActive(true);
-        editLabel.SetActive(false);
+        HideLabel(editLabel, editTween);
+        ShowLabel(profileLabel, profileTween);
 
         SaveData();
         SetData();
