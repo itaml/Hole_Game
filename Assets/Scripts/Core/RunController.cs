@@ -49,7 +49,7 @@ public class RunController : MonoBehaviour
     private int _buff2Count; // Radar    
     private int _buff3Count; // Magnet    
     private int _buff4Count; // FreezeTime    
-    private bool _bonusSpawn; //Спавн бонусных бафов если это 3 из 3 выигранных подряд уровней    
+    private int _bonusSpawn; //Спавн бонусных бафов, если уровень 0 то ничего не спавнится, если уровень 1 то там по 1 бусту спавнится, если 2 то по 2 буста и если 3 то по 3 буста
     private int _currentLevel; //Нынешний уровень
     private bool _boost1Activated; //Буст увеличивающий на весь уровень (не временно) размер дыры    
     private bool _boost2Activated; //Буст увеличивающий таймер (1 раз) в начале уровня.    
@@ -87,11 +87,11 @@ public class RunController : MonoBehaviour
         _buff3Count = Mathf.Max(0, _cfg.buff3Count);
         _buff4Count = Mathf.Max(0, _cfg.buff4Count);
 
-        _bonusSpawn = _cfg.bonusSpawnActive;
+        _bonusSpawn = _cfg.bonusSpawnLevel;
         _boost1Activated = _cfg.boost1Activated;
         _boost2Activated = _cfg.boost2Activated;
 
-        Debug.Log($"Init OK. Level={_cfg.levelIndex} boost1={_cfg.boost1Activated} boost2={_cfg.boost2Activated} bonusSpawn={_cfg.bonusSpawnActive} " + 
+        Debug.Log($"Init OK. Level={_cfg.levelIndex} boost1={_cfg.boost1Activated} boost2={_cfg.boost2Activated} bonusSpawn={_cfg.bonusSpawnLevel} " + 
             $"buff1={_cfg.buff1Count} buff2={_cfg.buff2Count} buff3={_cfg.buff3Count} buff4={_cfg.buff4Count} coins={_cfg.walletCoinsSnapshot}");
     }
 

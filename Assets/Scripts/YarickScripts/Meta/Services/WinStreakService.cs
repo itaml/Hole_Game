@@ -8,20 +8,17 @@ namespace Meta.Services
         {
             save.winStreak.currentStreak++;
             if (save.winStreak.currentStreak >= 3)
-                save.winStreak.bonusBagArmed = true;
+                save.winStreak.currentStreak = 3;
         }
 
         public void OnLose(PlayerSave save)
         {
             save.winStreak.currentStreak = 0;
-            save.winStreak.bonusBagArmed = false;
         }
 
-        public bool ConsumeBonusBagIfArmed(PlayerSave save)
+        public int GetStreak(PlayerSave save)
         {
-            if (!save.winStreak.bonusBagArmed) return false;
-            save.winStreak.bonusBagArmed = false;
-            return true;
+            return save.winStreak.currentStreak;
         }
     }
 }

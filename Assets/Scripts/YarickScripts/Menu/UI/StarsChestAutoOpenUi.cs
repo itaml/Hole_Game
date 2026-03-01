@@ -74,7 +74,6 @@ namespace Menu.UI
                     h = h * 31 + r.boost2Amount;
 
                     h = h * 31 + r.infiniteLivesMinutes;
-                    h = h * 31 + r.infiniteBoostsMinutes;
                     h = h * 31 + r.infiniteBoost1Minutes;
                     h = h * 31 + r.infiniteBoost2Minutes;
                 }

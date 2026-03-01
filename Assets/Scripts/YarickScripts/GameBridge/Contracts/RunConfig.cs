@@ -10,8 +10,7 @@ namespace GameBridge.Contracts
         public bool boost1Activated; // BoostType.GrowWholeLevel
         public bool boost2Activated; // BoostType.ExtraLevelTime
 
-        // 3 wins in a row => in 4th run enable bonus spawn
-        public bool bonusSpawnActive;
+        public int bonusSpawnLevel;
 
         // Buff inventory snapshot (for Game UI + usage logic)
         // BuffType:

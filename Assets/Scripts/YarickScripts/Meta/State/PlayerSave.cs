@@ -16,5 +16,6 @@ namespace Meta.State
 
         public InventoryState inventory = new InventoryState();
         public TimeBonusesState timeBonuses = new TimeBonusesState();
+        public ProfileState profile = new ProfileState();
     }
 }

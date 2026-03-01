@@ -6,6 +6,5 @@ namespace Meta.State
     public sealed class WinStreakState
     {
         public int currentStreak = 0;
-        public bool bonusBagArmed = false;
     }
 }

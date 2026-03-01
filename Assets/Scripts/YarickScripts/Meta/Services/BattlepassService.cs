@@ -76,14 +76,6 @@ namespace Meta.Services
                     System.Math.Max(save.timeBonuses.infiniteLivesUntilUtcTicks, until);
             }
 
-            // Infinite boosts (global)
-            if (r.infiniteBoostsMinutes > 0)
-            {
-                long until = _time.UtcNow.AddMinutes(r.infiniteBoostsMinutes).Ticks;
-                save.timeBonuses.infiniteBoostsUntilUtcTicks =
-                    System.Math.Max(save.timeBonuses.infiniteBoostsUntilUtcTicks, until);
-            }
-
             // 🔥 Infinite Boost 1
             if (r.infiniteBoost1Minutes > 0)
             {

@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Core.Configs.UnlockConfig
   starsChestUnlockLevel: 1
   levelsChestUnlockLevel: 1
-  buff1UnlockLevel: 4
-  buff2UnlockLevel: 6
-  buff3UnlockLevel: 8
-  buff4UnlockLevel: 10
-  bankUnlockLevel: 6
-  battlepassUnlockLevel: 12
-  boost1UnlockLevel: 14
-  boost2UnlockLevel: 16
-  winStreakUnlockLevel: 20
-  interstitialAdsUnlockLevel: 10
+  buff1UnlockLevel: 1
+  buff2UnlockLevel: 1
+  buff3UnlockLevel: 1
+  buff4UnlockLevel: 1
+  bankUnlockLevel: 1
+  battlepassUnlockLevel: 1
+  boost1UnlockLevel: 1
+  boost2UnlockLevel: 1
+  winStreakUnlockLevel: 1
+  interstitialAdsUnlockLevel: 1

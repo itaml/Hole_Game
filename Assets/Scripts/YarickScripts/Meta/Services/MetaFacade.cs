@@ -1,8 +1,9 @@
-using Core.Configs;
+ï»¿using Core.Configs;
 using Core.Save;
 using Core.Time;
 using GameBridge.Contracts;
 using Meta.State;
+using System;
 using System.Collections.Generic;
 
 namespace Meta.Services
@@ -67,13 +68,43 @@ namespace Meta.Services
             _saveSystem.Save();
         }
 
+        public void SetCharacterName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                name = "Player";
+
+            name = name.Trim();
+
+            // Ð¼Ð¾Ð¶Ð½Ð¾ Ð¾Ð³Ñ€Ð°Ð½Ð¸Ñ‡Ð¸Ñ‚ÑŒ Ð´Ð»Ð¸Ð½Ñƒ, Ñ‡Ñ‚Ð¾Ð±Ñ‹ UI Ð½Ðµ Ð»Ð¾Ð¼Ð°Ð»ÑÑ
+            const int maxLen = 16;
+            if (name.Length > maxLen)
+                name = name.Substring(0, maxLen);
+
+            Save.profile.characterName = name;
+            _saveSystem.Save();
+        }
+
+        public void SetAvatar(int avatarId)
+        {
+            if (avatarId < 0) avatarId = 0;
+            Save.profile.avatarId = avatarId;
+            _saveSystem.Save();
+        }
+
+        public void SetFrame(int frameId)
+        {
+            if (frameId < 0) frameId = 0;
+            Save.profile.frameId = frameId;
+            _saveSystem.Save();
+        }
+
+        public string GetCharacterName() => Save.profile.characterName;
+        public int GetAvatarId() => Save.profile.avatarId;
+        public int GetFrameId() => Save.profile.frameId;
+
         public bool CanStartGame() => _lives.CanStartGame(Save);
 
         public bool IsInfiniteLivesActive() => _lives.IsInfiniteLivesActive(Save);
-
-        // Global infinite boosts (if you still use it)
-        public bool IsInfiniteBoostsActive()
-            => Save.timeBonuses.infiniteBoostsUntilUtcTicks > _time.UtcNow.Ticks;
 
         // Per-boost infinite
         public bool IsInfiniteBoost1Active()
@@ -93,17 +124,21 @@ namespace Meta.Services
             // Keep timers up to date first
             _lives.TickRegen(Save);
 
-            // 0) Sanity: result äîëæåí îòíîñèòüñÿ ê òåêóùåìó óðîâíþ (èëè õîòÿ áû ê îæèäàåìîìó)
-            // Ìîæíî óáðàòü åñëè íå íóæíî
+            // 0) Sanity: result Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¾Ñ‚Ð½Ð¾ÑÐ¸Ñ‚ÑŒÑÑ Ðº Ñ‚ÐµÐºÑƒÑ‰ÐµÐ¼Ñƒ ÑƒÑ€Ð¾Ð²Ð½ÑŽ (Ð¸Ð»Ð¸ Ñ…Ð¾Ñ‚Ñ Ð±Ñ‹ Ðº Ð¾Ð¶Ð¸Ð´Ð°ÐµÐ¼Ð¾Ð¼Ñƒ)
+            // ÐœÐ¾Ð¶Ð½Ð¾ ÑƒÐ±Ñ€Ð°Ñ‚ÑŒ ÐµÑÐ»Ð¸ Ð½Ðµ Ð½ÑƒÐ¶Ð½Ð¾
             // if (r.levelIndex != Save.progress.currentLevel) ...
 
-            // 1) Ïðèìåíÿåì èòîãîâûå çíà÷åíèÿ (coins + buffs)
+            // 1) ÐŸÑ€Ð¸Ð¼ÐµÐ½ÑÐµÐ¼ Ð¸Ñ‚Ð¾Ð³Ð¾Ð²Ñ‹Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ (coins + buffs)
             ApplyFinalCoinsFromGame(r);
             ApplyFinalBuffCountsFromGame(r);
 
             // 2) Outcome handling: lives + streak
             if (r.outcome == LevelOutcome.Lose)
             {
+                Save.profile.currentWinStreak = 0;
+
+                Save.progress.failedLevels.Add(r.levelIndex);
+
                 _lives.ConsumeLifeOnLose(Save);
 
                 if (_unlocks.IsWinStreakUnlocked(r.levelIndex))
@@ -111,6 +146,22 @@ namespace Meta.Services
             }
             else // Win
             {
+                if (r.starsEarned == 3)
+                {
+                    Save.profile.threeStarWins++;
+                }
+
+                Save.profile.currentWinStreak++;
+
+                if (Save.profile.currentWinStreak > Save.profile.longestWinStreak)
+                    Save.profile.longestWinStreak = Save.profile.currentWinStreak;
+
+                bool failedBefore = Save.progress.failedLevels.Contains(r.levelIndex);
+
+                if (!failedBefore)
+                    Save.profile.firstTryWins++;
+                Save.progress.failedLevels.Remove(r.levelIndex);
+
                 if (_unlocks.IsWinStreakUnlocked(r.levelIndex))
                     _streak.OnWin(Save);
 
@@ -145,6 +196,36 @@ namespace Meta.Services
             _saveSystem.Save();
         }
 
+        public void RegisterLogin()
+        {
+            var profile = Save.profile;
+            var now = _time.UtcNow.Date;
+
+            if (profile.lastLoginUtcTicks == 0)
+            {
+                profile.loginDaysStreak = 1;
+            }
+            else
+            {
+                var lastLoginDate = new DateTime(profile.lastLoginUtcTicks).Date;
+                int diff = (now - lastLoginDate).Days;
+
+                if (diff == 1)
+                {
+                    profile.loginDaysStreak++;
+                }
+                else if (diff > 1)
+                {
+                    profile.loginDaysStreak = 1;
+                }
+                // diff == 0 â†’ Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ Ð´ÐµÐ»Ð°ÐµÐ¼
+            }
+
+            profile.lastLoginUtcTicks = now.Ticks;
+
+            _saveSystem.Save();
+        }
+
         private void ApplyFinalCoinsFromGame(LevelResult r)
         {
             Save.wallet.coins = System.Math.Max(0, r.coinsResult);
@@ -163,9 +244,9 @@ namespace Meta.Services
             int level = Save.progress.currentLevel;
 
             // Bonus bag for 4th game after 3 wins (only after unlock)
-            bool bonusSpawn = false;
+            int bonusSpawnLevel = 0;
             if (_unlocks.IsWinStreakUnlocked(level))
-                bonusSpawn = _streak.ConsumeBonusBagIfArmed(Save);
+                bonusSpawnLevel = _streak.GetStreak(Save);
 
             // Buff availability: only if unlocked by level; otherwise send 0 to Game UI
             bool buff1Unlocked = level >= 4;
@@ -189,7 +270,7 @@ namespace Meta.Services
                 boost1Activated = boost1Active,
                 boost2Activated = boost2Active,
 
-                bonusSpawnActive = bonusSpawn,
+                bonusSpawnLevel = bonusSpawnLevel,
 
                 buff1Count = buff1Count,
                 buff2Count = buff2Count,
@@ -208,7 +289,7 @@ namespace Meta.Services
             if (!selected) return false;
             if (!_unlocks.IsBoost1Unlocked(level)) return false;
 
-            bool infinite = IsInfiniteBoostsActive() || IsInfiniteBoost1Active();
+            bool infinite = IsInfiniteBoost1Active();
             if (infinite) return true;
 
             // consumable
@@ -222,7 +303,7 @@ namespace Meta.Services
             if (!selected) return false;
             if (!_unlocks.IsBoost2Unlocked(level)) return false;
 
-            bool infinite = IsInfiniteBoostsActive() || IsInfiniteBoost2Active();
+            bool infinite = IsInfiniteBoost2Active();
             if (infinite) return true;
 
             // consumable

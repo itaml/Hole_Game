@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: BankConfig
   m_EditorClassIdentifier: Assembly-CSharp::Core.Configs.BankConfig
   capacity: 6000
-  depositOnWin: 1000
+  depositOnWin: 300

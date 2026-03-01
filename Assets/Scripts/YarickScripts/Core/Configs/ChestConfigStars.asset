@@ -14,9 +14,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Core.Configs.ChestConfig
   threshold: 20
   possibleRewards:
-  - coins: 0
+  - weight: 60
+    coins: 0
+    coinsMin: 90
+    coinsMax: 100
     infiniteLivesMinutes: 0
-    infiniteBoostsMinutes: 0
+    infiniteBoost1Minutes: 0
+    infiniteBoost2Minutes: 0
+    boost1Amount: 0
+    boost2Amount: 0
+    buff1Amount: 0
+    buff2Amount: 0
+    buff3Amount: 0
+    buff4Amount: 0
+  - weight: 6
+    coins: 0
+    coinsMin: 0
+    coinsMax: 0
+    infiniteLivesMinutes: 0
+    infiniteBoost1Minutes: 0
+    infiniteBoost2Minutes: 0
+    boost1Amount: 3
+    boost2Amount: 0
+    buff1Amount: 0
+    buff2Amount: 0
+    buff3Amount: 0
+    buff4Amount: 0
+  - weight: 6
+    coins: 0
+    coinsMin: 0
+    coinsMax: 0
+    infiniteLivesMinutes: 0
+    infiniteBoost1Minutes: 0
+    infiniteBoost2Minutes: 0
+    boost1Amount: 0
+    boost2Amount: 3
+    buff1Amount: 0
+    buff2Amount: 0
+    buff3Amount: 0
+    buff4Amount: 0
+  - weight: 7
+    coins: 0
+    coinsMin: 0
+    coinsMax: 0
+    infiniteLivesMinutes: 0
     infiniteBoost1Minutes: 0
     infiniteBoost2Minutes: 0
     boost1Amount: 0
@@ -25,9 +66,11 @@ MonoBehaviour:
     buff2Amount: 0
     buff3Amount: 0
     buff4Amount: 0
-  - coins: 0
+  - weight: 7
+    coins: 0
+    coinsMin: 0
+    coinsMax: 0
     infiniteLivesMinutes: 0
-    infiniteBoostsMinutes: 0
     infiniteBoost1Minutes: 0
     infiniteBoost2Minutes: 0
     boost1Amount: 0
@@ -36,9 +79,11 @@ MonoBehaviour:
     buff2Amount: 3
     buff3Amount: 0
     buff4Amount: 0
-  - coins: 0
+  - weight: 7
+    coins: 0
+    coinsMin: 0
+    coinsMax: 0
     infiniteLivesMinutes: 0
-    infiniteBoostsMinutes: 0
     infiniteBoost1Minutes: 0
     infiniteBoost2Minutes: 0
     boost1Amount: 0
@@ -47,9 +92,11 @@ MonoBehaviour:
     buff2Amount: 0
     buff3Amount: 3
     buff4Amount: 0
-  - coins: 0
+  - weight: 7
+    coins: 0
+    coinsMin: 0
+    coinsMax: 0
     infiniteLivesMinutes: 0
-    infiniteBoostsMinutes: 0
     infiniteBoost1Minutes: 0
     infiniteBoost2Minutes: 0
     boost1Amount: 0

@@ -1,10 +1,12 @@
-using UnityEngine;
 using Core.Configs;
+using Core.RemoteConfig;
 using Core.Save;
 using Core.Time;
-using GameBridge.SceneFlow;
+using Firebase.Analytics;
 using GameBridge.Contracts;
+using GameBridge.SceneFlow;
 using Meta.Services;
+using UnityEngine;
 
 namespace Menu.UI
 {
@@ -24,6 +26,7 @@ namespace Menu.UI
 
         public bool boost1Selected = false;
         public bool boost2Selected = false;
+        public FirebaseConfigsApplier remoteConfig;
 
         public MetaFacade Meta => _meta;
 
@@ -45,6 +48,9 @@ namespace Menu.UI
 
             _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, _time);
 
+            
+            //if (remoteConfig != null) _ = remoteConfig.FetchAndApplySafe();
+
             // Apply pending level result if returned from Game
             if (SceneFlow.PendingLevelResult != null)
             {
@@ -59,6 +65,13 @@ namespace Menu.UI
             }
 
             _meta.Tick();
+        }
+
+        private void Start()
+        {
+            Meta.RegisterLogin();
+
+            //AnalyticsService.LogEvent("Menu_Run");
         }
 
         public void OnClickStart()

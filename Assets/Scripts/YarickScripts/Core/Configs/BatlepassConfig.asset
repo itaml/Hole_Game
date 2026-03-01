@@ -16,9 +16,446 @@ MonoBehaviour:
   tiers:
   - needItems: 5
     reward:
+      weight: 0
       coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 15
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 10
+    reward:
+      weight: 0
+      coins: 200
+      coinsMin: 0
+      coinsMax: 0
       infiniteLivesMinutes: 0
-      infiniteBoostsMinutes: 15
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 15
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 15
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 20
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 1
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 25
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 1
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 30
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 1
+      buff4Amount: 0
+  - needItems: 35
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 1
+  - needItems: 40
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 15
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 45
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 30
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 50
+    reward:
+      weight: 0
+      coins: 400
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 55
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 20
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 60
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 20
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 65
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 2
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 70
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 2
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 75
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 2
+      buff4Amount: 0
+  - needItems: 80
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 2
+  - needItems: 85
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 30
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 90
+    reward:
+      weight: 0
+      coins: 600
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 95
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 3
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 100
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 3
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 105
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 3
+      buff4Amount: 0
+  - needItems: 110
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 3
+  - needItems: 115
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 30
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 120
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 30
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 125
+    reward:
+      weight: 0
+      coins: 1000
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 130
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 5
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 135
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 5
+      buff3Amount: 0
+      buff4Amount: 0
+  - needItems: 140
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 5
+      buff4Amount: 0
+  - needItems: 145
+    reward:
+      weight: 0
+      coins: 0
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
+      infiniteBoost1Minutes: 0
+      infiniteBoost2Minutes: 0
+      boost1Amount: 0
+      boost2Amount: 0
+      buff1Amount: 0
+      buff2Amount: 0
+      buff3Amount: 0
+      buff4Amount: 5
+  - needItems: 125
+    reward:
+      weight: 0
+      coins: 10000
+      coinsMin: 0
+      coinsMax: 0
+      infiniteLivesMinutes: 0
       infiniteBoost1Minutes: 0
       infiniteBoost2Minutes: 0
       boost1Amount: 0

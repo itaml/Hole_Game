@@ -59,30 +59,46 @@ namespace Meta.Services
 
         private Reward PickReward(ChestConfig cfg)
         {
-            if (cfg.possibleRewards == null || cfg.possibleRewards.Length == 0) return new Reward();
-            int idx = Random.Range(0, cfg.possibleRewards.Length);
-            return cfg.possibleRewards[idx];
+            if (cfg.possibleRewards == null || cfg.possibleRewards.Length == 0)
+                return new Reward();
+
+            int totalWeight = 0;
+            for (int i = 0; i < cfg.possibleRewards.Length; i++)
+                totalWeight += Mathf.Max(0, cfg.possibleRewards[i].weight);
+
+            // Если веса не заданы или все 0 — fallback на старый равномерный рандом
+            if (totalWeight <= 0)
+            {
+                int idx = Random.Range(0, cfg.possibleRewards.Length);
+                return cfg.possibleRewards[idx];
+            }
+
+            int roll = Random.Range(0, totalWeight);
+            int acc = 0;
+
+            for (int i = 0; i < cfg.possibleRewards.Length; i++)
+            {
+                acc += Mathf.Max(0, cfg.possibleRewards[i].weight);
+                if (roll < acc)
+                    return cfg.possibleRewards[i];
+            }
+
+            return cfg.possibleRewards[cfg.possibleRewards.Length - 1];
         }
 
         private void GrantReward(PlayerSave save, Reward r)
         {
             if (r == null) return;
 
-            if (r.coins > 0)
-                _wallet.AddCoins(save, r.coins);
+            int coins = r.GetCoins();
+            if (coins != 0)
+                _wallet.AddCoins(save, coins);
 
             if (r.infiniteLivesMinutes > 0)
             {
                 long until = _time.UtcNow.AddMinutes(r.infiniteLivesMinutes).Ticks;
                 save.timeBonuses.infiniteLivesUntilUtcTicks =
                     System.Math.Max(save.timeBonuses.infiniteLivesUntilUtcTicks, until);
-            }
-
-            if (r.infiniteBoostsMinutes > 0)
-            {
-                long until = _time.UtcNow.AddMinutes(r.infiniteBoostsMinutes).Ticks;
-                save.timeBonuses.infiniteBoostsUntilUtcTicks =
-                    System.Math.Max(save.timeBonuses.infiniteBoostsUntilUtcTicks, until);
             }
 
             if (r.infiniteBoost1Minutes > 0)

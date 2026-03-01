@@ -10,6 +10,9 @@ namespace Menu.UI
         [Header("UI")]
         [SerializeField] private GameObject rootObject;
         [SerializeField] private TMP_Text levelText;
+        [SerializeField] private Sprite unlimitedBoostActive;
+        [SerializeField] private Sprite selectedBoostActive;
+        [SerializeField] private Sprite unSelectedBoostActive;
 
         [Header("Boost 1")]
         [SerializeField] private GameObject boost1Closed;
@@ -83,27 +86,55 @@ namespace Menu.UI
             bool boost1Unlocked = _menu.unlockConfig != null && level >= _menu.unlockConfig.boost1UnlockLevel;
             bool boost2Unlocked = _menu.unlockConfig != null && level >= _menu.unlockConfig.boost2UnlockLevel;
 
-            if (boost1Closed != null) boost1Closed.SetActive(!boost1Unlocked);
-            if (boost2Closed != null) boost2Closed.SetActive(!boost2Unlocked);
+            if (boost1Closed != null)
+            {
+                boost1Closed.SetActive(!boost1Unlocked);
+                boost1Button.gameObject.SetActive(boost1Unlocked);
+            }
+            if (boost2Closed != null)
+            {
+                boost2Closed.SetActive(!boost2Unlocked);
+                boost2Button.gameObject.SetActive(boost2Unlocked);
+            }
 
             if (boost1CountText != null)
                 boost1CountText.text = save.inventory.boostGrowWholeLevel.ToString();
             if (boost2CountText != null)
                 boost2CountText.text = save.inventory.boostExtraTime.ToString();
 
-            bool inf1 = _menu.Meta.IsInfiniteBoostsActive() || _menu.Meta.IsInfiniteBoost1Active();
-            bool inf2 = _menu.Meta.IsInfiniteBoostsActive() || _menu.Meta.IsInfiniteBoost2Active();
+            bool inf1 = _menu.Meta.IsInfiniteBoost1Active();
+            bool inf2 = _menu.Meta.IsInfiniteBoost2Active();
 
-            if (boost1Infinity != null) boost1Infinity.SetActive(inf1);
-            if (boost2Infinity != null) boost2Infinity.SetActive(inf2);
+            if (boost1Infinity != null)
+            {
+                boost1Infinity.SetActive(inf1);
+                boost1CountText.transform.parent.gameObject.SetActive(!inf1);
+            }
+            if (boost2Infinity != null)
+            {
+                boost2Infinity.SetActive(inf2);
+                boost2CountText.transform.parent.gameObject.SetActive(!inf2);
+            }
 
             if (boost1InfinityTimerText != null)
                 boost1InfinityTimerText.text = inf1 ? UiTimeFormat.FormatMinutesSeconds(GetBoost1TimeLeft()) : "";
             if (boost2InfinityTimerText != null)
                 boost2InfinityTimerText.text = inf2 ? UiTimeFormat.FormatMinutesSeconds(GetBoost2TimeLeft()) : "";
 
-            if (boost1SelectedMark != null) boost1SelectedMark.SetActive(_menu.boost1Selected);
-            if (boost2SelectedMark != null) boost2SelectedMark.SetActive(_menu.boost2Selected);
+            if (boost1SelectedMark != null)
+            {
+                boost1SelectedMark.SetActive(_menu.boost1Selected);
+                boost1CountText.transform.parent.gameObject.SetActive(!_menu.boost1Selected);
+                if (_menu.boost1Selected) boost1Button.GetComponent<Image>().sprite = selectedBoostActive;
+                else boost1Button.GetComponent<Image>().sprite = unSelectedBoostActive;
+            }
+            if (boost2SelectedMark != null)
+            {
+                boost2SelectedMark.SetActive(_menu.boost2Selected);
+                boost2CountText.transform.parent.gameObject.SetActive(!_menu.boost2Selected);
+                if (_menu.boost1Selected) boost2Button.GetComponent<Image>().sprite = selectedBoostActive;
+                else boost2Button.GetComponent<Image>().sprite = unSelectedBoostActive;
+            }
 
             if (boost1Button != null)
             {
@@ -118,6 +149,9 @@ namespace Menu.UI
                 boost2Button.interactable = canUse;
                 if (!canUse) _menu.boost2Selected = false;
             }
+
+            if (inf1) boost1Button.GetComponent<Image>().sprite = unlimitedBoostActive;
+            if (inf2) boost2Button.GetComponent<Image>().sprite = unlimitedBoostActive;
 
             if (startGameButton != null)
                 startGameButton.interactable = _menu.Meta.CanStartGame();
