@@ -4725,6 +4725,7 @@ GameObject:
   - component: {fileID: 1431604027}
   - component: {fileID: 1431604029}
   - component: {fileID: 1431604030}
+  - component: {fileID: 1431604031}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -4941,6 +4942,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1431604031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1431604024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4013ba10669b429db2bf4636ccd3ce5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PreRunPopupUI
+  root: {fileID: 0}
+  timeText: {fileID: 0}
+  slotsParent: {fileID: 0}
+  goalSlotPrefab: {fileID: 0}
+  startButton: {fileID: 0}
 --- !u!1 &1450767352
 GameObject:
   m_ObjectHideFlags: 0
@@ -6789,6 +6807,7 @@ MonoBehaviour:
   spawner: {fileID: 2006182040}
   goalBuilder: {fileID: 1431604025}
   run: {fileID: 1579769750}
+  preRunPopup: {fileID: 1431604031}
   levelText: {fileID: 927726999}
 --- !u!1 &2011469386
 GameObject:
