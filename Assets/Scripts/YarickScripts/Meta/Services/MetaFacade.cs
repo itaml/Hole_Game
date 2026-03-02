@@ -131,6 +131,7 @@ namespace Meta.Services
             // 1) Применяем итоговые значения (coins + buffs)
             ApplyFinalCoinsFromGame(r);
             ApplyFinalBuffCountsFromGame(r);
+            ApplyFinalBankCoinsFromGame(r);
 
             // 2) Outcome handling: lives + streak
             if (r.outcome == LevelOutcome.Lose)
@@ -226,6 +227,11 @@ namespace Meta.Services
             _saveSystem.Save();
         }
 
+        private void ApplyFinalBankCoinsFromGame(LevelResult r)
+        {
+            Save.bank.bankCoins = System.Math.Max(0, r.bankCoinsResult);
+        }
+
         private void ApplyFinalCoinsFromGame(LevelResult r)
         {
             Save.wallet.coins = System.Math.Max(0, r.coinsResult);
@@ -263,6 +269,10 @@ namespace Meta.Services
             bool boost1Active = ResolveBoost1Activation(level, boost1Selected);
             bool boost2Active = ResolveBoost2Activation(level, boost2Selected);
 
+            bool bpUnlocked = _unlocks != null && _unlocks.IsBattlepassUnlocked(level);
+
+            bool bankUnlocked = _unlocks != null && _unlocks.IsBankUnlocked(level);
+
             var cfg = new RunConfig
             {
                 levelIndex = level,
@@ -278,6 +288,11 @@ namespace Meta.Services
                 buff4Count = buff4Count,
 
                 walletCoinsSnapshot = Save.wallet.coins,
+
+                isBattlepasOpen = bpUnlocked,
+                isBankOpen = bankUnlocked,
+                bankCoinsSnapshot = bankUnlocked ? Save.bank.bankCoins : 0,
+                bankCapacitySnapshot = bankUnlocked ? _bank.Capacity : 0,
             };
 
             _saveSystem.Save(); // consumes bonusBagArmed + potentially consumes boosts

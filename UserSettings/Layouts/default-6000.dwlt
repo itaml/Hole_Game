@@ -323,8 +323,7 @@ MonoBehaviour:
     m_DynamicPanelBehavior: 0
   m_MixersTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs:
-    - m_Data: -169042
+    m_SelectedIDs: []
     m_LastClickedID:
       m_Data: -169042
     m_ExpandedIDs:
@@ -496,7 +495,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 43
+    y: 0
     width: 1920
     height: 36
   m_SerializedDataModeController:
@@ -776,7 +775,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 676
+    y: 621
     width: 1465
     height: 318
   m_SerializedDataModeController:
@@ -827,18 +826,16 @@ MonoBehaviour:
       m_Data: 35602
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 35602
-    - m_Data: 35604
-    - m_Data: 35606
-    - m_Data: 35608
-    - m_Data: 35610
-    - m_Data: 35612
-    - m_Data: 35614
-    - m_Data: 35616
-    - m_Data: 35744
-    - m_Data: 35750
-    - m_Data: 39470
-    - m_Data: 1000000000
+    - m_Data: 36828
+    - m_Data: 36830
+    - m_Data: 36832
+    - m_Data: 36834
+    - m_Data: 36836
+    - m_Data: 36838
+    - m_Data: 36840
+    - m_Data: 36842
+    - m_Data: 36844
+    - m_Data: 36846
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -871,14 +868,16 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 35602
-    - m_Data: 35604
-    - m_Data: 35606
-    - m_Data: 35608
-    - m_Data: 35610
-    - m_Data: 35612
-    - m_Data: 35614
-    - m_Data: 35616
+    - m_Data: 36828
+    - m_Data: 36830
+    - m_Data: 36832
+    - m_Data: 36834
+    - m_Data: 36836
+    - m_Data: 36838
+    - m_Data: 36840
+    - m_Data: 36842
+    - m_Data: 36844
+    - m_Data: 36846
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -964,7 +963,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 79
+    y: 24
     width: 266
     height: 571
   m_SerializedDataModeController:
@@ -1114,8 +1113,8 @@ MonoBehaviour:
       - m_Data: 1012380
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: AvatarFrameMenuImg
-        m_OriginalName: AvatarFrameMenuImg
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
@@ -1123,10 +1122,10 @@ MonoBehaviour:
           width: 0
           height: 0
         m_UserData:
-          m_Data: 824528
+          m_Data: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_TrimLeadingAndTrailingWhitespace: 0
         m_ClientGUIView: {fileID: 8}
@@ -1869,8 +1868,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Game\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 267
-    y: 79
+    x: 268
+    y: 24
     width: 1197
     height: 571
   m_SerializedDataModeController:
@@ -2108,8 +2107,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1466
-    y: 79
+    x: 1467
+    y: 24
     width: 453
     height: 915
   m_SerializedDataModeController:

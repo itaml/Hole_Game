@@ -18,5 +18,8 @@ namespace GameBridge.Contracts
         public int buff2Count; // Radar
         public int buff3Count; // Magnet
         public int buff4Count; // FreezeTime
+
+        //Данные банка
+        public int bankCoinsResult;
     }
 }
