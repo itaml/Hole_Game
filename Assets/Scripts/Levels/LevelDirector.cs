@@ -1,5 +1,7 @@
 using UnityEngine;
 using TMPro;
+using GameBridge.SceneFlow;
+using GameBridge.Contracts;
 
 public class LevelDirector : MonoBehaviour
 {
@@ -15,39 +17,60 @@ public class LevelDirector : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TMP_Text levelText;
 
-private const string PREF_LEVEL_INDEX = "current_level_index";
+    private const string PREF_LEVEL_INDEX = "current_level_index";
 
-private void Start()
-{
-    int index = PlayerPrefs.GetInt(PREF_LEVEL_INDEX, debugLevelIndex); // 0-based
-    LoadLevel(index);
-    run?.StartRun();
-}
-public void LoadLevel(int index)
-{
-    if (levelSequence == null)
+    private void Start()
     {
-        Debug.LogError("[LevelDirector] levelSequence missing");
-        return;
+        int index = ResolveLevelIndex();
+        LoadLevel(index);
+        run?.StartRun();
     }
 
-    var level = levelSequence.Get(index);
-    if (level == null)
+private int ResolveLevelIndex()
+{
+    RunConfig cfg = SceneFlow.PendingRunConfig;
+    if (cfg != null)
     {
-        Debug.LogError("[LevelDirector] LevelDefinition is null");
-        return;
+        // ✅ Конвертируем в 0-based для LevelSequence
+        int zeroBased = Mathf.Max(0, cfg.levelIndex - 1);
+        Debug.Log($"[LevelDirector] RunConfig.levelIndex={cfg.levelIndex} -> zeroBased={zeroBased}");
+        return zeroBased;
     }
 
-    if (levelText != null)
-        levelText.text = $"Level {index + 1}";
-
-    // 🔹 применяем длительность уровня
-    run?.ApplyLevelDuration(level.durationMinutesOverride);
-
-    // goals + UI
-    goalBuilder?.Build(level.goals, level.catalog);
-
-    // spawn
-    spawner?.Spawn(level.spawnConfig, level.catalog);
+    return PlayerPrefs.GetInt(PREF_LEVEL_INDEX, debugLevelIndex);
 }
+
+    public void LoadLevel(int index)
+    {
+        if (levelSequence == null)
+        {
+            Debug.LogError("[LevelDirector] levelSequence missing");
+            return;
+        }
+
+        var level = levelSequence.Get(index);
+        if (level == null)
+        {
+            Debug.LogError($"[LevelDirector] LevelDefinition is null for index={index}. Fallback to 0.");
+            index = 0;
+            level = levelSequence.Get(index);
+            if (level == null)
+            {
+                Debug.LogError("[LevelDirector] LevelDefinition is null even for index=0");
+                return;
+            }
+        }
+
+        if (levelText != null)
+            levelText.text = $"Level {index + 1}";
+
+        // применяем длительность уровня (если override=0, RunController оставит дефолт)
+        run?.ApplyLevelDuration(level.durationMinutesOverride);
+
+        // goals + UI
+        goalBuilder?.Build(level.goals, level.catalog);
+
+        // spawn
+        spawner?.Spawn(level.spawnConfig, level.catalog);
+    }
 }

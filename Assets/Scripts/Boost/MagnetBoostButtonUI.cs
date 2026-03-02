@@ -5,42 +5,42 @@ public class MagnetBoostButtonUI : BoostButtonUIBase
 {
     [SerializeField] private MagnetBoost boost;
 
-    private void Update()
+    protected override BuffType GetBuffType() => BuffType.Magnet;
+    protected override bool IsBoostActive() => boost != null && boost.IsActive;
+    protected override float GetRemaining() => boost != null ? boost.Remaining : 0f;
+    protected override float GetDuration() => boost != null ? boost.Duration : 1f;
+
+public void Click()
+{
+    Debug.Log("[MagnetBoostButtonUI] Click() CALLED");
+
+    if (boost == null)
     {
-        if (boost == null) return;
-
-        if (fillImage != null)
-        {
-            if (boost.IsActive)
-                fillImage.fillAmount = Mathf.Clamp01(boost.Remaining / Mathf.Max(0.001f, boost.Duration));
-            else
-                fillImage.fillAmount = 0f;
-        }
-
-        if (countText != null && inventory != null)
-            countText.text = inventory.AllowBoostsWhenEmpty ? "∞" : inventory.GetCount(BuffType.Magnet).ToString();
-
-        if (button != null)
-        {
-            if (boost.IsActive) button.interactable = false;
-            else button.interactable = (inventory == null) ? true : inventory.CanUse(BuffType.Magnet);
-        }
+        Debug.LogError("[MagnetBoostButtonUI] boost is NULL");
+        return;
     }
 
-    public void Click()
+    if (boost.IsActive)
     {
-        if (boost == null || boost.IsActive) return;
-
-        EnsureRefs();
-
-        if (inventory != null)
-        {
-            if (!inventory.TryConsume(BuffType.Magnet))
-                return;
-
-            run?.RegisterBuffUsed(BuffType.Magnet);
-        }
-
-        boost.Activate();
+        Debug.Log("[MagnetBoostButtonUI] boost already active -> ignore click");
+        return;
     }
+
+    EnsureRefs();
+
+    Debug.Log($"[MagnetBoostButtonUI] inventory={(inventory ? inventory.name : "NULL")} allowEmpty={(inventory ? inventory.AllowBoostsWhenEmpty : false)} count={(inventory ? inventory.GetCount(GameBridge.Contracts.BuffType.Magnet) : -1)}");
+
+    if (inventory != null)
+    {
+        bool ok = inventory.TryConsume(GameBridge.Contracts.BuffType.Magnet);
+        Debug.Log($"[MagnetBoostButtonUI] TryConsume(Magnet) => {ok}. NewCount={inventory.GetCount(GameBridge.Contracts.BuffType.Magnet)}");
+        if (!ok) return;
+    }
+    else
+    {
+        Debug.LogWarning("[MagnetBoostButtonUI] inventory is NULL -> consumption skipped");
+    }
+
+    boost.Activate();
+}
 }

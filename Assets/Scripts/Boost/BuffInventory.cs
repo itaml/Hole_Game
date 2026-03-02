@@ -3,26 +3,16 @@ using GameBridge.Contracts;
 
 public class BuffInventory : MonoBehaviour
 {
+    public static BuffInventory Instance { get; private set; }
+
     [Header("Debug")]
     [SerializeField] private bool allowBoostsWhenEmpty = false;
-
     public bool AllowBoostsWhenEmpty => allowBoostsWhenEmpty;
 
     public int GrowTempCount { get; private set; }
     public int RadarCount { get; private set; }
     public int MagnetCount { get; private set; }
     public int FreezeTimeCount { get; private set; }
-
-    // сколько раз реально использовали в этом ране
-    public int GrowTempUsed { get; private set; }
-    public int RadarUsed { get; private set; }
-    public int MagnetUsed { get; private set; }
-    public int FreezeTimeUsed { get; private set; }
-
-    public void ResetUsedCounters()
-    {
-        GrowTempUsed = RadarUsed = MagnetUsed = FreezeTimeUsed = 0;
-    }
 
     public void ApplyRunConfig(RunConfig cfg)
     {
@@ -33,7 +23,7 @@ public class BuffInventory : MonoBehaviour
         MagnetCount = Mathf.Max(0, cfg.buff3Count);
         FreezeTimeCount = Mathf.Max(0, cfg.buff4Count);
 
-        ResetUsedCounters();
+        Debug.Log($"[BuffInventory] Init buffs: ({GrowTempCount},{RadarCount},{MagnetCount},{FreezeTimeCount})");
     }
 
     public int GetCount(BuffType type) => type switch
@@ -49,26 +39,25 @@ public class BuffInventory : MonoBehaviour
 
     public bool TryConsume(BuffType type)
     {
-        if (allowBoostsWhenEmpty)
-            return true; // для теста не списываем и не считаем used (или хочешь считать? скажу ниже)
+Debug.Log($"[BuffInventory:{name}] TryConsume({type}) allowEmpty={allowBoostsWhenEmpty} before=({GrowTempCount},{RadarCount},{MagnetCount},{FreezeTimeCount})");
 
         switch (type)
         {
             case BuffType.GrowTemp:
-                if (GrowTempCount <= 0) return false;
-                GrowTempCount--; GrowTempUsed++; return true;
+                if (GrowTempCount > 0) { GrowTempCount--; return true; }
+                return allowBoostsWhenEmpty;
 
             case BuffType.Radar:
-                if (RadarCount <= 0) return false;
-                RadarCount--; RadarUsed++; return true;
+                if (RadarCount > 0) { RadarCount--; return true; }
+                return allowBoostsWhenEmpty;
 
             case BuffType.Magnet:
-                if (MagnetCount <= 0) return false;
-                MagnetCount--; MagnetUsed++; return true;
+                if (MagnetCount > 0) { MagnetCount--; return true; }
+                return allowBoostsWhenEmpty;
 
             case BuffType.FreezeTime:
-                if (FreezeTimeCount <= 0) return false;
-                FreezeTimeCount--; FreezeTimeUsed++; return true;
+                if (FreezeTimeCount > 0) { FreezeTimeCount--; return true; }
+                return allowBoostsWhenEmpty;
 
             default:
                 return false;

@@ -5,30 +5,10 @@ public class GoalFinderBoostButtonUI : BoostButtonUIBase
 {
     [SerializeField] private GoalFinderBoost boost;
 
-    private void Update()
-    {
-        if (boost == null) return;
-
-        // fill
-        if (fillImage != null)
-        {
-            if (boost.IsActive)
-                fillImage.fillAmount = Mathf.Clamp01(boost.Remaining / Mathf.Max(0.001f, boost.Duration));
-            else
-                fillImage.fillAmount = 0f;
-        }
-
-        // count
-        if (countText != null && inventory != null)
-            countText.text = inventory.AllowBoostsWhenEmpty ? "∞" : inventory.GetCount(BuffType.Radar).ToString();
-
-        // interactable
-        if (button != null)
-        {
-            if (boost.IsActive) button.interactable = false;
-            else button.interactable = (inventory == null) ? true : inventory.CanUse(BuffType.Radar);
-        }
-    }
+    protected override BuffType GetBuffType() => BuffType.Radar;
+    protected override bool IsBoostActive() => boost != null && boost.IsActive;
+    protected override float GetRemaining() => boost != null ? boost.Remaining : 0f;
+    protected override float GetDuration() => boost != null ? boost.Duration : 1f;
 
     public void Click()
     {
@@ -36,13 +16,8 @@ public class GoalFinderBoostButtonUI : BoostButtonUIBase
 
         EnsureRefs();
 
-        if (inventory != null)
-        {
-            if (!inventory.TryConsume(BuffType.Radar))
-                return;
-
-            run?.RegisterBuffUsed(BuffType.Radar);
-        }
+        if (inventory != null && !inventory.TryConsume(BuffType.Radar))
+            return;
 
         boost.Activate();
     }

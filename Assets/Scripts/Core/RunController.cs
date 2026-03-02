@@ -1,3 +1,4 @@
+using System;
 using GameBridge.Contracts;
 using GameBridge.SceneFlow;
 using UnityEngine;
@@ -16,8 +17,8 @@ public class RunController : MonoBehaviour
     [SerializeField] private float reviveAddTimeSeconds = 30f;
 
     [Header("Stars by time (percent of total time left)")]
-    [Range(0f, 1f)][SerializeField] private float threeStarsLeftPercent = 0.60f;
-    [Range(0f, 1f)][SerializeField] private float twoStarsLeftPercent = 0.30f;
+    [Range(0f, 1f)] [SerializeField] private float threeStarsLeftPercent = 0.60f;
+    [Range(0f, 1f)] [SerializeField] private float twoStarsLeftPercent = 0.30f;
 
     [Header("Refs")]
     [SerializeField] private ObjectiveTracker objectives;
@@ -28,6 +29,16 @@ public class RunController : MonoBehaviour
     [SerializeField] private GoalFinderBoost goalFinderBoost;
     [SerializeField] private WinIntroPopup winIntroPopup;
     [SerializeField] private FreezeTimeBoost freezeTimeBoost;
+
+    [Header("Buff Inventory (source of truth for buff counts)")]
+    [SerializeField] private BuffInventory buffInventory;
+
+    [Header("Dev Fallback (when RunConfig is null)")]
+    [SerializeField] private bool useFallbackBuffsWhenNoRunConfig = true;
+    [SerializeField] private int fallbackGrowTemp = 5;
+    [SerializeField] private int fallbackRadar = 5;
+    [SerializeField] private int fallbackMagnet = 5;
+    [SerializeField] private int fallbackFreezeTime = 5;
 
     [Header("UI")]
     [SerializeField] private WinScreenUI winUI;
@@ -44,16 +55,8 @@ public class RunController : MonoBehaviour
     private int _revivesUsed;
     private int _freeRevivesUsed;
 
-    private int _coins; // В начале игры ты получаешь сколько коинов есть у игрока, ты можешь их менять во время игры и в конце мне вернешь сколько коинов стало в итоге, я их присваиваю в преф
-    private int _buff1Count; // GrowTemp    Так же и с бустами
-    private int _buff2Count; // Radar    
-    private int _buff3Count; // Magnet    
-    private int _buff4Count; // FreezeTime    
-    private int _bonusSpawn; //Спавн бонусных бафов, если уровень 0 то ничего не спавнится, если уровень 1 то там по 1 бусту спавнится, если 2 то по 2 буста и если 3 то по 3 буста
-    private int _currentLevel; //Нынешний уровень
-    private bool _boost1Activated; //Буст увеличивающий на весь уровень (не временно) размер дыры    
-    private bool _boost2Activated; //Буст увеличивающий таймер (1 раз) в начале уровня.    
-    private int _collectedBP; //Сколько элементов Батлпаса игрок сожрал за уровень
+    private int _coins;
+    private int _collectedBP;
 
     private bool _losePending;
 
@@ -71,28 +74,56 @@ public class RunController : MonoBehaviour
         if (_initialized) return;
 
         _cfg = SceneFlow.PendingRunConfig;
+
+        // ✅ важное: всегда держим ссылку на SINGLETON,
+        // чтобы кнопки и RunController работали с одним инвентарём
+        if (buffInventory == null)
+            buffInventory = BuffInventory.Instance;
+
+        if (buffInventory == null)
+            buffInventory = FindFirstObjectByType<BuffInventory>(); // fallback, если Instance не настроен
+
         if (_cfg == null)
         {
-            Debug.LogError("RunController.Init: RunConfig is null. Start Game scene from Menu via SceneFlow.StartGame(cfg).");
+            Debug.LogWarning("[RunController.Init] RunConfig is null (Game scene started directly).");
+
+            if (buffInventory != null && useFallbackBuffsWhenNoRunConfig)
+            {
+                var fake = new RunConfig
+                {
+                    buff1Count = fallbackGrowTemp,
+                    buff2Count = fallbackRadar,
+                    buff3Count = fallbackMagnet,
+                    buff4Count = fallbackFreezeTime,
+                    walletCoinsSnapshot = 0,
+                    levelIndex = 0
+                };
+
+                buffInventory.ApplyRunConfig(fake);
+                _coins = 0;
+
+                Debug.LogWarning($"[RunController.Init] Using FALLBACK buffs: ({fallbackGrowTemp},{fallbackRadar},{fallbackMagnet},{fallbackFreezeTime})");
+            }
+            else
+            {
+                Debug.LogError("[RunController.Init] BuffInventory not found. Boost buttons will stay disabled.");
+            }
+
+            _initialized = true;
             return;
         }
 
         _initialized = true;
 
-        _currentLevel = _cfg.levelIndex;
-
         _coins = Mathf.Max(0, _cfg.walletCoinsSnapshot);
-        _buff1Count = Mathf.Max(0, _cfg.buff1Count);
-        _buff2Count = Mathf.Max(0, _cfg.buff2Count);
-        _buff3Count = Mathf.Max(0, _cfg.buff3Count);
-        _buff4Count = Mathf.Max(0, _cfg.buff4Count);
 
-        _bonusSpawn = _cfg.bonusSpawnLevel;
-        _boost1Activated = _cfg.boost1Activated;
-        _boost2Activated = _cfg.boost2Activated;
+        if (buffInventory != null)
+            buffInventory.ApplyRunConfig(_cfg);
+        else
+            Debug.LogError("[RunController.Init] BuffInventory not found. Boost buttons will stay disabled.");
 
-        Debug.Log($"Init OK. Level={_cfg.levelIndex} boost1={_cfg.boost1Activated} boost2={_cfg.boost2Activated} bonusSpawn={_cfg.bonusSpawnLevel} " + 
-            $"buff1={_cfg.buff1Count} buff2={_cfg.buff2Count} buff3={_cfg.buff3Count} buff4={_cfg.buff4Count} coins={_cfg.walletCoinsSnapshot}");
+        Debug.Log($"[RunController.Init] OK. Level={_cfg.levelIndex} bonusSpawn={_cfg.bonusSpawnLevel} " +
+                  $"buffs=({_cfg.buff1Count},{_cfg.buff2Count},{_cfg.buff3Count},{_cfg.buff4Count}) coins={_cfg.walletCoinsSnapshot}");
     }
 
     private void OnEnable()
@@ -113,9 +144,10 @@ public class RunController : MonoBehaviour
         }
     }
 
-    public void ApplyLevelDuration(float minutesOverride) 
-    { 
-        if (minutesOverride > 0f) levelDurationMinutes = minutesOverride; 
+    public void ApplyLevelDuration(float minutesOverride)
+    {
+        if (minutesOverride > 0f)
+            levelDurationMinutes = minutesOverride;
     }
 
     public void StartRun()
@@ -128,6 +160,7 @@ public class RunController : MonoBehaviour
         _revivesUsed = 0;
         _freeRevivesUsed = 0;
         _losePending = false;
+        _ended = false;
 
         IsRunning = true;
 
@@ -163,114 +196,27 @@ public class RunController : MonoBehaviour
         debugTimerText.text = $"{m:00}:{s:00}";
     }
 
-    // =========================================================
-    // БАЛАНСЫ / ЭКОНОМИКА В РАНЕ (главное)
-    // =========================================================
+    // ---------------- Coins ----------------
 
-    public int GetBuffCount(BuffType type)
-    {
-        return type switch
-        {
-            BuffType.GrowTemp => _buff1Count,
-            BuffType.Radar => _buff2Count,
-            BuffType.Magnet => _buff3Count,
-            BuffType.FreezeTime => _buff4Count,
-            _ => 0
-        };
-    }
+    public int Coins => _coins;
 
-    public void RegisterBuffUsed(BuffType type)
-    {
-        switch (type)
-        {
-            case BuffType.GrowTemp: TryUseBuff(BuffType.GrowTemp, 1); break;
-            case BuffType.Radar: TryUseBuff(BuffType.GrowTemp, 1);break;
-            case BuffType.Magnet: TryUseBuff(BuffType.GrowTemp, 1); break;
-            case BuffType.FreezeTime: TryUseBuff(BuffType.GrowTemp, 1); break;
-        }
-    }
-
-    /// <summary>
-    /// Любое изменение коинов: delta может быть + или -.
-    /// Минус НЕ пройдет, если не хватает.
-    /// </summary>
     public bool ChangeCoins(int delta)
     {
-        if (delta == 0) return true;
-
         int next = _coins + delta;
-        if (next < 0)
-        {
-            // Не хватает — отказ
-            return false;
-        }
-
+        if (next < 0) return false;
         _coins = next;
-        // TODO: если есть UI кошелька — обновляй здесь
         return true;
     }
 
-    public bool TrySpendCoins(int amount)
+    public bool TrySpendCoins(int amount) => amount <= 0 || ChangeCoins(-amount);
+    public void AddCoins(int amount) { if (amount > 0) ChangeCoins(amount); }
+
+    public void AddBattlepassItems(int amount)
     {
-        if (amount <= 0) return true;
-        return ChangeCoins(-amount);
+        if (amount > 0) _collectedBP += amount;
     }
 
-    public void AddCoins(int amount)
-    {
-        if (amount <= 0) return;
-        ChangeCoins(amount);
-    }
-
-    /// <summary>
-    /// Любое изменение бафа: delta может быть + или -.
-    /// Минус НЕ пройдет, если не хватает.
-    /// </summary>
-    public bool ChangeBuff(BuffType type, int delta)
-    {
-        if (delta == 0) return true;
-
-        ref int slot = ref GetBuffSlotRef(type);
-
-        int next = slot + delta;
-        if (next < 0)
-            return false;
-
-        slot = next;
-        // TODO: если есть UI бафов — обновляй здесь
-        return true;
-    }
-
-    public bool TryUseBuff(BuffType type, int count = 1)
-    {
-        if (count <= 0) return true;
-        return ChangeBuff(type, -count);
-    }
-
-    public void AddBuff(BuffType type, int count = 1)
-    {
-        if (count <= 0) return;
-        ChangeBuff(type, count);
-    }
-
-    private ref int GetBuffSlotRef(BuffType type)
-    {
-        switch (type)
-        {
-            case BuffType.GrowTemp: return ref _buff1Count;
-            case BuffType.Radar: return ref _buff2Count;
-            case BuffType.Magnet: return ref _buff3Count;
-            case BuffType.FreezeTime: return ref _buff4Count;
-            default:
-                // Нельзя вернуть ref на локальную, поэтому делаем "фиктивный" слот:
-                // но лучше убедись, что BuffType всегда из этих 4.
-                throw new System.ArgumentOutOfRangeException(nameof(type), type, "Unknown BuffType");
-        }
-    }
-
-    // =========================================================
-    // Gameplay
-    // =========================================================
+    // ---------------- Gameplay ----------------
 
     public void GameOverByBomb()
     {
@@ -320,9 +266,7 @@ public class RunController : MonoBehaviour
         goalUI?.GetSlotUI(type)?.MarkComplete();
     }
 
-    // =========================================================
-    // Win/Lose
-    // =========================================================
+    // ---------------- Win/Lose ----------------
 
     private void Win()
     {
@@ -349,7 +293,8 @@ public class RunController : MonoBehaviour
 
     private void ContinueAfterWin(int stars)
     {
-        OnWin(starsEarned: stars, _coins, _collectedBP, _buff1Count, _buff2Count, _buff3Count, _buff4Count);
+        if (_ended) return;
+        ReturnToMenu(LevelOutcome.Win, stars);
     }
 
     private void Lose(LoseReason reason)
@@ -366,10 +311,7 @@ public class RunController : MonoBehaviour
 
         string title = reason == LoseReason.TimeUp ? "Oops! Time's up!" : "Kaboom!";
         string subtitle = reason == LoseReason.TimeUp ? "Get more time to continue!" : "Use a revive to keep playing!";
-
-        string reviveText = !canRevive
-            ? "No revives"
-            : (isFree ? "Revive (FREE)" : "Revive");
+        string reviveText = !canRevive ? "No revives" : (isFree ? "Revive (FREE)" : "Revive");
 
         loseUI?.Show(
             title, subtitle,
@@ -385,7 +327,8 @@ public class RunController : MonoBehaviour
         if (!_losePending) return;
         _losePending = false;
 
-        OnLose(_coins, _buff1Count, _buff2Count, _buff3Count, _buff4Count);
+        if (_ended) return;
+        ReturnToMenu(LevelOutcome.Lose, 0);
     }
 
     private int CalculateStars()
@@ -396,9 +339,7 @@ public class RunController : MonoBehaviour
         return 1;
     }
 
-    // =========================================================
-    // Revive
-    // =========================================================
+    // ---------------- Revive ----------------
 
     private void TryRevive(bool free)
     {
@@ -432,22 +373,23 @@ public class RunController : MonoBehaviour
         loseUI?.Hide();
     }
 
+    // ---------------- Return to Menu ----------------
 
-    public void OnWin(int starsEarned, int coins, int battlepassItems, int buff1, int buff2, int buff3, int buff4)
-    {
-        if (!_initialized || _ended) return;
-        ReturnToMenu(LevelOutcome.Win, starsEarned, coins, battlepassItems, buff1, buff2, buff3, buff4);
-    }
-
-    public void OnLose(int coins, int buff1, int buff2, int buff3, int buff4)
-    {
-        if (!_initialized || _ended) return;
-        ReturnToMenu(LevelOutcome.Lose, 0, coins, 0, buff1, buff2, buff3, buff4);
-    }
-
-    private void ReturnToMenu(LevelOutcome outcome, int stars, int coins, int bpItems, int buff1, int buff2, int buff3, int buff4)
+    private void ReturnToMenu(LevelOutcome outcome, int stars)
     {
         _ended = true;
+
+        if (_cfg == null)
+        {
+            Debug.LogWarning("[RunController] ReturnToMenu called but RunConfig is null (started directly).");
+            return;
+        }
+
+        // ✅ читаем остатки ТОЛЬКО из BuffInventory
+        int b1 = buffInventory ? buffInventory.GrowTempCount : 0;
+        int b2 = buffInventory ? buffInventory.RadarCount : 0;
+        int b3 = buffInventory ? buffInventory.MagnetCount : 0;
+        int b4 = buffInventory ? buffInventory.FreezeTimeCount : 0;
 
         var result = new LevelResult
         {
@@ -455,19 +397,18 @@ public class RunController : MonoBehaviour
             outcome = outcome,
 
             starsEarned = (outcome == LevelOutcome.Win) ? Mathf.Max(0, stars) : 0,
-            coinsResult = Mathf.Max(0, coins),
-            battlepassItemsCollected = Mathf.Max(0, bpItems),
-            buff1Count = Mathf.Max(0, buff1),
-            buff2Count = Mathf.Max(0, buff2),
-            buff3Count = Mathf.Max(0, buff3),
-            buff4Count = Mathf.Max(0, buff4),
+            coinsResult = Mathf.Max(0, _coins),
+            battlepassItemsCollected = Mathf.Max(0, _collectedBP),
+
+            buff1Count = Mathf.Max(0, b1),
+            buff2Count = Mathf.Max(0, b2),
+            buff3Count = Mathf.Max(0, b3),
+            buff4Count = Mathf.Max(0, b4),
         };
 
-        Debug.Log(
-            $"ReturnToMenu: outcome={outcome} level={result.levelIndex} " +
-            $"stars={result.starsEarned} wallet+={result.coinsResult} bpItems={result.battlepassItemsCollected} " +
-            $"buffsCount=({result.buff1Count},{result.buff2Count},{result.buff3Count},{result.buff4Count})"
-        );
+        Debug.Log($"[RunController] ReturnToMenu outcome={outcome} level={result.levelIndex} " +
+                  $"stars={result.starsEarned} coins={result.coinsResult} bp={result.battlepassItemsCollected} " +
+                  $"buffs=({result.buff1Count},{result.buff2Count},{result.buff3Count},{result.buff4Count})");
 
         SceneFlow.ReturnToMenu(result);
     }

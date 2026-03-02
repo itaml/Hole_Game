@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using GameBridge.Contracts;
 
 public abstract class BoostButtonUIBase : MonoBehaviour
 {
@@ -10,8 +11,6 @@ public abstract class BoostButtonUIBase : MonoBehaviour
     [SerializeField] protected Image fillImage;
     [SerializeField] protected Button button;
     [SerializeField] protected TMP_Text countText;
-
-    protected RunController run;
 
     protected virtual void Awake()
     {
@@ -24,6 +23,12 @@ public abstract class BoostButtonUIBase : MonoBehaviour
     protected virtual void OnEnable()
     {
         EnsureRefs();
+        Refresh(); // сразу обновим UI при включении
+    }
+
+    protected virtual void Update()
+    {
+        Refresh();
     }
 
     protected void EnsureRefs()
@@ -36,14 +41,40 @@ public abstract class BoostButtonUIBase : MonoBehaviour
             inventory = Object.FindFirstObjectByType<BuffInventory>();
 #endif
         }
+    }
 
-        if (run == null)
+    private void Refresh()
+    {
+        // COUNT TEXT
+        if (countText != null && inventory != null)
         {
-#if UNITY_2023_1_OR_NEWER
-            run = Object.FindAnyObjectByType<RunController>();
-#else
-            run = Object.FindFirstObjectByType<RunController>();
-#endif
+            countText.text = inventory.AllowBoostsWhenEmpty
+                ? "∞"
+                : inventory.GetCount(GetBuffType()).ToString();
+        }
+
+        // FILL
+        if (fillImage != null)
+        {
+            if (IsBoostActive())
+                fillImage.fillAmount = Mathf.Clamp01(GetRemaining() / Mathf.Max(0.001f, GetDuration()));
+            else
+                fillImage.fillAmount = 0f;
+        }
+
+        // BUTTON INTERACTABLE
+        if (button != null)
+        {
+            if (IsBoostActive())
+                button.interactable = false;
+            else
+                button.interactable = (inventory == null) || inventory.CanUse(GetBuffType());
         }
     }
+
+    // ---- to be implemented by each button ----
+    protected abstract BuffType GetBuffType();
+    protected abstract bool IsBoostActive();
+    protected abstract float GetRemaining();
+    protected abstract float GetDuration();
 }

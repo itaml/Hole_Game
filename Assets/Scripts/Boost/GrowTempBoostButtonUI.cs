@@ -5,27 +5,10 @@ public class GrowTempBoostButtonUI : BoostButtonUIBase
 {
     [SerializeField] private GrowTempBoost boost;
 
-    private void Update()
-    {
-        if (boost == null) return;
-
-        if (fillImage != null)
-        {
-            if (boost.IsActive)
-                fillImage.fillAmount = Mathf.Clamp01(boost.Remaining / Mathf.Max(0.001f, boost.Duration));
-            else
-                fillImage.fillAmount = 0f;
-        }
-
-        if (countText != null && inventory != null)
-            countText.text = inventory.AllowBoostsWhenEmpty ? "∞" : inventory.GetCount(BuffType.GrowTemp).ToString();
-
-        if (button != null)
-        {
-            if (boost.IsActive) button.interactable = false;
-            else button.interactable = (inventory == null) ? true : inventory.CanUse(BuffType.GrowTemp);
-        }
-    }
+    protected override BuffType GetBuffType() => BuffType.GrowTemp;
+    protected override bool IsBoostActive() => boost != null && boost.IsActive;
+    protected override float GetRemaining() => boost != null ? boost.Remaining : 0f;
+    protected override float GetDuration() => boost != null ? boost.Duration : 1f;
 
     public void Click()
     {
@@ -33,13 +16,8 @@ public class GrowTempBoostButtonUI : BoostButtonUIBase
 
         EnsureRefs();
 
-        if (inventory != null)
-        {
-            if (!inventory.TryConsume(BuffType.GrowTemp))
-                return;
-
-            run?.RegisterBuffUsed(BuffType.GrowTemp);
-        }
+        if (inventory != null && !inventory.TryConsume(BuffType.GrowTemp))
+            return;
 
         boost.Activate();
     }

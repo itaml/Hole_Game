@@ -993,64 +993,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a47f546fc70ec8428172694e78e4288, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &379487406
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 379487408}
-  - component: {fileID: 379487407}
-  - component: {fileID: 379487409}
-  m_Layer: 0
-  m_Name: Yarik
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &379487407
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 379487406}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b12f4cff46b72482ebbca0153955b46a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BuffInventory
-  allowBoostsWhenEmpty: 1
---- !u!4 &379487408
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 379487406}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &379487409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 379487406}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75403f55e047a574584e7a659524a65a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Game.GameEntry
 --- !u!1 &400239270
 GameObject:
   m_ObjectHideFlags: 0
@@ -1225,6 +1167,51 @@ Transform:
   - {fileID: 1429012931}
   - {fileID: 522268974}
   - {fileID: 147806558}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &432303257
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 432303259}
+  - component: {fileID: 432303258}
+  m_Layer: 0
+  m_Name: Dont
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &432303258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432303257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b12f4cff46b72482ebbca0153955b46a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffInventory
+  allowBoostsWhenEmpty: 0
+--- !u!4 &432303259
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432303257}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &455854145
@@ -1425,9 +1412,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1745840904}
-        m_TargetAssemblyTypeName: GoalFinderBoost, Assembly-CSharp
-        m_MethodName: Activate
+      - m_Target: {fileID: 468613326}
+        m_TargetAssemblyTypeName: GoalFinderBoostButtonUI, Assembly-CSharp
+        m_MethodName: Click
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3054,9 +3041,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1745840907}
-        m_TargetAssemblyTypeName: FreezeTimeBoost, Assembly-CSharp
-        m_MethodName: Activate
+      - m_Target: {fileID: 915752567}
+        m_TargetAssemblyTypeName: FreezeTimeBoostButtonUI, Assembly-CSharp
+        m_MethodName: Click
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5016,7 +5003,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1471092480
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5371,9 +5358,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1745840906}
-        m_TargetAssemblyTypeName: MagnetBoost, Assembly-CSharp
-        m_MethodName: Activate
+      - m_Target: {fileID: 1538235129}
+        m_TargetAssemblyTypeName: MagnetBoostButtonUI, Assembly-CSharp
+        m_MethodName: Click
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5633,7 +5620,12 @@ MonoBehaviour:
   goalFinderBoost: {fileID: 1745840904}
   winIntroPopup: {fileID: 1431604029}
   freezeTimeBoost: {fileID: 1745840907}
-  gameEntry: {fileID: 379487409}
+  buffInventory: {fileID: 432303258}
+  useFallbackBuffsWhenNoRunConfig: 0
+  fallbackGrowTemp: 5
+  fallbackRadar: 5
+  fallbackMagnet: 5
+  fallbackFreezeTime: 5
   winUI: {fileID: 1431604028}
   loseUI: {fileID: 1431604027}
   debugTimerText: {fileID: 0}
@@ -8245,4 +8237,4 @@ SceneRoots:
   - {fileID: 2006182039}
   - {fileID: 2016510019}
   - {fileID: 1745840905}
-  - {fileID: 379487408}
+  - {fileID: 432303259}

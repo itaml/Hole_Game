@@ -10,9 +10,9 @@ namespace Meta.State
         public int boostExtraTime = 5;
 
         // 🔥 Buffs (если они должны накапливаться)
-        public int buffGrowTemp = 5;
-        public int buffRadar = 5;
-        public int buffMagnet = 5;
+        public int buffGrowTemp = 3;
+        public int buffRadar = 3;
+        public int buffMagnet = 3;
         public int buffFreezeTime = 5;
     }
 }
