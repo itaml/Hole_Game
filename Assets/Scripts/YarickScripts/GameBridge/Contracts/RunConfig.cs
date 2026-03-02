@@ -22,13 +22,5 @@ namespace GameBridge.Contracts
 
         // Convenience for "continue" offer logic in Game
         public int walletCoinsSnapshot;
-
-        //Данные банка
-        public bool isBankOpen;
-        public int bankCoinsSnapshot;
-        public int bankCapacitySnapshot;
-
-        //Спавнятся ли батлпас обьекты
-        public bool isBattlepasOpen;
     }
 }
