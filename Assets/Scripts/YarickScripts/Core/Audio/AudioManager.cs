@@ -201,14 +201,8 @@ public class AudioManager : MonoBehaviour
 
     private void LoadVolumeSettings()
     {
-        Debug.Log("defMus: " + musicVolume);
-        Debug.Log("defSfx: " + sfxVolume);
-
         SetMusicVolume(PlayerPrefs.GetFloat("MusicVolume", 1f));
         SetSFXVolume(PlayerPrefs.GetFloat("SFXVolume", 1f));
-
-        Debug.Log(PlayerPrefs.GetFloat("MusicVolume", 1f));
-        Debug.Log(PlayerPrefs.GetFloat("SFXVolume", 1f));
     }
 
     public float GetMusicVolume() => musicVolume;

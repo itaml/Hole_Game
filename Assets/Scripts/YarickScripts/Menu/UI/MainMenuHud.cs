@@ -24,6 +24,14 @@ namespace Menu.UI
         [SerializeField] private Button bankOpenButton;
         [SerializeField] private BankPopupUi bankPopup;
 
+        [Header("LevelChest")]
+        [SerializeField] private Button levelChestOpenBtn;
+        [SerializeField] private LevelsChestPopupUi levelChestPopup;
+
+        [Header("StarChest")]
+        [SerializeField] private Button starChestOpenBtn;
+        [SerializeField] private StarsChestPopupUi starChestPopup;
+
         [Header("Bonus (win streak)")]
         [SerializeField] private GameObject bonusClosed;
         [SerializeField] private Image bonusBar;
@@ -45,6 +53,8 @@ namespace Menu.UI
 
         private void OnEnable()
         {
+            if (starChestOpenBtn != null) starChestOpenBtn.onClick.AddListener(OpenStarChest);
+            if (levelChestOpenBtn != null) levelChestOpenBtn.onClick.AddListener(OpenLevelChest);
             if (livesPlusButton != null) livesPlusButton.onClick.AddListener(OpenLivesPopup);
             if (bankOpenButton != null) bankOpenButton.onClick.AddListener(OpenBankPopup);
             if (startButton != null) startButton.onClick.AddListener(OpenStartPopup);
@@ -52,6 +62,8 @@ namespace Menu.UI
 
         private void OnDisable()
         {
+            if (starChestOpenBtn != null) starChestOpenBtn.onClick.RemoveListener(OpenStarChest);
+            if (levelChestOpenBtn != null) levelChestOpenBtn.onClick.RemoveListener(OpenLevelChest);
             if (livesPlusButton != null) livesPlusButton.onClick.RemoveListener(OpenLivesPopup);
             if (bankOpenButton != null) bankOpenButton.onClick.RemoveListener(OpenBankPopup);
             if (startButton != null) startButton.onClick.RemoveListener(OpenStartPopup);
@@ -145,6 +157,18 @@ namespace Menu.UI
         {
             if (bankPopup == null || root == null) return;
             bankPopup.Show(root);
+        }
+
+        private void OpenLevelChest()
+        {
+            if (levelChestPopup == null || root == null) return;
+            levelChestPopup.Show(root);
+        }
+
+        private void OpenStarChest()
+        {
+            if (starChestPopup == null || root == null) return;
+            starChestPopup.Show(root);
         }
 
         private void OpenStartPopup()

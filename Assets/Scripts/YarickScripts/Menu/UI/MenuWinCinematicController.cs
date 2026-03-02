@@ -14,6 +14,9 @@ namespace Menu.UI
         [SerializeField] private RewardPopupRouter popupRouter;
         [SerializeField] private RewardPopupQueue popupQueue;
 
+        [Header("Tutorial")]
+        [SerializeField] private StartTutorialPopupUi tutorialPopup;
+
         [Header("Block input")]
         [SerializeField] private CanvasGroup inputBlocker;
 
@@ -148,8 +151,52 @@ namespace Menu.UI
                 }
             }
 
-            root.SuppressAutoRewardPopups = false;
+            
+// 4) Any remaining rewards (e.g., feature unlock welcome grants: buffs/boosts, etc.)
+// MenuWinCinematicController ранее показывал только награды, связанные с открытием сундуков.
+// Из-за этого "welcome rewards" могли теряться и попап не появлялся.
+if (allGranted != null && allGranted.Length > 0)
+{
+    int consumed = levelOpenCount + starOpenCount;
+    var remaining = SkipFirst(allGranted, consumed);
+    if (remaining != null && remaining.Length > 0)
+    {
+        ShowRewards(remaining);
+        yield return WaitForPopups();
+    }
+}
+
+            // 5) Post-win tutorial popups (after all animations + reward popups)
+            yield return TryShowPostWinTutorial();
+root.SuppressAutoRewardPopups = false;
             SetBlocked(false);
+        }
+
+        private IEnumerator TryShowPostWinTutorial()
+        {
+            if (tutorialPopup == null) yield break;
+            if (root == null || root.Meta == null) yield break;
+
+            var save = root.Meta.Save;
+            if (save == null || save.tutorial == null) yield break;
+
+            int id = save.tutorial.pendingPostWinTutorialId;
+            if (id == 0) yield break;
+
+            // Clear pending immediately to avoid duplicates if UI re-renders.
+            save.tutorial.pendingPostWinTutorialId = 0;
+
+            tutorialPopup.Show();
+
+            // Wait until player closes the tutorial popup
+            while (tutorialPopup != null && tutorialPopup.IsShown)
+                yield return null;
+
+            // Mark shown
+            if (id == 1)
+                save.tutorial.profilePostWinTutorialShown = true;
+
+            root.Meta.SaveNow();
         }
 
         private void ShowRewards(Core.Configs.Reward[] rewards)

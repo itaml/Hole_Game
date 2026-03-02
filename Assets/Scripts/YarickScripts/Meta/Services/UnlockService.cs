@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using Core.Configs;
-using GameBridge.Contracts;
 
 namespace Meta.Services
 {
@@ -10,6 +8,25 @@ namespace Meta.Services
 
         public UnlockService(UnlockConfig cfg) { _cfg = cfg; }
 
+        // Expose thresholds
+        public int StarsChestUnlockLevel => _cfg.starsChestUnlockLevel;
+        public int LevelsChestUnlockLevel => _cfg.levelsChestUnlockLevel;
+
+        public int BankUnlockLevel => _cfg.bankUnlockLevel;
+        public int BattlepassUnlockLevel => _cfg.battlepassUnlockLevel;
+
+        public int Boost1UnlockLevel => _cfg.boost1UnlockLevel;
+        public int Boost2UnlockLevel => _cfg.boost2UnlockLevel;
+
+        public int Buff1UnlockLevel => _cfg.buff1UnlockLevel;
+        public int Buff2UnlockLevel => _cfg.buff2UnlockLevel;
+        public int Buff3UnlockLevel => _cfg.buff3UnlockLevel;
+        public int Buff4UnlockLevel => _cfg.buff4UnlockLevel;
+
+        public int WinStreakUnlockLevel => _cfg.winStreakUnlockLevel;
+        public int InterstitialAdsUnlockLevel => _cfg.interstitialAdsUnlockLevel;
+
+        // Existing helpers
         public bool IsStarsChestUnlocked(int level) => level >= _cfg.starsChestUnlockLevel;
         public bool IsLevelsChestUnlocked(int level) => level >= _cfg.levelsChestUnlockLevel;
 

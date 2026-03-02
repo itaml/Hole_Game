@@ -1,10 +1,12 @@
 ﻿using Core.Configs;
+using Core.Levels;
 using Core.Save;
 using Core.Time;
 using GameBridge.Contracts;
 using Meta.State;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Meta.Services
 {
@@ -50,6 +52,8 @@ namespace Meta.Services
         }
 
         public PlayerSave Save => _saveSystem.Current;
+
+        public void SaveNow() => _saveSystem.Save();
 
         private readonly List<Reward> _grantedRewards = new();
 
@@ -121,6 +125,8 @@ namespace Meta.Services
         {
             if (r == null) return;
 
+            int prevLevelBefore = Save.progress.currentLevel;
+
             // Keep timers up to date first
             _lives.TickRegen(Save);
 
@@ -135,6 +141,10 @@ namespace Meta.Services
             // 2) Outcome handling: lives + streak
             if (r.outcome == LevelOutcome.Lose)
             {
+                // If player loses a Master/Challenge level once, this level becomes 'burned' (no bonuses anymore)
+                if (LevelTypeUtils.IsMasterLevel(r.levelIndex) || LevelTypeUtils.IsChallengeLevel(r.levelIndex))
+                    SpecialLevelBurnStorage.Burn(r.levelIndex);
+
                 Save.profile.currentWinStreak = 0;
 
                 Save.progress.failedLevels.Add(r.levelIndex);
@@ -180,11 +190,23 @@ namespace Meta.Services
                 _chests.AddLevelWinAndOpenIfReady(Save, _grantedRewards);
 
             // 5) Battlepass
-            if (_unlocks.IsBattlepassUnlocked(r.levelIndex))
-            {
-                _battlepass.EnsureSeason(Save);
-                _battlepass.AddItems(Save, r.battlepassItemsCollected);
-            }
+if (_unlocks.IsBattlepassUnlocked(r.levelIndex))
+{
+    _battlepass.EnsureSeason(Save);
+
+    int itemsToAdd = r.battlepassItemsCollected;
+
+    // Multiply rewards only on Win and only if this special level wasn't burned by a previous loss
+    if (r.outcome == LevelOutcome.Win && itemsToAdd > 0 && !SpecialLevelBurnStorage.IsBurned(r.levelIndex))
+    {
+        if (LevelTypeUtils.IsMasterLevel(r.levelIndex))
+            itemsToAdd *= 5;
+        else if (LevelTypeUtils.IsChallengeLevel(r.levelIndex))
+            itemsToAdd *= 3;
+    }
+
+    _battlepass.AddItems(Save, itemsToAdd);
+}
 
             // 6) Progression: advance only on win
             if (r.outcome == LevelOutcome.Win)
@@ -193,7 +215,103 @@ namespace Meta.Services
                     Save.progress.currentLevel = r.levelIndex + 1;
             }
 
+// 6.5) Feature unlock rewards + tutorials (one-time)
+if (r.outcome == LevelOutcome.Win)
+    HandleUnlocksAndTutorials(prevLevelBefore, Save.progress.currentLevel);
+
             _saveSystem.Save();
+        }
+
+        private void HandleUnlocksAndTutorials(int prevLevel, int newLevel)
+        {
+            if (_unlocks == null) return;
+            if (Save == null) return;
+
+            if (newLevel <= prevLevel) return;
+
+            const int DefaultBuffGrant = 3;
+            const int DefaultBoostGrant = 3;
+
+            // Buff 1
+            if (!Save.tutorial.buff1Granted &&
+                prevLevel < _unlocks.Buff1UnlockLevel && newLevel >= _unlocks.Buff1UnlockLevel)
+            {
+                Save.inventory.buffGrowTemp += DefaultBuffGrant;
+                Save.tutorial.buff1Granted = true;
+                _grantedRewards.Add(new Reward { buff1Amount = DefaultBuffGrant });
+            }
+
+            // Buff 2
+            if (!Save.tutorial.buff2Granted &&
+                prevLevel < _unlocks.Buff2UnlockLevel && newLevel >= _unlocks.Buff2UnlockLevel)
+            {
+                Save.inventory.buffRadar += DefaultBuffGrant;
+                Save.tutorial.buff2Granted = true;
+                _grantedRewards.Add(new Reward { buff2Amount = DefaultBuffGrant });
+            }
+
+            // Buff 3
+            if (!Save.tutorial.buff3Granted &&
+                prevLevel < _unlocks.Buff3UnlockLevel && newLevel >= _unlocks.Buff3UnlockLevel)
+            {
+                Save.inventory.buffMagnet += DefaultBuffGrant;
+                Save.tutorial.buff3Granted = true;
+                _grantedRewards.Add(new Reward { buff3Amount = DefaultBuffGrant });
+            }
+
+            // Buff 4
+            if (!Save.tutorial.buff4Granted &&
+                prevLevel < _unlocks.Buff4UnlockLevel && newLevel >= _unlocks.Buff4UnlockLevel)
+            {
+                Save.inventory.buffFreezeTime += DefaultBuffGrant;
+                Save.tutorial.buff4Granted = true;
+                _grantedRewards.Add(new Reward { buff4Amount = DefaultBuffGrant });
+            }
+
+            // Boost 1
+            if (!Save.tutorial.boost1Granted &&
+                prevLevel < _unlocks.Boost1UnlockLevel && newLevel >= _unlocks.Boost1UnlockLevel)
+            {
+                Save.inventory.boostGrowWholeLevel += DefaultBoostGrant;
+                Save.tutorial.boost1Granted = true;
+                _grantedRewards.Add(new Reward { boost1Amount = DefaultBoostGrant });
+if (!Save.tutorial.boost1StartTutorialShown &&
+    Save.tutorial.pendingStartTutorialId == 0)
+{
+    Save.tutorial.pendingStartTutorialId = 2;
+}
+}
+
+            // Boost 2
+            if (!Save.tutorial.boost2Granted &&
+                prevLevel < _unlocks.Boost2UnlockLevel && newLevel >= _unlocks.Boost2UnlockLevel)
+            {
+                Save.inventory.boostExtraTime += DefaultBoostGrant;
+                Save.tutorial.boost2Granted = true;
+                _grantedRewards.Add(new Reward { boost2Amount = DefaultBoostGrant });
+if (!Save.tutorial.boost2StartTutorialShown &&
+    Save.tutorial.pendingStartTutorialId == 0)
+{
+    Save.tutorial.pendingStartTutorialId = 3;
+}
+}
+
+            // Win streak tutorial: show ON TOP of StartPopup after unlocking
+            if (!Save.tutorial.winStreakStartTutorialShown &&
+                Save.tutorial.pendingStartTutorialId == 0 &&
+                prevLevel < _unlocks.WinStreakUnlockLevel && newLevel >= _unlocks.WinStreakUnlockLevel)
+            {
+                Save.tutorial.pendingStartTutorialId = 1;
+            }
+
+            // Profile tutorial (post-win): when reaching level 18 (after cinematic/rewards)
+            const int ProfileTutorialLevel = 18;
+            if (!Save.tutorial.profilePostWinTutorialShown &&
+                Save.tutorial.pendingPostWinTutorialId == 0 &&
+                prevLevel < ProfileTutorialLevel && newLevel >= ProfileTutorialLevel)
+            {
+                Save.tutorial.pendingPostWinTutorialId = 1;
+            }
         }
 
         public void RegisterLogin()

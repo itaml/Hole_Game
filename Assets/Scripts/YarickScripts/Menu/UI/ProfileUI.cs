@@ -12,7 +12,14 @@ public class ProfileUI : MonoBehaviour
     [SerializeField] private Sprite[] framesSpr;
     [SerializeField] private Sprite[] avatarsSpr;
     [SerializeField] private Button profileOpenBtn;
+    [SerializeField] private Button optionsOpenBtn;
+    [SerializeField] private Button optionsCloseBtn;
     [SerializeField] private GameObject profileLabel;
+    [SerializeField] private GameObject optionsLabel;
+    [SerializeField] private GameObject mallLabel;
+    [SerializeField] private Button mallOpenBtn;
+    [SerializeField] private Button mallCloseBtn;
+    [SerializeField] private Button mallCloseBtn2;
     [Header("Profile")]
     [SerializeField] private Image frameImgProfile;
     [SerializeField] private Image avatarImgProfile;
@@ -40,13 +47,20 @@ public class ProfileUI : MonoBehaviour
     private int avatar, frame;
 
     [SerializeField] private PopupTween profileTween;
+    [SerializeField] private PopupTween optionsTween;
     [SerializeField] private PopupTween editTween;
+    [SerializeField] private PopupTween mallTween;
 
     private void Start()
     {
         SetData();
 
+        if (mallCloseBtn2 != null) mallCloseBtn2.onClick.AddListener(OnClickMallClosed);
+        if (mallCloseBtn != null) mallCloseBtn.onClick.AddListener(OnClickMallClosed);
+        if (mallOpenBtn != null) mallOpenBtn.onClick.AddListener(OnClickMallOpen);
         if (profileOpenBtn != null) profileOpenBtn.onClick.AddListener(OnClickProfileOpen);
+        if (optionsOpenBtn != null) optionsOpenBtn.onClick.AddListener(OnClickOptionsOpen);
+        if (optionsCloseBtn != null) optionsCloseBtn.onClick.AddListener(OnClickOptionsClosed);
         if (editOpenBtn != null) editOpenBtn.onClick.AddListener(OnClickEditOpen);
         if (profileCloseBtn != null) profileCloseBtn.onClick.AddListener(OnClickProfileClose);
         if (editCloseBtn != null) editCloseBtn.onClick.AddListener(OnClickEditClose);
@@ -56,7 +70,12 @@ public class ProfileUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (mallCloseBtn2 != null) mallCloseBtn2.onClick.RemoveListener(OnClickMallClosed);
+        if (mallCloseBtn != null) mallCloseBtn.onClick.RemoveListener(OnClickMallClosed);
+        if (mallOpenBtn != null) mallOpenBtn.onClick.RemoveListener(OnClickMallOpen);
         if (profileOpenBtn != null) profileOpenBtn.onClick.RemoveListener(OnClickProfileOpen);
+        if (optionsOpenBtn != null) optionsOpenBtn.onClick.RemoveListener(OnClickOptionsOpen);
+        if (optionsCloseBtn != null) optionsCloseBtn.onClick.RemoveListener(OnClickOptionsClosed);
         if (editOpenBtn != null) editOpenBtn.onClick.RemoveListener(OnClickEditOpen);
         if (profileCloseBtn != null) profileCloseBtn.onClick.RemoveListener(OnClickProfileClose);
         if (editCloseBtn != null) editCloseBtn.onClick.RemoveListener(OnClickEditClose);
@@ -135,6 +154,26 @@ public class ProfileUI : MonoBehaviour
         {
             go.SetActive(false);
         }
+    }
+
+    private void OnClickMallOpen()
+    {
+        ShowLabel(mallLabel, mallTween);
+    }
+
+    private void OnClickMallClosed()
+    {
+        HideLabel(mallLabel, mallTween);
+    }
+
+    private void OnClickOptionsOpen()
+    {
+        ShowLabel(optionsLabel, optionsTween);
+    }
+
+    private void OnClickOptionsClosed()
+    {
+        HideLabel(optionsLabel, optionsTween);
     }
 
     private void OnClickProfileOpen()

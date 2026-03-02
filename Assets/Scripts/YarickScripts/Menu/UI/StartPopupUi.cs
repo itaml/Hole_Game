@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Core.Levels;
 
 namespace Menu.UI
 {
@@ -10,6 +11,19 @@ namespace Menu.UI
         [Header("UI")]
         [SerializeField] private GameObject rootObject;
         [SerializeField] private TMP_Text levelText;
+
+        [Header("Level Type")]
+        [SerializeField] private GameObject masterLevel;
+        [SerializeField] private GameObject challengeLevel;
+        [SerializeField] private Sprite challengeLevelSpr;
+        [SerializeField] private Sprite masterLevelSpr;
+        [SerializeField] private Sprite defaultLevelSpr;
+        [SerializeField] private Image levelImg;
+
+        [Header("Tutorial (optional)")]
+        [SerializeField] private StartTutorialPopupUi tutorialPopup;
+        [SerializeField] private StartTutorialPopupUi tutorialPopup2;
+        [SerializeField] private StartTutorialPopupUi tutorialPopup3;
         [SerializeField] private Sprite unlimitedBoostActive;
         [SerializeField] private Sprite selectedBoostActive;
         [SerializeField] private Sprite unSelectedBoostActive;
@@ -81,10 +95,10 @@ namespace Menu.UI
 
         public void ShowInfo()
         {
-            // включаем инфо заранее, иначе твины не сыграют
+            //   ,    
             SetInfoActive(true);
 
-            // пр€чем start, а потом выключаем его GO
+            //  start,     GO
             if (tween != null)
             {
                 tween.PlayHide(() => SetStartActive(false));
@@ -94,13 +108,13 @@ namespace Menu.UI
                 SetStartActive(false);
             }
 
-            // показываем инфо
+            //  
             tweenInfo?.PlayShow();
         }
 
         public void HideInfo()
         {
-            // пр€чем инфо и выключаем его GO
+            //      GO
             if (tweenInfo != null)
             {
                 tweenInfo.PlayHide(() => SetInfoActive(false));
@@ -110,7 +124,7 @@ namespace Menu.UI
                 SetInfoActive(false);
             }
 
-            // включаем start GO и показываем
+            //  start GO  
             SetStartActive(true);
             tween?.PlayShow();
         }
@@ -122,9 +136,10 @@ namespace Menu.UI
             if (rootObject != null) rootObject.SetActive(true);
             else gameObject.SetActive(true);
 
-            tween?.PlayShow(); // добавить
+            tween?.PlayShow(); // 
 
             Render();
+            TryShowStartTutorial();
         }
 
         public void Hide()
@@ -150,7 +165,34 @@ namespace Menu.UI
         {
             if (_menu == null || _menu.Meta == null) return;
             Render();
+            TryShowStartTutorial();
         }
+
+
+private void TryShowStartTutorial()
+{
+    if (tutorialPopup == null) return;
+    if (_menu == null || _menu.Meta == null) return;
+
+    var save = _menu.Meta.Save;
+    if (save == null || save.tutorial == null) return;
+
+    int id = save.tutorial.pendingStartTutorialId;
+    if (id == 0) return;
+
+    // Clear pending immediately to avoid duplicates if StartPopup re-renders.
+    save.tutorial.pendingStartTutorialId = 0;
+
+    if (id == 1) tutorialPopup.Show();
+    if (id == 2) tutorialPopup2.Show();
+    if (id == 3) tutorialPopup3.Show();
+
+    if (id == 1) save.tutorial.winStreakStartTutorialShown = true;
+    if (id == 2) save.tutorial.boost1StartTutorialShown = true;
+    if (id == 3) save.tutorial.boost2StartTutorialShown = true;
+
+    _menu.Meta.SaveNow();
+}
 
         private void Render()
         {
@@ -159,6 +201,23 @@ namespace Menu.UI
 
             if (levelText != null)
                 levelText.text = $"Level {level}";
+
+bool burnedSpecial = SpecialLevelBurnStorage.IsBurned(level);
+
+            if (!burnedSpecial)
+            {
+                if (LevelTypeUtils.IsMasterLevel(level)) levelImg.sprite = masterLevelSpr;
+                if (LevelTypeUtils.IsChallengeLevel(level)) levelImg.sprite = challengeLevelSpr;
+            }
+            else
+            {
+                levelImg.sprite = defaultLevelSpr;
+            }
+
+if (masterLevel != null)
+                masterLevel.SetActive(!burnedSpecial && LevelTypeUtils.IsMasterLevel(level));
+if (challengeLevel != null)
+    challengeLevel.SetActive(!burnedSpecial && LevelTypeUtils.IsChallengeLevel(level));
 
             bool boost1Unlocked = _menu.unlockConfig != null && level >= _menu.unlockConfig.boost1UnlockLevel;
             bool boost2Unlocked = _menu.unlockConfig != null && level >= _menu.unlockConfig.boost2UnlockLevel;

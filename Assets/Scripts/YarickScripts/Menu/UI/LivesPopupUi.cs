@@ -12,6 +12,7 @@ namespace Menu.UI
         [SerializeField] private TMP_Text livesCountText;
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private Button buyLifeButton;
+        [SerializeField] private Button watchAdLifeButton;
         [SerializeField] private TMP_Text buyLifePriceText; // optional
         [SerializeField] private Button closeButton;
 
@@ -105,6 +106,14 @@ namespace Menu.UI
                              && save.wallet.coins >= cost;
 
                 buyLifeButton.interactable = canBuy;
+            }
+
+            if (watchAdLifeButton != null)
+            {
+                bool canBuy = !_menu.Meta.IsInfiniteLivesActive()
+                             && save.lives.currentLives < save.lives.maxLives;
+
+                watchAdLifeButton.interactable = canBuy;
             }
         }
 
