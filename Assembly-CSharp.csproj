@@ -89,6 +89,7 @@
     <Compile Include="Assets/Scripts/Levels/LevelSequence.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Menu/UI/UIIdleMotion.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Menu/UI/RewardPopupRouter.cs" />
+    <Compile Include="Assets/Scripts/Core/UI/PreRunGoalSlotUI.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs" />
     <Compile Include="Assets/Scripts/Core/VelocityLimiter.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
@@ -167,6 +168,7 @@
     <Compile Include="Assets/Scripts/LevelGoals/LevelGoals.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Core/RemoteConfig/FirebaseConfigsApplier.cs" />
     <Compile Include="Assets/Scripts/Core/TimerUI.cs" />
+    <Compile Include="Assets/Scripts/Core/UI/PreRunPopupUI.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Core/Audio/AudioManager.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Core/Ads/ATTRequestor.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Meta/State/InventoryState.cs" />
