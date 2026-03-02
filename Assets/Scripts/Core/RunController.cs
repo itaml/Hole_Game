@@ -46,6 +46,7 @@ public class RunController : MonoBehaviour
 
     [Header("Debug UI (optional)")]
     [SerializeField] private Text debugTimerText;
+    public float DefaultDurationMinutes => levelDurationMinutes;
 
     public bool IsRunning { get; private set; }
 
