@@ -19,28 +19,46 @@ public class LevelDirector : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private TMP_Text levelText;
+    public int CurrentLevelIndex { get; private set; }
 
-    private void Start()
+
+    void Awake()
     {
-        int index = ResolveLevelIndex();
-
-        var level = LoadLevel(index);
-        if (level == null) return;
-
-        // ВАЖНО: ран НЕ стартуем сразу.
-        // Показываем попап, и только после закрытия запускаем таймер.
-        if (preRunPopup != null)
-        {
-            preRunPopup.Show(level, run != null ? run.DefaultDurationMinutes : 2.3f, () =>
-            {
-                run?.StartRun();
-            });
-        }
-        else
-        {
-            run?.StartRun();
-        }
+      CurrentLevelIndex = ResolveLevelIndex();
     }
+private void Start()
+{
+    int index = CurrentLevelIndex;
+
+    var level = LoadLevel(index);
+    if (level == null) return;
+
+    bool isLevel1 = SceneFlow.PendingRunConfig != null
+                    && SceneFlow.PendingRunConfig.levelIndex <= 1; // у тебя 1-based
+
+    // 👉 На первом уровне:
+    // - НЕ показываем PreRun
+    // - сразу стартуем ран (туториал сам всё покажет)
+    if (isLevel1)
+    {
+        run?.StartRun();
+        return;
+    }
+
+    // 👉 На остальных уровнях — обычное поведение
+    if (preRunPopup != null)
+    {
+        preRunPopup.Show(
+            level,
+            run != null ? run.DefaultDurationMinutes : 2.3f,
+            () => run?.StartRun()
+        );
+    }
+    else
+    {
+        run?.StartRun();
+    }
+}
 
     private int ResolveLevelIndex()
     {
@@ -67,7 +85,7 @@ public class LevelDirector : MonoBehaviour
         }
 
         if (levelText != null)
-            levelText.text = $"Level {index + 1}";
+            levelText.text = $"Level {index}";
 
         // применяем длительность уровня в RunController (если override=0 — не трогаем)
         run?.ApplyLevelDuration(level.durationMinutesOverride);

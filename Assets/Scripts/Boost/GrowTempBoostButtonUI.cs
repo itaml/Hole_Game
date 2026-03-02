@@ -12,12 +12,38 @@ public class GrowTempBoostButtonUI : BoostButtonUIBase
 
     public void Click()
     {
-        if (boost == null || boost.IsActive) return;
+        Debug.Log("[GrowTempBoostButtonUI] Click() CALLED");
+
+        if (boost == null)
+        {
+            Debug.LogError("[GrowTempBoostButtonUI] boost is NULL");
+            return;
+        }
+
+        if (boost.IsActive)
+        {
+            Debug.Log("[GrowTempBoostButtonUI] boost already active -> ignore click");
+            return;
+        }
 
         EnsureRefs();
 
-        if (inventory != null && !inventory.TryConsume(BuffType.GrowTemp))
-            return;
+        Debug.Log(
+            $"[GrowTempBoostButtonUI] inventory={(inventory ? inventory.name : "NULL")} " +
+            $"allowEmpty={(inventory ? inventory.AllowBoostsWhenEmpty : false)} " +
+            $"count={(inventory ? inventory.GetCount(BuffType.GrowTemp) : -1)}"
+        );
+
+        if (inventory != null)
+        {
+            bool ok = inventory.TryConsume(BuffType.GrowTemp);
+            Debug.Log($"[GrowTempBoostButtonUI] TryConsume(GrowTemp) => {ok}. NewCount={inventory.GetCount(BuffType.GrowTemp)}");
+            if (!ok) return;
+        }
+        else
+        {
+            Debug.LogWarning("[GrowTempBoostButtonUI] inventory is NULL -> consumption skipped");
+        }
 
         boost.Activate();
     }

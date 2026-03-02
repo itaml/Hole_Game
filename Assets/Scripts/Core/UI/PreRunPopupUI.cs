@@ -1,8 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PreRunPopupUI : MonoBehaviour
 {
@@ -16,10 +16,11 @@ public class PreRunPopupUI : MonoBehaviour
     [SerializeField] private Transform slotsParent;
     [SerializeField] private PreRunGoalSlotUI goalSlotPrefab;
 
-    [Header("Buttons")]
-    [SerializeField] private Button startButton;
+    [Header("Auto Close")]
+    [SerializeField] private float autoCloseSeconds = 2f;
 
     private readonly List<GameObject> _spawned = new();
+    private Coroutine _autoCloseRoutine;
 
     private void Awake()
     {
@@ -37,29 +38,47 @@ public class PreRunPopupUI : MonoBehaviour
         if (root) root.SetActive(true);
 
         // 1) Time
-        float minutes = (level.durationMinutesOverride > 0f) ? level.durationMinutesOverride : defaultMinutes;
+        float minutes = (level.durationMinutesOverride > 0f)
+            ? level.durationMinutesOverride
+            : defaultMinutes;
+
         int totalSeconds = Mathf.Max(1, Mathf.RoundToInt(minutes * 60f));
         if (timeText) timeText.text = FormatTime(totalSeconds);
 
         // 2) Goals
         RebuildGoals(level);
 
-        // 3) Button
-        if (startButton)
-        {
-            startButton.onClick.RemoveAllListeners();
-            startButton.onClick.AddListener(() =>
-            {
-                Hide();
-                onStart?.Invoke();
-            });
-        }
+        // 3) Auto close вместо кнопки
+        if (_autoCloseRoutine != null)
+            StopCoroutine(_autoCloseRoutine);
+
+        _autoCloseRoutine = StartCoroutine(AutoClose(onStart));
     }
 
     public void Hide()
     {
+        if (_autoCloseRoutine != null)
+        {
+            StopCoroutine(_autoCloseRoutine);
+            _autoCloseRoutine = null;
+        }
+
         CleanupGoals();
         if (root) root.SetActive(false);
+    }
+
+    private IEnumerator AutoClose(Action onStart)
+    {
+        float t = 0f;
+        while (t < autoCloseSeconds)
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // ТО ЖЕ САМОЕ, ЧТО БЫЛО В КНОПКЕ
+        Hide();
+        onStart?.Invoke();
     }
 
     private void RebuildGoals(LevelDefinition level)
@@ -83,7 +102,7 @@ public class PreRunPopupUI : MonoBehaviour
 
             Sprite icon = null;
             if (catalog != null)
-                icon = catalog.GetIcon(g.type); // предполагаю, что у тебя есть такой метод
+                icon = catalog.GetIcon(g.type);
 
             slot.Set(icon, g.required);
         }

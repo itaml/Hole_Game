@@ -17,12 +17,4 @@ public enum ItemType
     Dango,          // данго (шарики на палочке)
     TakoyakiSkewer, // такояки на шпажке
     Ramune,
-    // Currency / rewards
-    Coin = 20,
-    Gem = 21,
-
-    // Props / misc
-    Box = 30,
-    Rock = 31,
-    Barrel = 32,
 }

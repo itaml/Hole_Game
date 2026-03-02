@@ -65,6 +65,9 @@ public class RunController : MonoBehaviour
     private bool _initialized;
     private bool _ended;
 
+    public float TimeLeft => _timeLeft;
+public float TimeTotal => _timeTotal;
+
     private void Awake()
     {
         Init();
@@ -413,4 +416,14 @@ public class RunController : MonoBehaviour
 
         SceneFlow.ReturnToMenu(result);
     }
+
+    public void QuitToMenuFromPause()
+{
+    if (_ended) return;
+
+    IsRunning = false;
+    HideScreens();
+
+    ReturnToMenu(LevelOutcome.Lose, 0);
+}
 }
