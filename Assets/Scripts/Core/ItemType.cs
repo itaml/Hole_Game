@@ -3,7 +3,6 @@ using UnityEngine;
 public enum ItemType
 {
     None = 0,
-
     // Japan
     SushiRoll,      // суши-ролл
     Onigiri,        // онигири (рисовый треугольник)
@@ -45,4 +44,5 @@ public enum ItemType
     Cherry,          // данго (шарики на палочке)
     Peach, // такояки на шпажке
     Strawberry,
+        Bomb = 999,
 }

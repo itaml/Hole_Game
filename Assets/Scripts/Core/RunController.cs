@@ -54,7 +54,8 @@ public class RunController : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private WinScreenUI winUI;
-    [SerializeField] private LoseScreenUI loseUI;
+[SerializeField] private LoseScreenUI loseTimeUpUI;
+[SerializeField] private LoseKaboomUI loseKaboomUI;
 
     [Header("Lose UI Containers")]
     [SerializeField] private GameObject timeUpFreeContainer; // FREE revive
@@ -66,7 +67,7 @@ public class RunController : MonoBehaviour
     [SerializeField] private Sprite[] timeUpArts = new Sprite[4]; // 0..3
 
     [Header("Coins Text (optional, TMP)")]
-    [SerializeField] private TMP_Text coinsText;
+    [SerializeField] private TMP_Text[] coinsText;
 
     [Header("Debug UI (optional)")]
     [SerializeField] private Text debugTimerText;
@@ -86,6 +87,10 @@ public class RunController : MonoBehaviour
     private bool _losePending;
     private bool _initialized;
     private bool _ended;
+
+    [Header("Boosts")]
+[SerializeField] private bool boostsEnabled = true;
+public RunConfig PendingConfig => _cfg;
 
     private RunConfig _cfg;
 
@@ -189,30 +194,36 @@ public class RunController : MonoBehaviour
             levelDurationMinutes = minutesOverride;
     }
 
-    public void StartRun()
+ public void StartRun()
+{
+    HideScreens();
+
+    _timeTotal = Mathf.Max(1f, levelDurationMinutes * 60f);
+    _timeLeft = _timeTotal;
+
+    _revivesUsed = 0;
+    _losePending = false;
+    _ended = false;
+    IsRunning = true;
+
+    // если у тебя есть эти поля
+    _timeUpPaidUsed = 0;
+    _timeUpFreeRevivesUsed = 0;
+
+    holeGrowth?.ResetRun();
+    timerUI?.Set(_timeLeft, _timeTotal);
+    UpdateDebugTimerText();
+    UpdateCoinsUI();
+    SetLoseContainers(null);
+
+    // ✅ Battlepass корзина в начале рана
+    var bp = FindFirstObjectByType<BattlepassBoostSpawner>();
+    if (bp != null)
     {
-        _timeUpPaidUsed = 0;
-        _timeUpFreeRevivesUsed = 0;
-
-        HideScreens();
-
-        _timeTotal = Mathf.Max(1f, levelDurationMinutes * 60f);
-        _timeLeft = _timeTotal;
-
-        _revivesUsed = 0;
-
-        _losePending = false;
-        _ended = false;
-
-        IsRunning = true;
-
-        holeGrowth?.ResetRun();
-        timerUI?.Set(_timeLeft, _timeTotal);
-        UpdateDebugTimerText();
-
-        SetLoseContainers(null);
-        UpdateCoinsUI();
+        bp.ResetForNewRun();
+        bp.SpawnIfNeeded();
     }
+}
 
     private void Update()
     {
@@ -270,7 +281,11 @@ public class RunController : MonoBehaviour
     private void UpdateCoinsUI()
     {
         if (coinsText != null)
-            coinsText.text = _coins.ToString();
+        for (int i = 0; i < coinsText.Length; i++)
+        {
+                        coinsText[i].text = _coins.ToString();
+        }
+
     }
 
     // ---------------- Lose containers + art ----------------
@@ -315,29 +330,114 @@ public class RunController : MonoBehaviour
         Lose(LoseReason.Kaboom);
     }
 
-    public void OnItemCollected(AbsorbablePhysicsItem item)
-    {
-        if (!IsRunning || item == null) return;
+public void OnItemCollected(AbsorbablePhysicsItem item)
+{
+    if (item.TryGetComponent<BoostPickupItem>(out var boost))
+{
+    ApplyBoostPickup(boost, item);
+    return;
+}
+    Debug.Log($"[Collected] {item.name} type={item.Type} xp={item.XpValue} timeLeft={_timeLeft:F2}");
+    if (!IsRunning || item == null) return;
 
+    // фикс: сохраняем позицию сразу (до любых Destroy/Disable внутри других скриптов)
+Vector3 pos = holeGrowth != null ? holeGrowth.transform.position : item.transform.position;
+
+    // если XP=0 — спавним "on absorbed" объект/эффект
+    if (!item.HasXp)
+        item.SpawnOnAbsorbed(pos);
+
+    // 💣 Bomb: проигрыш сразу, без XP и целей
+if (item.Type == ItemType.Bomb)
+{
+    Debug.Log("[Collected] BOMB -> GameOverByBomb()");
+    GameOverByBomb();
+    return;
+}
+
+    // XP только если > 0
+    if (item.HasXp)
         holeGrowth?.AddXp(item.XpValue);
 
-        if (objectives != null && objectives.IsGoalItem(item.Type))
+    // цели + fly-to
+    if (objectives != null && objectives.IsGoalItem(item.Type))
+    {
+        objectives.Add(item.Type, 1);
+        goalFinderBoost?.OnGoalItemCollected(item);
+
+        var target = GetGoalIconTarget(item.Type);
+        var slotUi = GetGoalSlotUI(item.Type);
+
+        if (flyToUi != null && target != null && item.UiIcon != null)
         {
-            objectives.Add(item.Type, 1);
-            goalFinderBoost?.OnGoalItemCollected(item);
-
-            var target = GetGoalIconTarget(item.Type);
-            var slotUi = GetGoalSlotUI(item.Type);
-
-            if (flyToUi != null && target != null && item.UiIcon != null)
-            {
-                flyToUi.Spawn(item.transform.position, item.UiIcon, target, onArrived: () => slotUi?.PlayArrivePunch());
-            }
-
-            if (objectives.IsComplete())
-                Win();
+            flyToUi.Spawn(
+                item.transform.position,
+                item.UiIcon,
+                target,
+                onArrived: () => slotUi?.PlayArrivePunch()
+            );
         }
+
+        if (objectives.IsComplete())
+            Win();
     }
+}
+
+private void ApplyBoostPickup(BoostPickupItem boost, AbsorbablePhysicsItem item)
+{
+    // эффект "после проглатывания" (если есть)
+    Vector3 fxPos = (holeGrowth ? holeGrowth.transform.position : item.transform.position) + Vector3.up * 0.3f;
+    if (!item.HasXp) item.SpawnOnAbsorbed(fxPos);
+
+    if (boost.Type == BoostPickupType.GrowWholeLevel)
+    {
+        holeGrowth?.AddSizeLevels(1); // см. ниже
+        return;
+    }
+
+    if (boost.Type == BoostPickupType.ExtraLevelTime)
+    {
+        float add = boost.GetAddSeconds();
+        AddExtraTimeSeconds(add);
+        return;
+    }
+}
+
+private void AddExtraTimeSeconds(float addSeconds)
+{
+    if (addSeconds <= 0f) return;
+
+    // ✅ важно: чтобы добавленное время реально работало всегда,
+    // увеличиваем и left, и total (иначе Clamp может съесть прибавку)
+    _timeLeft += addSeconds;
+    _timeTotal += addSeconds;
+
+    timerUI?.Set(_timeLeft, _timeTotal);
+    UpdateDebugTimerText();
+}
+
+private void ApplyBoost(BoostPickupItem boost, AbsorbablePhysicsItem item)
+{
+    if (boost == null) return;
+
+    // эффекты "после проглатывания" (если назначены)
+    // спавним в точке дыры, а не item.position, потому что item улетает под землю
+    Vector3 fxPos = (holeGrowth ? holeGrowth.transform.position : item.transform.position) + Vector3.up * 0.3f;
+    if (!item.HasXp) item.SpawnOnAbsorbed(fxPos);
+
+    switch (boost.Type)
+    {
+        case BoostPickupType.GrowWholeLevel:
+            holeGrowth?.AddSizeLevels(1);
+            break;
+
+        case BoostPickupType.ExtraLevelTime:
+            AddExtraTimeSeconds(boost.GetAddSeconds());
+            break;
+    }
+}
+
+
 
     public RectTransform GetGoalIconTarget(ItemType t) => goalUI ? goalUI.GetTarget(t) : null;
     public GoalSlotUI GetGoalSlotUI(ItemType t) => goalUI ? goalUI.GetSlotUI(t) : null;
@@ -384,56 +484,41 @@ public class RunController : MonoBehaviour
     }
 
     private void Lose(LoseReason reason)
+{
+    if (!IsRunning) return;
+
+    IsRunning = false;
+    HideScreens();
+    _losePending = true;
+
+    UpdateCoinsUI();
+
+    if (reason == LoseReason.TimeUp)
     {
-        if (!IsRunning) return;
+        SetLoseContainers(LoseReason.TimeUp);
+        UpdateTimeUpArt();
 
-        IsRunning = false;
-        HideScreens();
-        _losePending = true;
-
-        UpdateCoinsUI();
-        SetLoseContainers(reason);
-
-        if (reason == LoseReason.TimeUp)
-            UpdateTimeUpArt();
-
-        string title = (reason == LoseReason.TimeUp) ? "Oops! Time's up!" : "Kaboom!";
-        string subtitle = (reason == LoseReason.TimeUp) ? "Get more time to continue!" : "Use a revive to keep playing!";
-
-        if (reason == LoseReason.TimeUp)
-        {
-            bool canByLimit = _revivesUsed < reviveMaxPerRun;
-
-            bool freeAvailable = !IsTimeUpFreeEverUsed;
-
-            bool canAffordPaid =
-                (_timeUpPaidUsed < timeUpPaidMaxPerRun) &&
-                (_coins >= timeUpPaidReviveCost);
-
-            loseUI?.Show(
-                title,
-                subtitle,
-                onFreeRevive: (canByLimit && freeAvailable) ? TryRevive_TimeUpFree : null,
-                onPaidRevive: (canByLimit && canAffordPaid) ? TryRevive_TimeUpPaid : null,
-                onKaboomRevive: null,
-                onRetry: ContinueAfterLose
-            );
-        }
-        else // Kaboom
-        {
-            bool canAfford = _coins >= kaboomReviveCost;
-
-            loseUI?.Show(
-                title,
-                subtitle,
-                onFreeRevive: null,
-                onPaidRevive: null,
-                onKaboomRevive: canAfford ? TryRevive_Kaboom : null,
-                onRetry: ContinueAfterLose
-            );
-        }
+        loseTimeUpUI?.Show(
+            "Ooops!! Time's up",
+            "Get more time to continue!",
+            onFreeRevive: (!IsTimeUpFreeEverUsed && _revivesUsed < reviveMaxPerRun) ? TryRevive_TimeUpFree : null,
+            onPaidRevive: (_timeUpPaidUsed < timeUpPaidMaxPerRun && _coins >= timeUpPaidReviveCost && _revivesUsed < reviveMaxPerRun) ? TryRevive_TimeUpPaid : null,
+            onKaboomRevive: null,
+            onRetry: ContinueAfterLose
+        );
     }
+    else // Kaboom
+    {
+        SetLoseContainers(LoseReason.Kaboom);
 
+        bool canAfford = _coins >= kaboomReviveCost;
+
+        loseKaboomUI?.Show(
+            onKaboomRevive: canAfford ? TryRevive_Kaboom : null,
+            onRetry: ContinueAfterLose
+        );
+    }
+}
     private void ContinueAfterLose()
     {
         if (!_losePending) return;
@@ -513,12 +598,13 @@ public class RunController : MonoBehaviour
         UpdateCoinsUI();
     }
 
-    private void HideScreens()
-    {
-        winUI?.Hide();
-        loseUI?.Hide();
-        SetLoseContainers(null);
-    }
+private void HideScreens()
+{
+    winUI?.Hide();
+    loseTimeUpUI?.Hide();
+    loseKaboomUI?.Hide();
+    SetLoseContainers(null);
+}
 
     // ---------------- Return to Menu ----------------
 
@@ -554,6 +640,7 @@ public class RunController : MonoBehaviour
 
         SceneFlow.ReturnToMenu(result);
     }
+    
 
     public void QuitToMenuFromPause()
     {

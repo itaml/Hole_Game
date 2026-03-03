@@ -33,11 +33,34 @@ public class GoalSlotUI : MonoBehaviour
         if (checkImage) checkImage.gameObject.SetActive(false);
     }
 
-    public void Setup(Sprite icon, int requiredRemaining)
-    {
-        if (iconImage) iconImage.sprite = icon;
-        SetRemaining(requiredRemaining);
-    }
+public void Setup(Sprite icon, int requiredRemaining)
+{
+    ApplySpriteProperSize(icon);
+    SetRemaining(requiredRemaining);
+}
+private void ApplySpriteProperSize(Sprite sprite)
+{
+    if (!iconImage) return;
+
+    iconImage.sprite = sprite;
+
+    if (sprite == null) return;
+
+    iconImage.preserveAspect = true;
+
+    // Сначала применяем нативный размер
+    iconImage.SetNativeSize();
+
+    // Ограничиваем максимальный размер (чтобы не вылезало из UI)
+    float maxSize = 80f; // можешь поменять под свой дизайн
+
+    RectTransform rt = iconImage.rectTransform;
+    float width = rt.sizeDelta.x;
+    float height = rt.sizeDelta.y;
+
+    float scale = Mathf.Min(maxSize / width, maxSize / height, 1f);
+    rt.sizeDelta = new Vector2(width * scale, height * scale);
+}
 
     public void SetRemaining(int remaining)
     {

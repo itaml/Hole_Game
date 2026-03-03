@@ -22,6 +22,9 @@ public class FloatingXpTextSpawner : MonoBehaviour
 
     public void Spawn(Vector3 worldPos, int xp)
     {
+        // ✅ XP=0 -> не спавним ничего
+        if (xp <= 0) return;
+
         if (!uiCanvas || !prefab || uiRoot == null) return;
 
         var t = Instantiate(prefab, uiRoot);

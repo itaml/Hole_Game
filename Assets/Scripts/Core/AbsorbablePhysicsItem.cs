@@ -8,8 +8,23 @@ public class AbsorbablePhysicsItem : MonoBehaviour
 
     [field: SerializeField] public Sprite UiIcon { get; private set; }   // ✅ Sprite, не RectTransform
 
-    [Header("Rewards")]
+    [Header("Rewards")] 
     [field: SerializeField] public int XpValue { get; private set; } = 1;
+
+    /// <summary>
+    /// Удобный флаг: если XP = 0, то не показываем XP-текст/попап.
+    /// </summary>
+    public bool HasXp => XpValue > 0;
+
+    [Header("On Absorbed (optional)")]
+    [Tooltip("Если задано — будет заспавнено в момент, когда предмет засчитан/проглочен.")]
+    [SerializeField] private GameObject onAbsorbedSpawn;
+
+    [Tooltip("Смещение точки спавна относительно позиции предмета (например, чуть выше пола).")]
+    [SerializeField] private Vector3 onAbsorbedSpawnOffset = Vector3.zero;
+
+    [Tooltip("Если > 0 — заспавненный объект будет уничтожен через N секунд.")]
+    [SerializeField] private float destroySpawnAfterSeconds = 2f;
 
     [Header("Fit override (optional)")]
     [SerializeField] private float overrideRadius = 0f;
@@ -22,6 +37,9 @@ public class AbsorbablePhysicsItem : MonoBehaviour
 
     public Rigidbody Rb => _rb;
     public Collider Col => _col;
+
+    /// <summary>Можно использовать снаружи, чтобы понять есть ли что спавнить.</summary>
+    public GameObject OnAbsorbedSpawnPrefab => onAbsorbedSpawn;
 
     private void Awake()
     {
@@ -52,4 +70,23 @@ public class AbsorbablePhysicsItem : MonoBehaviour
 
         gameObject.layer = enabled ? passThroughLayer : _defaultLayer;
     }
+
+    /// <summary>
+    /// Вызывай в момент "предмет засчитан/проглочен" (не при касании триггера).
+    /// </summary>
+public void SpawnOnAbsorbed(Vector3 worldPos)
+{
+    Debug.Log($"[AbsorbablePhysicsItem] SpawnOnAbsorbed: item={name} " +
+              $"prefab={(onAbsorbedSpawn ? onAbsorbedSpawn.name : "NULL")} " +
+              $"pos={worldPos} offset={onAbsorbedSpawnOffset} xp={XpValue}");
+
+    if (onAbsorbedSpawn == null) return;
+
+    var go = Instantiate(onAbsorbedSpawn, worldPos + onAbsorbedSpawnOffset, Quaternion.identity);
+
+    Debug.Log($"[AbsorbablePhysicsItem] Spawned GO: {(go ? go.name : "NULL")} activeSelf={(go ? go.activeSelf : false)}");
+
+    if (destroySpawnAfterSeconds > 0f)
+        Destroy(go, destroySpawnAfterSeconds);
+}
 }

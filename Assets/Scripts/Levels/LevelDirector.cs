@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using GameBridge.SceneFlow;
 using GameBridge.Contracts;
+using System.Collections.Generic;
 
 public class LevelDirector : MonoBehaviour
 {
@@ -17,56 +18,71 @@ public class LevelDirector : MonoBehaviour
     [Header("PreRun Popup")]
     [SerializeField] private PreRunPopupUI preRunPopup;
 
+    [Header("Procedural (Levels 2+)")]
+    [SerializeField] private ProceduralSpawnBuilder proceduralBuilder;
+    [SerializeField] private ProceduralGoalBuilder proceduralGoals;
+
+    [Header("Indexing")]
+    [Tooltip("Если PendingRunConfig.levelIndex приходит 1..N (1-based) — включи. Если 0..N-1 — выключи.")]
+    [SerializeField] private bool pendingRunConfigIsOneBased = true;
+
     [Header("UI")]
     [SerializeField] private TMP_Text levelText;
+
     public int CurrentLevelIndex { get; private set; }
 
+    private LevelGoals _runtimeGoals;
+    private LevelDefinition _currentLevel;
 
-    void Awake()
+    private void Awake()
     {
-      CurrentLevelIndex = ResolveLevelIndex();
-    }
-private void Start()
-{
-    int index = CurrentLevelIndex;
-
-    var level = LoadLevel(index);
-    if (level == null) return;
-
-    bool isLevel1 = SceneFlow.PendingRunConfig != null
-                    && SceneFlow.PendingRunConfig.levelIndex <= 1; // у тебя 1-based
-
-    // 👉 На первом уровне:
-    // - НЕ показываем PreRun
-    // - сразу стартуем ран (туториал сам всё покажет)
-    if (isLevel1)
-    {
-        run?.StartRun();
-        return;
+        CurrentLevelIndex = ResolveLevelIndex();
     }
 
-    // 👉 На остальных уровнях — обычное поведение
-    if (preRunPopup != null)
+    private void Start()
     {
-        preRunPopup.Show(
-            level,
-            run != null ? run.DefaultDurationMinutes : 2.3f,
-            () => run?.StartRun()
-        );
+        int index = CurrentLevelIndex;
+
+        _currentLevel = LoadLevel(index);
+        if (_currentLevel == null) return;
+
+        // LEVEL 1: без прерана
+        if (index == 0)
+        {
+            run?.StartRun();
+            return;
+        }
+
+        // LEVEL 2+: преран показывает актуальные goals
+        if (preRunPopup != null)
+        {
+            preRunPopup.Show(
+                _currentLevel,
+                run != null ? run.DefaultDurationMinutes : 2.3f,
+                () => run?.StartRun(),
+                goalsOverride: _runtimeGoals,
+                catalogOverride: _currentLevel.catalog
+            );
+        }
+        else
+        {
+            run?.StartRun();
+        }
     }
-    else
-    {
-        run?.StartRun();
-    }
-}
 
     private int ResolveLevelIndex()
     {
         RunConfig cfg = SceneFlow.PendingRunConfig;
         if (cfg != null)
-            return Mathf.Max(0, cfg.levelIndex);
+        {
+            int idx = cfg.levelIndex;
+            if (pendingRunConfigIsOneBased)
+                idx -= 1; // 1..N -> 0..N-1
 
-        return debugLevelIndex;
+            return Mathf.Max(0, idx);
+        }
+
+        return Mathf.Max(0, debugLevelIndex);
     }
 
     private LevelDefinition LoadLevel(int index)
@@ -85,16 +101,73 @@ private void Start()
         }
 
         if (levelText != null)
-            levelText.text = $"Level {index}";
+            levelText.text = $"Level {index + 1}";
 
-        // применяем длительность уровня в RunController (если override=0 — не трогаем)
+        // duration override
         run?.ApplyLevelDuration(level.durationMinutesOverride);
 
-        // goals + UI
-        goalBuilder?.Build(level.goals, level.catalog);
+        // -------------------------
+        // LEVEL 1 (index 0) — ручной
+        // -------------------------
+        if (index == 0)
+        {
+            _runtimeGoals = null;
 
-        // spawn
-        spawner?.Spawn(level.spawnConfig, level.catalog);
+            goalBuilder?.Build(level.goals, level.catalog);
+
+            if (level.spawnConfig != null)
+                spawner?.Spawn(level.spawnConfig, level.catalog);
+            else
+                Debug.LogWarning("[LevelDirector] Level 1 spawnConfig is null.");
+
+            return level;
+        }
+
+        // --------------------------------
+        // LEVEL 2+ — procedural: config -> count -> goals -> ui -> spawn
+        // --------------------------------
+        int humanLevel = index + 1;
+        int seed = humanLevel * 10007;
+
+        if (proceduralBuilder == null)
+        {
+            Debug.LogError("[LevelDirector] proceduralBuilder is null. Fallback to manual spawn+goals.");
+            _runtimeGoals = level.goals;
+            goalBuilder?.Build(_runtimeGoals, level.catalog);
+            if (level.spawnConfig != null) spawner?.Spawn(level.spawnConfig, level.catalog);
+            return level;
+        }
+
+        // 1) build runtime spawn config (без спавна)
+        var runtimeCfg = proceduralBuilder.BuildConfig(humanLevel, seed);
+        if (runtimeCfg == null || runtimeCfg.groups == null || runtimeCfg.groups.Count == 0)
+        {
+            Debug.LogError("[LevelDirector] Procedural spawn config is empty. Fallback to manual.");
+            _runtimeGoals = level.goals;
+            goalBuilder?.Build(_runtimeGoals, level.catalog);
+            if (level.spawnConfig != null) spawner?.Spawn(level.spawnConfig, level.catalog);
+            return level;
+        }
+
+        // 2) count items реально присутствующие на карте
+        Dictionary<ItemType, int> counts = SpawnConfigCounter.CountAll(runtimeCfg);
+
+        // 3) build goals from counts
+        _runtimeGoals = null;
+        if (proceduralGoals != null)
+            _runtimeGoals = proceduralGoals.BuildGoalsFromSpawn(humanLevel, seed, counts);
+
+        if (_runtimeGoals == null)
+        {
+            Debug.LogWarning("[LevelDirector] Failed to build procedural goals. Fallback to manual goals.");
+            _runtimeGoals = level.goals;
+        }
+
+        // 4) goals UI
+        goalBuilder?.Build(_runtimeGoals, level.catalog);
+
+        // 5) spawn exactly that config
+        spawner?.Spawn(runtimeCfg, level.catalog);
 
         return level;
     }

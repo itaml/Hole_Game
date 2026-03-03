@@ -1,5 +1,4 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,37 +7,63 @@ public class LoseKaboomUI : MonoBehaviour
     [Header("Root")]
     [SerializeField] private GameObject root;
 
-    [Header("Art")]
+    [Header("Art (optional)")]
     [SerializeField] private Image artImage;
-    [SerializeField] private Sprite kaboomArt;
+    [SerializeField] private Sprite kaboomSprite;
 
-    [Header("Kaboom Revive")]
-    [SerializeField] private Button kaboomButton;
+    [Header("Buttons")]
+    [SerializeField] private Button kaboomButton; // кнопка revive за 900
+    [SerializeField] private Button retryButton;  // если есть, можно убрать
 
+    private Action _onKaboomRevive;
+    private Action _onRetry;
+
+    private void Awake()
+    {
+        if (kaboomButton)
+        {
+            kaboomButton.onClick.RemoveAllListeners();
+            kaboomButton.onClick.AddListener(OnKaboomClicked);
+        }
+
+        if (retryButton)
+        {
+            retryButton.onClick.RemoveAllListeners();
+            retryButton.onClick.AddListener(OnRetryClicked);
+        }
+    }
+
+    public void Show(Action onKaboomRevive, Action onRetry)
+    {
+        _onKaboomRevive = onKaboomRevive;
+        _onRetry = onRetry;
+
+        if (root) root.SetActive(true);
+
+        if (artImage && kaboomSprite)
+            artImage.sprite = kaboomSprite;
+
+        if (kaboomButton)
+            kaboomButton.interactable = (_onKaboomRevive != null);
+
+        if (retryButton)
+            retryButton.interactable = (_onRetry != null);
+    }
 
     public void Hide()
     {
         if (root) root.SetActive(false);
+        _onKaboomRevive = null;
+        _onRetry = null;
     }
 
-    public void Show(
-        bool canKaboomRevive,
-        Action onKaboom,
-        Action onRetry)
+    private void OnKaboomClicked()
     {
-        if (root) root.SetActive(true);
-
-        if (artImage != null && kaboomArt != null)
-            artImage.sprite = kaboomArt;
-
-        SetupButton(kaboomButton, canKaboomRevive, onKaboom);
+        _onKaboomRevive?.Invoke();
     }
 
-    private void SetupButton(Button btn, bool interactable, Action action)
+    private void OnRetryClicked()
     {
-        if (!btn) return;
-        btn.interactable = interactable;
-        btn.onClick.RemoveAllListeners();
-        if (action != null) btn.onClick.AddListener(() => action.Invoke());
+        _onRetry?.Invoke();
     }
 }

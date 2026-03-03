@@ -188,4 +188,12 @@ private void ApplyScaleAndRadius()
         xpSlider.maxValue = need;
         xpSlider.value = Mathf.Clamp(_xp, 0, need);
     }
+
+    public void AddSizeLevels(int addLevels)
+{
+    if (addLevels <= 0) return;
+
+    for (int i = 0; i < addLevels; i++)
+        LevelUp();
+}
 }

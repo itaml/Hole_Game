@@ -27,7 +27,11 @@ public class PreRunPopupUI : MonoBehaviour
         if (root) root.SetActive(false);
     }
 
-    public void Show(LevelDefinition level, float defaultMinutes, Action onStart)
+    /// <summary>
+    /// goalsOverride - если задан, показывает эти goals (актуально для процедурных уровней).
+    /// catalogOverride - если задан, берёт иконки из него (иначе level.catalog).
+    /// </summary>
+    public void Show(LevelDefinition level, float defaultMinutes, Action onStart, LevelGoals goalsOverride = null, ItemCatalog catalogOverride = null)
     {
         if (level == null)
         {
@@ -45,8 +49,10 @@ public class PreRunPopupUI : MonoBehaviour
         int totalSeconds = Mathf.Max(1, Mathf.RoundToInt(minutes * 60f));
         if (timeText) timeText.text = FormatTime(totalSeconds);
 
-        // 2) Goals
-        RebuildGoals(level);
+        // 2) Goals (берём override если есть)
+        var goals = goalsOverride != null ? goalsOverride : level.goals;
+        var catalog = catalogOverride != null ? catalogOverride : level.catalog;
+        RebuildGoals(goals, catalog);
 
         // 3) Auto close вместо кнопки
         if (_autoCloseRoutine != null)
@@ -76,16 +82,15 @@ public class PreRunPopupUI : MonoBehaviour
             yield return null;
         }
 
-        // ТО ЖЕ САМОЕ, ЧТО БЫЛО В КНОПКЕ
         Hide();
         onStart?.Invoke();
     }
 
-    private void RebuildGoals(LevelDefinition level)
+    private void RebuildGoals(LevelGoals goals, ItemCatalog catalog)
     {
         CleanupGoals();
 
-        if (level.goals == null || level.goals.goals == null)
+        if (goals == null || goals.goals == null || goals.goals.Count == 0)
             return;
 
         if (slotsParent == null || goalSlotPrefab == null)
@@ -94,8 +99,7 @@ public class PreRunPopupUI : MonoBehaviour
             return;
         }
 
-        var catalog = level.catalog;
-        foreach (var g in level.goals.goals)
+        foreach (var g in goals.goals)
         {
             var slot = Instantiate(goalSlotPrefab, slotsParent);
             _spawned.Add(slot.gameObject);

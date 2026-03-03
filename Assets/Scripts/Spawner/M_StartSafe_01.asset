@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64039b99391fa45089353928776256eb, type: 3}
+  m_Name: M_StartSafe_01
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnModule
+  id: module
+  tags: -1
+  cost: 1
+  size: {x: 10, y: 10}
+  groups:
+  - type: 1
+    formation: 0
+    localCenter: {x: 0, y: 0, z: 0}
+    rotationY: 0
+    jitter: 0
+    seed: 0
+    circleCount: 12
+    circleRadius: 3
+    lineCount: 0
+    lineDirection: {x: 0, y: 0, z: 0}
+    lineSpacing: 0
+    rows: 0
+    cols: 0
+    spacingX: 0
+    spacingZ: 0
+    localPoints: []
+  - type: 2
+    formation: 1
+    localCenter: {x: -0.7, y: 0, z: 13}
+    rotationY: 0
+    jitter: 0
+    seed: 0
+    circleCount: 12
+    circleRadius: 3
+    lineCount: 7
+    lineDirection: {x: 0, y: 0, z: 1}
+    lineSpacing: 1.1
+    rows: 0
+    cols: 0
+    spacingX: 0
+    spacingZ: 0
+    localPoints: []
+  - type: 2
+    formation: 1
+    localCenter: {x: 0.7, y: 0, z: 13}
+    rotationY: 0
+    jitter: 0
+    seed: 0
+    circleCount: 12
+    circleRadius: 2
+    lineCount: 7
+    lineDirection: {x: 0, y: 0, z: 1}
+    lineSpacing: 1.1
+    rows: 0
+    cols: 0
+    spacingX: 0
+    spacingZ: 0
+    localPoints: []
+  - type: 3
+    formation: 2
+    localCenter: {x: 0, y: 0, z: 22}
+    rotationY: 0
+    jitter: 0
+    seed: 0
+    circleCount: 12
+    circleRadius: 2
+    lineCount: 7
+    lineDirection: {x: 0, y: 0, z: 1}
+    lineSpacing: 1.1
+    rows: 7
+    cols: 7
+    spacingX: 1.2
+    spacingZ: 1.2
+    localPoints: []
