@@ -12,6 +12,7 @@ namespace Menu.UI
 
         [Header("Top")]
         [SerializeField] private TMP_Text coinsText;
+        [SerializeField] private TMP_Text coinsTextShop;
         [SerializeField] private TMP_Text livesText;
         [SerializeField] private Button livesPlusButton;
 
@@ -90,6 +91,9 @@ namespace Menu.UI
 
             if (coinsText != null)
                 coinsText.text = save.wallet.coins.ToString();
+
+            if (coinsTextShop != null)
+                coinsTextShop.text = save.wallet.coins.ToString();
 
             if (livesText != null)
             {

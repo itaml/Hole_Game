@@ -29,5 +29,7 @@ namespace Meta.State
 
         // One-time shown flags for post-win tutorials
         public bool profilePostWinTutorialShown;
+
+        public long dailyBonusLastClaimUtcTicks;
     }
 }

@@ -8,6 +8,8 @@ namespace Meta.State
     {
         public string characterName = "Player";
 
+        public bool adsRemoved;
+
         // Обычно удобнее хранить ID (int) или ключ (string), не сам Sprite.
         public int avatarId = 0;
         public int frameId = 0;
