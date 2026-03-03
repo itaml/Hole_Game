@@ -120,8 +120,8 @@
     <Compile Include="Assets\Scripts\Boost\BoostUnlockSlotUI.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelDirector.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Base\Joystick.cs" />
-    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\CoinsRewardPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\AdsPolicyService.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\CoinsRewardPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\EconomyConfig.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\MainMenuHud.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\ProgressState.cs" />
@@ -137,8 +137,8 @@
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\LoseScreenUI.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\GoalUIBuilder.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\GoalFinderBoost.cs" />
-    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\StartPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\MallPopupUi.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\StartPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\BattlepassTier.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\BuffType.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\BoostType.cs" />
