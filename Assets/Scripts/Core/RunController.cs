@@ -1,6 +1,6 @@
-using System;
 using GameBridge.Contracts;
 using GameBridge.SceneFlow;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,10 +11,22 @@ public class RunController : MonoBehaviour
     [Header("Run Time (minutes)")]
     [SerializeField] private float levelDurationMinutes = 2.3f;
 
-    [Header("Revive")]
+    [Header("Revive Limits (total revives per run, TimeUp only)")]
     [SerializeField] private int reviveMaxPerRun = 4;
-    [SerializeField] private int freeRevivesPerRun = 1;
-    [SerializeField] private float reviveAddTimeSeconds = 30f;
+
+    [Header("Revive Costs")]
+    [SerializeField] private int timeUpPaidReviveCost = 1490;
+    [SerializeField] private int kaboomReviveCost = 900;
+
+    [Header("Revive Add Time (seconds)")]
+    [SerializeField] private float timeUpFreeAddSeconds = 60f;
+    [SerializeField] private float timeUpPaidAddSeconds = 75f;
+
+    [Header("Kaboom (no time add!)")]
+    [SerializeField] private float kaboomAddSeconds = 0f; // оставлено, но НЕ используется (кабум не добавляет время)
+
+    [Header("TimeUp Paid Limit")]
+    [SerializeField] private int timeUpPaidMaxPerRun = 3;
 
     [Header("Stars by time (percent of total time left)")]
     [Range(0f, 1f)] [SerializeField] private float threeStarsLeftPercent = 0.60f;
@@ -44,29 +56,56 @@ public class RunController : MonoBehaviour
     [SerializeField] private WinScreenUI winUI;
     [SerializeField] private LoseScreenUI loseUI;
 
+    [Header("Lose UI Containers")]
+    [SerializeField] private GameObject timeUpFreeContainer; // FREE revive
+    [SerializeField] private GameObject timeUpPaidContainer; // paid TimeUp revive
+    [SerializeField] private GameObject kaboomContainer;     // kaboom revive container
+
+    [Header("TimeUp Art (optional)")]
+    [SerializeField] private Image timeUpArtImage;
+    [SerializeField] private Sprite[] timeUpArts = new Sprite[4]; // 0..3
+
+    [Header("Coins Text (optional, TMP)")]
+    [SerializeField] private TMP_Text coinsText;
+
     [Header("Debug UI (optional)")]
     [SerializeField] private Text debugTimerText;
-    public float DefaultDurationMinutes => levelDurationMinutes;
 
+    public float DefaultDurationMinutes => levelDurationMinutes;
     public bool IsRunning { get; private set; }
 
     private float _timeTotal;
     private float _timeLeft;
 
-    private int _revivesUsed;
-    private int _freeRevivesUsed;
+    private int _revivesUsed;       // общий счётчик TimeUp revive (free + paid)
+    private int _timeUpPaidUsed;    // платные TimeUp revive (0..3)
 
     private int _coins;
     private int _collectedBP;
 
     private bool _losePending;
-
-    private RunConfig _cfg;
     private bool _initialized;
     private bool _ended;
 
+    private RunConfig _cfg;
+
+    // (локально) оставим, чтобы не ломать уже вставленное, но основной контроль через PlayerPrefs
+    private int _timeUpFreeRevivesUsed;
+
     public float TimeLeft => _timeLeft;
-public float TimeTotal => _timeTotal;
+    public float TimeTotal => _timeTotal;
+
+    // FREE должен показываться, пока не использовали, и исчезнуть навсегда после использования
+    private const string KEY_TIMEUP_FREE_USED = "TimeUpFreeReviveUsed";
+    private bool IsTimeUpFreeEverUsed
+    {
+        get => PlayerPrefs.GetInt(KEY_TIMEUP_FREE_USED, 0) == 1;
+        set
+        {
+            PlayerPrefs.SetInt(KEY_TIMEUP_FREE_USED, value ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+    }
 
     private void Awake()
     {
@@ -79,13 +118,11 @@ public float TimeTotal => _timeTotal;
 
         _cfg = SceneFlow.PendingRunConfig;
 
-        // ✅ важное: всегда держим ссылку на SINGLETON,
-        // чтобы кнопки и RunController работали с одним инвентарём
         if (buffInventory == null)
             buffInventory = BuffInventory.Instance;
 
         if (buffInventory == null)
-            buffInventory = FindFirstObjectByType<BuffInventory>(); // fallback, если Instance не настроен
+            buffInventory = FindFirstObjectByType<BuffInventory>();
 
         if (_cfg == null)
         {
@@ -105,8 +142,6 @@ public float TimeTotal => _timeTotal;
 
                 buffInventory.ApplyRunConfig(fake);
                 _coins = 0;
-
-                Debug.LogWarning($"[RunController.Init] Using FALLBACK buffs: ({fallbackGrowTemp},{fallbackRadar},{fallbackMagnet},{fallbackFreezeTime})");
             }
             else
             {
@@ -114,6 +149,7 @@ public float TimeTotal => _timeTotal;
             }
 
             _initialized = true;
+            UpdateCoinsUI();
             return;
         }
 
@@ -126,8 +162,7 @@ public float TimeTotal => _timeTotal;
         else
             Debug.LogError("[RunController.Init] BuffInventory not found. Boost buttons will stay disabled.");
 
-        Debug.Log($"[RunController.Init] OK. Level={_cfg.levelIndex} bonusSpawn={_cfg.bonusSpawnLevel} " +
-                  $"buffs=({_cfg.buff1Count},{_cfg.buff2Count},{_cfg.buff3Count},{_cfg.buff4Count}) coins={_cfg.walletCoinsSnapshot}");
+        UpdateCoinsUI();
     }
 
     private void OnEnable()
@@ -156,13 +191,16 @@ public float TimeTotal => _timeTotal;
 
     public void StartRun()
     {
+        _timeUpPaidUsed = 0;
+        _timeUpFreeRevivesUsed = 0;
+
         HideScreens();
 
         _timeTotal = Mathf.Max(1f, levelDurationMinutes * 60f);
         _timeLeft = _timeTotal;
 
         _revivesUsed = 0;
-        _freeRevivesUsed = 0;
+
         _losePending = false;
         _ended = false;
 
@@ -171,6 +209,9 @@ public float TimeTotal => _timeTotal;
         holeGrowth?.ResetRun();
         timerUI?.Set(_timeLeft, _timeTotal);
         UpdateDebugTimerText();
+
+        SetLoseContainers(null);
+        UpdateCoinsUI();
     }
 
     private void Update()
@@ -208,16 +249,62 @@ public float TimeTotal => _timeTotal;
     {
         int next = _coins + delta;
         if (next < 0) return false;
+
         _coins = next;
+        UpdateCoinsUI();
         return true;
     }
 
     public bool TrySpendCoins(int amount) => amount <= 0 || ChangeCoins(-amount);
-    public void AddCoins(int amount) { if (amount > 0) ChangeCoins(amount); }
+
+    public void AddCoins(int amount)
+    {
+        if (amount > 0) ChangeCoins(amount);
+    }
 
     public void AddBattlepassItems(int amount)
     {
         if (amount > 0) _collectedBP += amount;
+    }
+
+    private void UpdateCoinsUI()
+    {
+        if (coinsText != null)
+            coinsText.text = _coins.ToString();
+    }
+
+    // ---------------- Lose containers + art ----------------
+
+    private void SetLoseContainers(LoseReason? reason)
+    {
+        if (timeUpFreeContainer) timeUpFreeContainer.SetActive(false);
+        if (timeUpPaidContainer) timeUpPaidContainer.SetActive(false);
+        if (kaboomContainer) kaboomContainer.SetActive(false);
+
+        if (reason == null) return;
+
+        if (reason.Value == LoseReason.Kaboom)
+        {
+            if (kaboomContainer) kaboomContainer.SetActive(true);
+            return;
+        }
+
+        // TimeUp
+        bool showFree = !IsTimeUpFreeEverUsed;
+        if (timeUpFreeContainer) timeUpFreeContainer.SetActive(showFree);
+        if (timeUpPaidContainer) timeUpPaidContainer.SetActive(!showFree);
+    }
+
+    private void UpdateTimeUpArt()
+    {
+        if (timeUpArtImage == null) return;
+        if (timeUpArts == null || timeUpArts.Length == 0) return;
+
+        // по числу платных попыток: 0..3
+        int idx = Mathf.Clamp(_timeUpPaidUsed, 0, 3);
+
+        if (idx < timeUpArts.Length && timeUpArts[idx] != null)
+            timeUpArtImage.sprite = timeUpArts[idx];
     }
 
     // ---------------- Gameplay ----------------
@@ -244,12 +331,7 @@ public float TimeTotal => _timeTotal;
 
             if (flyToUi != null && target != null && item.UiIcon != null)
             {
-                flyToUi.Spawn(
-                    item.transform.position,
-                    item.UiIcon,
-                    target,
-                    onArrived: () => slotUi?.PlayArrivePunch()
-                );
+                flyToUi.Spawn(item.transform.position, item.UiIcon, target, onArrived: () => slotUi?.PlayArrivePunch());
             }
 
             if (objectives.IsComplete())
@@ -275,8 +357,8 @@ public float TimeTotal => _timeTotal;
     private void Win()
     {
         if (!IsRunning) return;
-        IsRunning = false;
 
+        IsRunning = false;
         HideScreens();
 
         float timeSpent = _timeTotal - _timeLeft;
@@ -307,28 +389,55 @@ public float TimeTotal => _timeTotal;
 
         IsRunning = false;
         HideScreens();
-
         _losePending = true;
 
-        bool canRevive = _revivesUsed < reviveMaxPerRun;
-        bool isFree = _freeRevivesUsed < freeRevivesPerRun;
+        UpdateCoinsUI();
+        SetLoseContainers(reason);
 
-        string title = reason == LoseReason.TimeUp ? "Oops! Time's up!" : "Kaboom!";
-        string subtitle = reason == LoseReason.TimeUp ? "Get more time to continue!" : "Use a revive to keep playing!";
-        string reviveText = !canRevive ? "No revives" : (isFree ? "Revive (FREE)" : "Revive");
+        if (reason == LoseReason.TimeUp)
+            UpdateTimeUpArt();
 
-        loseUI?.Show(
-            title, subtitle,
-            canRevive,
-            reviveText,
-            onRevive: () => TryRevive(isFree),
-            onRetry: ContinueAfterLose
-        );
+        string title = (reason == LoseReason.TimeUp) ? "Oops! Time's up!" : "Kaboom!";
+        string subtitle = (reason == LoseReason.TimeUp) ? "Get more time to continue!" : "Use a revive to keep playing!";
+
+        if (reason == LoseReason.TimeUp)
+        {
+            bool canByLimit = _revivesUsed < reviveMaxPerRun;
+
+            bool freeAvailable = !IsTimeUpFreeEverUsed;
+
+            bool canAffordPaid =
+                (_timeUpPaidUsed < timeUpPaidMaxPerRun) &&
+                (_coins >= timeUpPaidReviveCost);
+
+            loseUI?.Show(
+                title,
+                subtitle,
+                onFreeRevive: (canByLimit && freeAvailable) ? TryRevive_TimeUpFree : null,
+                onPaidRevive: (canByLimit && canAffordPaid) ? TryRevive_TimeUpPaid : null,
+                onKaboomRevive: null,
+                onRetry: ContinueAfterLose
+            );
+        }
+        else // Kaboom
+        {
+            bool canAfford = _coins >= kaboomReviveCost;
+
+            loseUI?.Show(
+                title,
+                subtitle,
+                onFreeRevive: null,
+                onPaidRevive: null,
+                onKaboomRevive: canAfford ? TryRevive_Kaboom : null,
+                onRetry: ContinueAfterLose
+            );
+        }
     }
 
     private void ContinueAfterLose()
     {
         if (!_losePending) return;
+
         _losePending = false;
 
         if (_ended) return;
@@ -343,38 +452,72 @@ public float TimeTotal => _timeTotal;
         return 1;
     }
 
-    // ---------------- Revive ----------------
+    // ---------------- Revive handlers ----------------
 
-    private void TryRevive(bool free)
+    private void TryRevive_TimeUpFree()
     {
+        if (IsTimeUpFreeEverUsed) return;
         if (_revivesUsed >= reviveMaxPerRun) return;
 
-        if (free)
-        {
-            _freeRevivesUsed++;
-            ApplyRevive();
-            return;
-        }
+        // FREE используем навсегда
+        IsTimeUpFreeEverUsed = true;
+        _timeUpFreeRevivesUsed = 1;
 
-        // TODO: rewarded ad / purchase
-        ApplyRevive();
+        SetLoseContainers(LoseReason.TimeUp);
+
+        ApplyTimeUpRevive(timeUpFreeAddSeconds); // ✅ +60
     }
 
-    private void ApplyRevive()
+    private void TryRevive_TimeUpPaid()
+    {
+        if (_revivesUsed >= reviveMaxPerRun) return;
+        if (_timeUpPaidUsed >= timeUpPaidMaxPerRun) return;
+
+        if (!TrySpendCoins(timeUpPaidReviveCost))
+            return;
+
+        _timeUpPaidUsed++;
+
+        ApplyTimeUpRevive(timeUpPaidAddSeconds); // ✅ +75
+    }
+
+    private void TryRevive_Kaboom()
+    {
+        if (!TrySpendCoins(kaboomReviveCost))
+            return;
+
+        // ✅ КАБУМ НЕ ДОБАВЛЯЕТ ВРЕМЯ, просто продолжаем
+        HideScreens();
+        _losePending = false;
+        IsRunning = true;
+
+        timerUI?.Set(_timeLeft, _timeTotal);
+        UpdateDebugTimerText();
+        UpdateCoinsUI();
+    }
+
+    // ✅ TimeUp revive: расширяем TOTAL, чтобы бонус не съедал Clamp
+    private void ApplyTimeUpRevive(float addTimeSeconds)
     {
         _revivesUsed++;
 
-        _timeLeft = Mathf.Clamp(_timeLeft + reviveAddTimeSeconds, 0f, _timeTotal);
-        HideScreens();
+        _timeTotal += addTimeSeconds;
+        _timeLeft += addTimeSeconds;
 
+        HideScreens();
         _losePending = false;
         IsRunning = true;
+
+        timerUI?.Set(_timeLeft, _timeTotal);
+        UpdateDebugTimerText();
+        UpdateCoinsUI();
     }
 
     private void HideScreens()
     {
         winUI?.Hide();
         loseUI?.Hide();
+        SetLoseContainers(null);
     }
 
     // ---------------- Return to Menu ----------------
@@ -389,7 +532,6 @@ public float TimeTotal => _timeTotal;
             return;
         }
 
-        // ✅ читаем остатки ТОЛЬКО из BuffInventory
         int b1 = buffInventory ? buffInventory.GrowTempCount : 0;
         int b2 = buffInventory ? buffInventory.RadarCount : 0;
         int b3 = buffInventory ? buffInventory.MagnetCount : 0;
@@ -410,20 +552,16 @@ public float TimeTotal => _timeTotal;
             buff4Count = Mathf.Max(0, b4),
         };
 
-        Debug.Log($"[RunController] ReturnToMenu outcome={outcome} level={result.levelIndex} " +
-                  $"stars={result.starsEarned} coins={result.coinsResult} bp={result.battlepassItemsCollected} " +
-                  $"buffs=({result.buff1Count},{result.buff2Count},{result.buff3Count},{result.buff4Count})");
-
         SceneFlow.ReturnToMenu(result);
     }
 
     public void QuitToMenuFromPause()
-{
-    if (_ended) return;
+    {
+        if (_ended) return;
 
-    IsRunning = false;
-    HideScreens();
+        IsRunning = false;
+        HideScreens();
 
-    ReturnToMenu(LevelOutcome.Lose, 0);
-}
+        ReturnToMenu(LevelOutcome.Lose, 0);
+    }
 }
