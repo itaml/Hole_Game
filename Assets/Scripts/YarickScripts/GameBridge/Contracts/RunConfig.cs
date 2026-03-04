@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace GameBridge.Contracts
 {
@@ -22,5 +22,12 @@ namespace GameBridge.Contracts
 
         // Convenience for "continue" offer logic in Game
         public int walletCoinsSnapshot;
+
+        public bool isBankOpen;
+        public int bankCoinsSnapshot;
+        public int bankCapacitySnapshot;
+
+        //��������� �� ������� �������
+        public bool isBattlepasOpen;
     }
 }

@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using Core.Configs;
 using Meta.State;
 
@@ -7,6 +7,7 @@ namespace Meta.Services
     public sealed class BankService
     {
         private readonly BankConfig _config;
+        public int Capacity => _config != null ? _config.capacity : 0;
 
         public BankService(BankConfig config)
         {
@@ -14,8 +15,8 @@ namespace Meta.Services
         }
 
         /// <summary>
-        /// Начисляет монеты в банк при победе (НЕ забирая из wallet).
-        /// Возвращает сколько реально начислили (с учётом capacity).
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ wallet).
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ capacity).
         /// </summary>
         public int AddWinDeposit(PlayerSave save)
         {
