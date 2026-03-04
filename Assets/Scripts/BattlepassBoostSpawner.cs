@@ -29,27 +29,43 @@ public class BattlepassBoostSpawner : MonoBehaviour
         _spawnedThisRun = false;
     }
 
-   public void SpawnIfNeeded()
+public void SpawnIfNeeded()
 {
-    Debug.Log($"[BP] SpawnIfNeeded. cfg={(run.PendingConfig==null?"null":"ok")} b1={run.PendingConfig?.boost1Activated} b2={run.PendingConfig?.boost2Activated}");
     var cfg = run.PendingConfig;
     if (cfg == null) return;
 
-    if (!cfg.boost1Activated && !cfg.boost2Activated)
+    // ✅ если бусты выбраны вручную — батл пас НЕ спавним
+    if (cfg.boost1Activated || cfg.boost2Activated)
         return;
 
-    // ✅ инстансим сразу в точке старта прилёта
-var basket = Instantiate(basketPrefab, flyFromPoint.position, flyFromPoint.rotation);
-basket.gameObject.SetActive(true);
-Debug.Log($"[BP] Basket instanced: {basket.name} active={basket.gameObject.activeInHierarchy} pos={basket.transform.position}");
+    // ✅ батл пас включён?
+    if (!cfg.isBattlepasOpen)
+        return;
 
-    if (cfg.boost1Activated)
+    if (spawnOncePerRun && _spawnedThisRun)
+        return;
+
+    int bpLevel = Mathf.Clamp(cfg.bonusSpawnLevel, 1, 3); // 1..3
+    _spawnedThisRun = true;
+
+    if (basketPrefab == null || flyFromPoint == null || flyToPoint == null)
+    {
+        Debug.LogWarning("[BP] Missing basketPrefab/fly points");
+        return;
+    }
+
+    var basket = Instantiate(basketPrefab, flyFromPoint.position, flyFromPoint.rotation);
+    basket.gameObject.SetActive(true);
+
+    // ✅ по уровню батл паса: 1 -> по 1, 2 -> по 2, 3 -> по 3
+    for (int i = 0; i < bpLevel; i++)
+    {
         basket.AddGrowLevelBoost(BoostSpawnSource.Battlepass);
-
-    if (cfg.boost2Activated)
         basket.AddExtraTimeBoost(BoostSpawnSource.Battlepass);
+    }
 
-    // ✅ корзина прилетает к flyToPoint и выстреливает вперёд
     basket.FlyInAndShoot(flyFromPoint, flyToPoint, flyToPoint.forward);
+
+    Debug.Log($"[BP] Spawned basket. bpLevel={bpLevel}");
 }
 }

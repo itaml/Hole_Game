@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Clean ProceduralSpawnBuilder
-/// - Выбирает N модулей (уникальные по возможности)
-/// - Размещает их плотно в кольце вокруг hole (packing по радиусам + углам)
-/// - Строгий no-overlap по AABB (модули квадратные -> ок)
-/// - Бомба добавляется с 30 уровня
-/// - Каталог (тематика) приходит снаружи: catalogOverride
+/// ProceduralSpawnBuilder (Clean + Composition Plan)
+/// - Выбирает модули (с учетом unlock tags, если надо)
+/// - Строит "план композиции": 1-2 больших GRID, потом чередуем формы
+/// - Размещает аккуратно: кольца (layers) + слоты по окружности + сектора
+/// - Snap-to-grid для "как в оригинале"
+/// - No-overlap AABB по XZ
+/// - Бомба с 30 уровня
 /// </summary>
 public class ProceduralSpawnBuilder : MonoBehaviour
 {
@@ -22,30 +23,48 @@ public class ProceduralSpawnBuilder : MonoBehaviour
 
     [Header("Ring")]
     [SerializeField] private float ringMinRadius = 6f;
-    [SerializeField] private float ringMaxRadius = 14f;
+    [SerializeField] private float ringMaxRadius = 22f;
 
     [Header("Module footprints (world units)")]
     [SerializeField] private float circleModuleSize = 7f;   // 7x7
     [SerializeField] private float gridModuleSize = 8.5f;   // 8.5x8.5
-    [SerializeField] private float gap = 0.10f;             // почти впритык
+    [SerializeField] private float gap = 0.25f;             // "воздух" между модулями
 
-    [Header("Placement quality")]
-    [Tooltip("Сколько радиальных слоёв максимум перебираем (больше = плотнее, но медленнее).")]
+    [Header("Clean Layout")]
+    [SerializeField] private bool snapToGrid = true;
+    [SerializeField] private float gridStep = 0.5f;         // 0.5 / 1.0
+    [SerializeField] private float angleQuantizeDeg = 15f;  // 15/30 делает "ровно"
+
+    [Header("Distribution")]
+    [Tooltip("Сколько секторов по кругу. 6..10 обычно ок.")]
+    [SerializeField] private int sectors = 8;
+
+    [Tooltip("Максимум радиальных слоёв. Больше = плотнее/дальше.")]
     [SerializeField] private int maxRadialLayers = 24;
 
-    [Tooltip("Доп. попытки, если слой получился пустой (чтобы не залипать на одном радиусе).")]
+    [Tooltip("Сколько попыток на слой (смещение стартового угла/сектора).")]
     [SerializeField] private int extraLayerTries = 6;
 
-    [Header("Module Count Growth")]
-    [SerializeField] private int modulesBase = 10;     // НА СТАРТЕ ХОТЯ БЫ 10
-    [SerializeField] private int modulesMax = 24;
-    [SerializeField] private int addEveryLevels = 3;
-    [SerializeField] private int addModulesStep = 1;
+    [Header("Composition Plan")]
+    [Tooltip("Сколько больших GRID модулей пытаться поставить первыми.")]
+    [SerializeField] private int bigGridsFirstMin = 1;
+    [SerializeField] private int bigGridsFirstMax = 2;
+
+    [Tooltip("Стараться чередовать формы (GRID/CIRCLE), чтобы не было каши.")]
+    [SerializeField] private bool alternateShapes = true;
+
+    [Tooltip("Не допускать 2 одинаковых модулей подряд (если повторения разрешены).")]
+    [SerializeField] private bool avoidSameModuleBackToBack = true;
 
     [Header("Rules")]
     [SerializeField] private bool forceStartSafeFirst = true;
     [SerializeField] private bool useTagFiltering = true;
-    [SerializeField] private bool uniqueModules = true; // делать разные все (пока хватает)
+
+    [Header("Module Count Growth")]
+    [SerializeField] private int modulesBase = 10;
+    [SerializeField] private int modulesMax = 24;
+    [SerializeField] private int addEveryLevels = 3;
+    [SerializeField] private int addModulesStep = 1;
 
     [Header("Bomb")]
     [SerializeField] private bool enableBomb = true;
@@ -58,9 +77,6 @@ public class ProceduralSpawnBuilder : MonoBehaviour
 
     // ===================== PUBLIC API =====================
 
-    /// <summary>
-    /// BuildConfig(humanLevel (1..), activeCatalog, seed, goalPoolOverride)
-    /// </summary>
     public LevelSpawnConfig BuildConfig(int levelIndex, ItemCatalog catalogOverride, int seedOverride = 0, GoalPool goalPoolOverride = null)
     {
         if (!library || !curve)
@@ -80,19 +96,27 @@ public class ProceduralSpawnBuilder : MonoBehaviour
             : new System.Random(levelIndex * 10007);
 
         var unlock = curve.GetUnlock(levelIndex);
-        int budget = curve.GetBudget(levelIndex, rng); // можно оставить, даже если не используем жёстко
+        int budget = curve.GetBudget(levelIndex, rng); // оставляем для логов/будущего
 
         int targetCount = GetTargetModuleCount(levelIndex);
-        var picked = PickModules(targetCount, unlock, rng);
 
+        // 1) Берём кандидатов (по тегам или без)
+        var candidates = CollectCandidates(unlock);
+
+        // 2) Выбираем модули под "план композиции"
+        var picked = PickWithCompositionPlan(candidates, targetCount, unlock, rng);
+
+        // 3) Build runtime cfg
         var runtimeCfg = ScriptableObject.CreateInstance<LevelSpawnConfig>();
         runtimeCfg.groups = new List<SpawnGroup>(256);
 
-        PlaceModulesPacked(picked, runtimeCfg.groups, rng, goalPoolOverride);
+        // 4) Place (clean packed ring)
+        PlaceModulesClean(picked, runtimeCfg.groups, rng, goalPoolOverride);
 
+        // 5) Bomb
         TryAddBombGroup(levelIndex, runtimeCfg.groups, rng, catalogOverride);
 
-        Debug.Log($"[ProcGen] level={levelIndex} budget={budget} modules={picked.Count} groups={runtimeCfg.groups.Count}");
+        Debug.Log($"[ProcGen] level={levelIndex} budget={budget} target={targetCount} picked={picked.Count} groups={runtimeCfg.groups.Count}");
         return runtimeCfg;
     }
 
@@ -117,89 +141,156 @@ public class ProceduralSpawnBuilder : MonoBehaviour
     private int GetTargetModuleCount(int humanLevel)
     {
         humanLevel = Mathf.Max(1, humanLevel);
-
         int adds = (humanLevel - 1) / Mathf.Max(1, addEveryLevels);
         int count = modulesBase + adds * Mathf.Max(1, addModulesStep);
-
         return Mathf.Clamp(count, 1, Mathf.Max(1, modulesMax));
     }
 
-    // ===================== MODULE PICKING =====================
+    // ===================== CANDIDATES =====================
 
-   private List<SpawnModule> PickModules(int targetCount, DifficultyCurve.UnlockRule unlock, System.Random rng)
-{
-    var candidates = new List<SpawnModule>(library.modules.Count);
-
-    foreach (var m in library.modules)
+    private List<SpawnModule> CollectCandidates(DifficultyCurve.UnlockRule unlock)
     {
-        if (!m) continue;
+        var list = new List<SpawnModule>(library.modules.Count);
 
-        if (useTagFiltering && (m.tags & unlock.allowedTags) == 0)
-            continue;
-
-        candidates.Add(m);
-    }
-
-    if (candidates.Count == 0)
-    {
         foreach (var m in library.modules)
-            if (m) candidates.Add(m);
+        {
+            if (!m) continue;
+
+            if (useTagFiltering)
+            {
+                if ((m.tags & unlock.allowedTags) == 0) continue;
+            }
+
+            list.Add(m);
+        }
+
+        // fallback: если по тегам пусто - берём всё
+        if (list.Count == 0)
+        {
+            foreach (var m in library.modules)
+                if (m) list.Add(m);
+        }
+
+        return list;
     }
 
-    if (candidates.Count == 0)
-        return new List<SpawnModule>();
+    // ===================== COMPOSITION PLAN PICK =====================
 
-    var result = new List<SpawnModule>(targetCount);
-
-    // start safe первым (если есть)
-    SpawnModule last = null;
-    if (forceStartSafeFirst)
+    private List<SpawnModule> PickWithCompositionPlan(
+        List<SpawnModule> candidates,
+        int targetCount,
+        DifficultyCurve.UnlockRule unlock,
+        System.Random rng)
     {
-        var ss = FindModuleWithTag(candidates, ModuleTag.StartSafe, rng);
-        if (ss != null)
+        var result = new List<SpawnModule>(targetCount);
+        if (candidates == null || candidates.Count == 0) return result;
+
+        // Чтобы не ломалось, если targetCount больше уникальных
+        // (у тебя всего 10 модулей, и это норм).
+        // Будем позволять повторы, но:
+        // - StartSafe первым
+        // - без одинакового подряд
+        // - при alternateShapes стараемся чередовать
+
+        // 1) StartSafe первым
+        SpawnModule last = null;
+        if (forceStartSafeFirst)
         {
-            result.Add(ss);
-            last = ss;
+            var ss = FindModuleWithTag(candidates, ModuleTag.StartSafe, rng);
+            if (ss != null)
+            {
+                result.Add(ss);
+                last = ss;
+            }
         }
+
+        // 2) Сколько больших GRID поставить первыми
+        int bigCount = rng.Next(Mathf.Min(bigGridsFirstMin, bigGridsFirstMax),
+                                Mathf.Max(bigGridsFirstMin, bigGridsFirstMax) + 1);
+        bigCount = Mathf.Clamp(bigCount, 0, Mathf.Max(0, targetCount - result.Count));
+
+        // Собираем “большие” кандидаты: shape Grid (или по размеру)
+        var gridCandidates = new List<SpawnModule>();
+        var circleCandidates = new List<SpawnModule>();
+        foreach (var m in candidates)
+        {
+            if (!m) continue;
+            if (m.shape == SpawnModule.ModuleShape.Grid) gridCandidates.Add(m);
+            else circleCandidates.Add(m);
+        }
+
+        // 2a) добираем big grids
+        for (int i = 0; i < bigCount && result.Count < targetCount; i++)
+        {
+            var pick = PickAvoidingBackToBack(gridCandidates.Count > 0 ? gridCandidates : candidates, rng, last);
+            if (pick == null) break;
+
+            result.Add(pick);
+            last = pick;
+        }
+
+        // 3) Остальное: “план” чередования форм
+        SpawnModule.ModuleShape want = SpawnModule.ModuleShape.Circle;
+
+        if (alternateShapes && last != null)
+            want = (last.shape == SpawnModule.ModuleShape.Grid) ? SpawnModule.ModuleShape.Circle : SpawnModule.ModuleShape.Grid;
+
+        int guard = 0;
+        while (result.Count < targetCount && guard++ < 5000)
+        {
+            SpawnModule pick = null;
+
+            if (alternateShapes)
+            {
+                // пытаемся взять желаемую форму
+                var list = (want == SpawnModule.ModuleShape.Grid) ? gridCandidates : circleCandidates;
+                pick = PickAvoidingBackToBack(list.Count > 0 ? list : candidates, rng, last);
+
+                // если не нашли — берём что есть
+                if (pick == null)
+                    pick = PickAvoidingBackToBack(candidates, rng, last);
+
+                // переключаем желаемую форму
+                want = (want == SpawnModule.ModuleShape.Grid) ? SpawnModule.ModuleShape.Circle : SpawnModule.ModuleShape.Grid;
+            }
+            else
+            {
+                pick = PickAvoidingBackToBack(candidates, rng, last);
+            }
+
+            if (pick == null) break;
+
+            result.Add(pick);
+            last = pick;
+        }
+
+        return result;
     }
 
-    // чтобы не было "один и тот же" постоянно: держим небольшой буфер последних
-    int recentBuffer = Mathf.Min(3, candidates.Count - 1);
-    var recent = new Queue<SpawnModule>(recentBuffer);
-    if (last != null && recentBuffer > 0) recent.Enqueue(last);
-
-    int guard = 0;
-    while (result.Count < targetCount && guard++ < 5000)
+    private SpawnModule PickAvoidingBackToBack(List<SpawnModule> list, System.Random rng, SpawnModule last)
     {
-        var m = candidates[rng.Next(0, candidates.Count)];
-        if (!m) continue;
+        if (list == null || list.Count == 0) return null;
 
-        // не повторяем прям подряд
-        if (last == m) continue;
-
-        // не повторяем слишком часто (в пределах буфера)
-        bool inRecent = false;
-        foreach (var r in recent)
+        // 8 попыток найти не тот же самый
+        for (int i = 0; i < 8; i++)
         {
-            if (r == m) { inRecent = true; break; }
-        }
-        if (inRecent) continue;
+            var m = list[rng.Next(0, list.Count)];
+            if (!m) continue;
 
-        result.Add(m);
+            if (avoidSameModuleBackToBack && last == m)
+                continue;
 
-        last = m;
-        if (recentBuffer > 0)
-        {
-            recent.Enqueue(m);
-            while (recent.Count > recentBuffer) recent.Dequeue();
+            return m;
         }
+
+        // fallback
+        return list[rng.Next(0, list.Count)];
     }
-
-    return result;
-}
 
     private SpawnModule FindModuleWithTag(List<SpawnModule> list, ModuleTag tag, System.Random rng)
     {
+        if (list == null || list.Count == 0) return null;
+
         var tmp = new List<SpawnModule>();
         foreach (var m in list)
             if (m && (m.tags & tag) != 0) tmp.Add(m);
@@ -208,14 +299,11 @@ public class ProceduralSpawnBuilder : MonoBehaviour
         return tmp[rng.Next(0, tmp.Count)];
     }
 
-    // ===================== PLACEMENT (PACKED RING) =====================
+    // ===================== PLACEMENT (CLEAN) =====================
 
-    private struct PlacedRect
-    {
-        public Rect rectXZ;
-    }
+    private struct PlacedRect { public Rect rectXZ; }
 
-    private void PlaceModulesPacked(
+    private void PlaceModulesClean(
         List<SpawnModule> modules,
         List<SpawnGroup> outGroups,
         System.Random rng,
@@ -225,58 +313,63 @@ public class ProceduralSpawnBuilder : MonoBehaviour
 
         Vector3 center = (hole != null) ? hole.position : Vector3.zero;
 
-        // занятые AABB по XZ
         var placed = new List<PlacedRect>(modules.Count);
 
-        // радиусный шаг примерно по "самому большому модулю"
         float maxSize = Mathf.Max(circleModuleSize, gridModuleSize);
-        float layerStep = maxSize + gap;
+        float layerStep = maxSize + gap; // шаг радиальных колец
 
-        // стартуем с min
         float rStart = Mathf.Max(0.01f, ringMinRadius);
         float rEnd = Mathf.Max(rStart, ringMaxRadius);
 
         int moduleIndex = 0;
 
-        // Несколько проходов по слоям: r = rStart + layer * layerStep
-        // На каждом слое пробуем углы с шагом, зависящим от размера модуля (чтобы по окружности реально уместилось много).
+        // “секторный” распределитель, чтобы не всё в одну сторону
+        int secCount = Mathf.Clamp(sectors, 4, 12);
+        int secCursor = rng.Next(0, secCount);
+
         for (int layer = 0; layer < maxRadialLayers && moduleIndex < modules.Count; layer++)
         {
             float r = rStart + layer * layerStep;
             if (r > rEnd) break;
 
-            // рандомный поворот слоя, чтобы уровни отличались
-            float baseAngle = (float)rng.NextDouble() * 360f;
+            // сколько слотов по окружности на этом радиусе
+            int slots = Mathf.Max(6, Mathf.RoundToInt((2f * Mathf.PI * r) / (maxSize + gap)));
+            float stepDeg = 360f / slots;
+
+            // базовый угол для слоя: привязан к сектору
+            float sectorDeg = 360f / secCount;
+            float baseAngleDeg = secCursor * sectorDeg + (float)rng.NextDouble() * (sectorDeg * 0.25f);
 
             int placedThisLayer = 0;
 
-            // пытаться на этом слое несколько раз (чуть сдвигая базовый угол)
             for (int extra = 0; extra < Mathf.Max(1, extraLayerTries) && moduleIndex < modules.Count; extra++)
             {
-                float layerAngleOffset = baseAngle + extra * 11.5f;
+                // смещаемся по секторам, чтобы равномерно заполнялось
+                int sec = (secCursor + extra) % secCount;
+                float offsetDeg = sec * sectorDeg;
 
-                // чтобы шаг был разумным: берём размер текущего (или максимальный) и делаем шаг по дуге
-                float sizeGuess = maxSize;
-                float arcStep = sizeGuess + gap; // сколько хотим дуги между центрами
-                float stepRad = arcStep / Mathf.Max(0.5f, r);
-                float stepDeg = Mathf.Clamp(stepRad * Mathf.Rad2Deg, 6f, 30f);
+                // делаем "оригинальный" ритм: каждый extra прыгаем на следующий сектор
+                float layerAngleOffset = baseAngleDeg + offsetDeg;
 
-                int steps = Mathf.CeilToInt(360f / stepDeg);
-
-                for (int s = 0; s < steps && moduleIndex < modules.Count; s++)
+                for (int s = 0; s < slots && moduleIndex < modules.Count; s++)
                 {
                     var module = modules[moduleIndex];
                     if (!module) { moduleIndex++; continue; }
 
                     Vector2 size = GetModuleFootprint(module);
+
                     float angleDeg = layerAngleOffset + s * stepDeg;
-                    float angle = angleDeg * Mathf.Deg2Rad;
+                    angleDeg = QuantizeAngleDeg(angleDeg);
+
+                    float a = angleDeg * Mathf.Deg2Rad;
 
                     Vector3 pos = new Vector3(
-                        center.x + Mathf.Cos(angle) * r,
+                        center.x + Mathf.Cos(a) * r,
                         center.y,
-                        center.z + Mathf.Sin(angle) * r
+                        center.z + Mathf.Sin(a) * r
                     );
+
+                    pos = Snap(pos);
 
                     Rect rect = MakeFootprintRect(pos, size, gap);
 
@@ -286,27 +379,27 @@ public class ProceduralSpawnBuilder : MonoBehaviour
                     placed.Add(new PlacedRect { rectXZ = rect });
                     placedThisLayer++;
 
-                    // Ротация: можно оставить 0/90/180/270, но модули квадратные и так
+                    // Поворот 0/90/180/270 (аккуратнее выглядит, чем рандомный)
                     int rotY = (rng.Next(0, 4) * 90);
-
                     bool mirrorX = rng.NextDouble() < 0.5;
                     bool mirrorZ = rng.NextDouble() < 0.5;
 
                     EmitModule(module, pos, rotY, mirrorX, mirrorZ, outGroups, rng, goalPoolOverride);
 
                     moduleIndex++;
+
+                    // каждый успешный модуль двигает сектор, чтобы не было "комка"
+                    secCursor = (secCursor + 1) % secCount;
                 }
             }
 
-            // если слой вообще пустой, то всё равно идём дальше (иначе можно залипнуть)
+            // если слой пустой, всё равно идём дальше
             _ = placedThisLayer;
         }
 
-        // Если вдруг не успели разместить все (кольцо маленькое или modulesMax огромный)
-        // то просто остановимся. Лучше “меньше, но красиво”, чем “все в одной точке”.
         if (moduleIndex < modules.Count)
         {
-            Debug.LogWarning($"[ProcGen] Not enough space in ring to place all modules. Placed {moduleIndex}/{modules.Count}. Consider increasing ringMaxRadius.");
+            Debug.LogWarning($"[ProcGen] Not enough space in ring to place all modules. Placed {moduleIndex}/{modules.Count}. Increase ringMaxRadius or reduce modulesMax/gap.");
         }
     }
 
@@ -316,17 +409,27 @@ public class ProceduralSpawnBuilder : MonoBehaviour
         return new Vector2(s, s);
     }
 
+    private Vector3 Snap(Vector3 p)
+    {
+        if (!snapToGrid) return p;
+        float step = Mathf.Max(0.01f, gridStep);
+        p.x = Mathf.Round(p.x / step) * step;
+        p.z = Mathf.Round(p.z / step) * step;
+        return p;
+    }
+
+    private float QuantizeAngleDeg(float deg)
+    {
+        if (angleQuantizeDeg <= 0.01f) return deg;
+        return Mathf.Round(deg / angleQuantizeDeg) * angleQuantizeDeg;
+    }
+
     private Rect MakeFootprintRect(Vector3 center, Vector2 size, float padding)
     {
         float halfX = Mathf.Max(0.1f, size.x * 0.5f + padding);
         float halfZ = Mathf.Max(0.1f, size.y * 0.5f + padding);
 
-        return new Rect(
-            center.x - halfX,
-            center.z - halfZ,
-            halfX * 2f,
-            halfZ * 2f
-        );
+        return new Rect(center.x - halfX, center.z - halfZ, halfX * 2f, halfZ * 2f);
     }
 
     private static bool OverlapsAny(Rect r, List<PlacedRect> placed)
@@ -358,7 +461,6 @@ public class ProceduralSpawnBuilder : MonoBehaviour
 
             ItemType finalType = t.type;
 
-            // если группа хочет брать тип из goal pool
             if (t.randomTypeFromGoalPool && goalPoolOverride != null)
                 finalType = PickTypeFromGoalPool(goalPoolOverride, rng, finalType);
 
@@ -431,8 +533,7 @@ public class ProceduralSpawnBuilder : MonoBehaviour
         {
             if (it == null) continue;
             acc += Mathf.Max(0, it.weight);
-            if (roll < acc)
-                return it.type;
+            if (roll < acc) return it.type;
         }
 
         return fallback;

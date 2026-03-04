@@ -215,6 +215,15 @@ public RunConfig PendingConfig => _cfg;
     UpdateDebugTimerText();
     UpdateCoinsUI();
     SetLoseContainers(null);
+    // ✅ Если игрок ВЫБРАЛ бусты в меню — применяем сразу, без корзины / айтемов
+if (_cfg != null && boostsEnabled)
+{
+    if (_cfg.boost1Activated)
+        holeGrowth?.AddSizeLevels(1); // GrowWholeLevel
+
+    if (_cfg.boost2Activated)
+        AddExtraTimeSeconds(60f); // или сколько у тебя должен давать выбранный буст
+}
 
     // ✅ Battlepass корзина в начале рана
     var bp = FindFirstObjectByType<BattlepassBoostSpawner>();
