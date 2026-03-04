@@ -9,12 +9,9 @@ public class GoalCurve : ScriptableObject
     public class GoalRule
     {
         public int fromLevelInclusive = 1;
-        public int toLevelInclusive = 5;
+        public int toLevelInclusive = 10;
 
-        [Tooltip("Сколько разных типов целей на уровне (например: 1-2 типа).")]
-        public Vector2Int goalTypesMinMax = new Vector2Int(1, 2);
-
-        [Tooltip("Множитель required (на поздних уровнях больше).")]
+        public Vector2Int goalTypesMinMax = new Vector2Int(1, 1);
         public float requiredMultiplier = 1f;
     }
 
@@ -23,9 +20,12 @@ public class GoalCurve : ScriptableObject
     public GoalRule GetRule(int level)
     {
         level = Mathf.Max(1, level);
+
         foreach (var r in rules)
+        {
             if (level >= r.fromLevelInclusive && level <= r.toLevelInclusive)
                 return r;
+        }
 
         return rules.Count > 0 ? rules[rules.Count - 1] : new GoalRule();
     }

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cda9f7e2fe158428994158472bfece69, type: 3}
+  m_Name: MadagascarCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ItemCatalog
+  entries:
+  - type: 25
+    icon: {fileID: 6740147, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 5027410131598312757, guid: e6a7ae18f0802f944b0c4f222e7d7f4e, type: 3}
+  - type: 26
+    icon: {fileID: 878116250, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 2516393109111580507, guid: 13fc4aa63d99d1447b012e61912cfb05, type: 3}
+  - type: 27
+    icon: {fileID: -1573645973, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 1656954332832858279, guid: 5e1a95c59dc323041af4e6676373328d, type: 3}
+  - type: 28
+    icon: {fileID: 1682222927, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 2878470986281833540, guid: 2322c2c7cd438ad41827d71a506ad8dc, type: 3}
+  - type: 29
+    icon: {fileID: 1324752110, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 2326964411935722871, guid: 92eb1c052e3b5914cb40156ba9b40866, type: 3}
+  - type: 30
+    icon: {fileID: 2067085781, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 4495692957142728453, guid: 0e4c047ff09ef504f9aa91920889d176, type: 3}
+  - type: 31
+    icon: {fileID: -398005888, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 9210970270480168147, guid: dc39238fa331880469d3f7e32d3a0291, type: 3}
+  - type: 32
+    icon: {fileID: 2066127172, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 4349966701456158976, guid: 7a4916f63200c3a4db8b07a15395c9a6, type: 3}
+  - type: 33
+    icon: {fileID: -1260044925, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 4449076531568997483, guid: 537fe1cd97a008743b294dbf86cdd5ad, type: 3}
+  - type: 34
+    icon: {fileID: -435506517, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 3007207278149737415, guid: 4aa2071f304ccf4459f398d2f9354df8, type: 3}
+  - type: 35
+    icon: {fileID: -1386710413, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 2403675610805099158, guid: 600c0554172f3a346ac4678827180239, type: 3}
+  - type: 36
+    icon: {fileID: -1426694008, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 2959209345088412031, guid: 46baa7a1a475f2b44b86a2ca73e39ae5, type: 3}
+  - type: 999
+    icon: {fileID: -1426694008, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
+    worldPrefab: {fileID: 912970043207805595, guid: c86148a76e43449fa8f98fd09587b738, type: 3}

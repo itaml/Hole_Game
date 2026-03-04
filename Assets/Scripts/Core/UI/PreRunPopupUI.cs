@@ -27,11 +27,8 @@ public class PreRunPopupUI : MonoBehaviour
         if (root) root.SetActive(false);
     }
 
-    /// <summary>
-    /// goalsOverride - если задан, показывает эти goals (актуально для процедурных уровней).
-    /// catalogOverride - если задан, берёт иконки из него (иначе level.catalog).
-    /// </summary>
-    public void Show(LevelDefinition level, float defaultMinutes, Action onStart, LevelGoals goalsOverride = null, ItemCatalog catalogOverride = null)
+    public void Show(LevelDefinition level, float defaultMinutes, Action onStart,
+                     LevelGoals goalsOverride = null, ItemCatalog catalogOverride = null)
     {
         if (level == null)
         {
@@ -42,19 +39,16 @@ public class PreRunPopupUI : MonoBehaviour
         if (root) root.SetActive(true);
 
         // 1) Time
-        float minutes = (level.durationMinutesOverride > 0f)
-            ? level.durationMinutesOverride
-            : defaultMinutes;
-
+        float minutes = (level.durationMinutesOverride > 0f) ? level.durationMinutesOverride : defaultMinutes;
         int totalSeconds = Mathf.Max(1, Mathf.RoundToInt(minutes * 60f));
         if (timeText) timeText.text = FormatTime(totalSeconds);
 
-        // 2) Goals (берём override если есть)
+        // 2) Goals
         var goals = goalsOverride != null ? goalsOverride : level.goals;
         var catalog = catalogOverride != null ? catalogOverride : level.catalog;
         RebuildGoals(goals, catalog);
 
-        // 3) Auto close вместо кнопки
+        // 3) Auto close
         if (_autoCloseRoutine != null)
             StopCoroutine(_autoCloseRoutine);
 

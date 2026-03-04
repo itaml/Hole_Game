@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: ModuleLibrary
   m_EditorClassIdentifier: Assembly-CSharp::SpawnModuleLibrary
   modules:
-  - {fileID: 11400000, guid: 3249975321a9e4f16b07941bd7a941e5, type: 2}
-  - {fileID: 11400000, guid: e9f53ba366d7644009f75e82c6f09584, type: 2}
-  - {fileID: 11400000, guid: fe4482628f30e4633bf483df9b6b65b1, type: 2}
-  - {fileID: 11400000, guid: 4bdff2680f914424ebfbf9652efd46b3, type: 2}
-  - {fileID: 11400000, guid: 6fc4bcf82532244638cad5e3bc293ce9, type: 2}
-  - {fileID: 11400000, guid: eb7d8df750c0f42eab50595751ff1624, type: 2}
-  - {fileID: 11400000, guid: dea39cd3e9bf3449aa82d1529f5b7224, type: 2}
+  - {fileID: 11400000, guid: 3e84982fbbbed4351b8371dc84666690, type: 2}
+  - {fileID: 11400000, guid: 5014770e5274c4cf289a05fe251f250d, type: 2}
+  - {fileID: 11400000, guid: ba9de06b068624f99873413e066b4038, type: 2}
+  - {fileID: 11400000, guid: 780e2f435ad294fdd87ef0e7fd75fb97, type: 2}
+  - {fileID: 11400000, guid: edfb710fcbd5c45bf881f7b91b047a44, type: 2}
+  - {fileID: 11400000, guid: e1501532a782843a6aa342c6528d7dd5, type: 2}
+  - {fileID: 11400000, guid: ae41ebfb4f1c54cf2bdc63e4b35371be, type: 2}
+  - {fileID: 11400000, guid: cb695d1ba98d04aa39673337d68b288d, type: 2}

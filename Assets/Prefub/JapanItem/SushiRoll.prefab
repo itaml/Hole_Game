@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3751101308488000435}
@@ -51,6 +51,9 @@ MonoBehaviour:
   <Type>k__BackingField: 1
   <UiIcon>k__BackingField: {fileID: 1537154856, guid: 1599c61d68c1c450b8fd8b9ee49c431f, type: 3}
   <XpValue>k__BackingField: 1
+  onAbsorbedSpawn: {fileID: 0}
+  onAbsorbedSpawnOffset: {x: 0, y: 0, z: 0}
+  destroySpawnAfterSeconds: 2
   overrideRadius: 0
 --- !u!54 &5882687430052321486
 Rigidbody:

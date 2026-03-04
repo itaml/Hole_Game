@@ -1,8 +1,8 @@
-using UnityEngine;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 using GameBridge.SceneFlow;
 using GameBridge.Contracts;
-using System.Collections.Generic;
 
 public class LevelDirector : MonoBehaviour
 {
@@ -22,8 +22,11 @@ public class LevelDirector : MonoBehaviour
     [SerializeField] private ProceduralSpawnBuilder proceduralBuilder;
     [SerializeField] private ProceduralGoalBuilder proceduralGoals;
 
+    [Header("Catalogs by Level")]
+    [SerializeField] private CatalogProgression catalogProgression;
+
     [Header("Indexing")]
-    [Tooltip("Если PendingRunConfig.levelIndex приходит 1..N (1-based) — включи. Если 0..N-1 — выключи.")]
+    [Tooltip("Если PendingRunConfig.levelIndex приходит 1..N — включи. Если 0..N-1 — выключи.")]
     [SerializeField] private bool pendingRunConfigIsOneBased = true;
 
     [Header("UI")]
@@ -32,6 +35,7 @@ public class LevelDirector : MonoBehaviour
     public int CurrentLevelIndex { get; private set; }
 
     private LevelGoals _runtimeGoals;
+    private ItemCatalog _activeCatalog;
     private LevelDefinition _currentLevel;
 
     private void Awake()
@@ -46,14 +50,14 @@ public class LevelDirector : MonoBehaviour
         _currentLevel = LoadLevel(index);
         if (_currentLevel == null) return;
 
-        // LEVEL 1: без прерана
+        // Level 1: без прерана
         if (index == 0)
         {
             run?.StartRun();
             return;
         }
 
-        // LEVEL 2+: преран показывает актуальные goals
+        // Level 2+: PreRun показывает актуальные goals и активный каталог
         if (preRunPopup != null)
         {
             preRunPopup.Show(
@@ -61,7 +65,7 @@ public class LevelDirector : MonoBehaviour
                 run != null ? run.DefaultDurationMinutes : 2.3f,
                 () => run?.StartRun(),
                 goalsOverride: _runtimeGoals,
-                catalogOverride: _currentLevel.catalog
+                catalogOverride: _activeCatalog
             );
         }
         else
@@ -76,9 +80,7 @@ public class LevelDirector : MonoBehaviour
         if (cfg != null)
         {
             int idx = cfg.levelIndex;
-            if (pendingRunConfigIsOneBased)
-                idx -= 1; // 1..N -> 0..N-1
-
+            if (pendingRunConfigIsOneBased) idx -= 1;
             return Mathf.Max(0, idx);
         }
 
@@ -103,59 +105,78 @@ public class LevelDirector : MonoBehaviour
         if (levelText != null)
             levelText.text = $"Level {index + 1}";
 
-        // duration override
         run?.ApplyLevelDuration(level.durationMinutesOverride);
 
         // -------------------------
-        // LEVEL 1 (index 0) — ручной
+        // Level 1 — ручной
         // -------------------------
         if (index == 0)
         {
             _runtimeGoals = null;
+            _activeCatalog = level.catalog;
 
-            goalBuilder?.Build(level.goals, level.catalog);
+            goalBuilder?.Build(level.goals, _activeCatalog);
 
             if (level.spawnConfig != null)
-                spawner?.Spawn(level.spawnConfig, level.catalog);
-            else
-                Debug.LogWarning("[LevelDirector] Level 1 spawnConfig is null.");
+                spawner?.Spawn(level.spawnConfig, _activeCatalog);
 
             return level;
         }
 
-        // --------------------------------
-        // LEVEL 2+ — procedural: config -> count -> goals -> ui -> spawn
-        // --------------------------------
+        // -------------------------
+        // Level 2+ — procedural
+        // -------------------------
         int humanLevel = index + 1;
         int seed = humanLevel * 10007;
 
+        // выбрать активный каталог и (опционально) goal pool по диапазону уровней
+        GoalPool poolOverride = null;
+        _activeCatalog = level.catalog;
+
+        if (catalogProgression != null)
+        {
+            var range = catalogProgression.GetRange(humanLevel);
+            if (range != null)
+            {
+                if (range.catalog != null) _activeCatalog = range.catalog;
+                poolOverride = range.goalPoolOverride;
+            }
+        }
+
+        if (_activeCatalog == null)
+        {
+            Debug.LogError("[LevelDirector] Active catalog is null (catalogProgression + level.catalog are null)");
+            return level;
+        }
+
         if (proceduralBuilder == null)
         {
-            Debug.LogError("[LevelDirector] proceduralBuilder is null. Fallback to manual spawn+goals.");
+            Debug.LogError("[LevelDirector] proceduralBuilder is null. Fallback to manual spawn/goals.");
             _runtimeGoals = level.goals;
-            goalBuilder?.Build(_runtimeGoals, level.catalog);
-            if (level.spawnConfig != null) spawner?.Spawn(level.spawnConfig, level.catalog);
+            goalBuilder?.Build(_runtimeGoals, _activeCatalog);
+            if (level.spawnConfig != null) spawner?.Spawn(level.spawnConfig, _activeCatalog);
             return level;
         }
 
         // 1) build runtime spawn config (без спавна)
-        var runtimeCfg = proceduralBuilder.BuildConfig(humanLevel, seed);
+var runtimeCfg = proceduralBuilder.BuildConfig(humanLevel, _activeCatalog, seed, poolOverride);
+        
         if (runtimeCfg == null || runtimeCfg.groups == null || runtimeCfg.groups.Count == 0)
         {
             Debug.LogError("[LevelDirector] Procedural spawn config is empty. Fallback to manual.");
             _runtimeGoals = level.goals;
-            goalBuilder?.Build(_runtimeGoals, level.catalog);
-            if (level.spawnConfig != null) spawner?.Spawn(level.spawnConfig, level.catalog);
+            goalBuilder?.Build(_runtimeGoals, _activeCatalog);
+            if (level.spawnConfig != null) spawner?.Spawn(level.spawnConfig, _activeCatalog);
             return level;
         }
 
-        // 2) count items реально присутствующие на карте
+        // 2) count items from runtime config
         Dictionary<ItemType, int> counts = SpawnConfigCounter.CountAll(runtimeCfg);
 
-        // 3) build goals from counts
+        // 3) build goals ONLY from what exists
         _runtimeGoals = null;
         if (proceduralGoals != null)
-            _runtimeGoals = proceduralGoals.BuildGoalsFromSpawn(humanLevel, seed, counts);
+            _runtimeGoals = proceduralGoals.BuildGoalsFromSpawn(humanLevel, seed, counts, poolOverride);
 
         if (_runtimeGoals == null)
         {
@@ -163,11 +184,11 @@ public class LevelDirector : MonoBehaviour
             _runtimeGoals = level.goals;
         }
 
-        // 4) goals UI
-        goalBuilder?.Build(_runtimeGoals, level.catalog);
+        // 4) build goals UI using ACTIVE catalog (icons)
+        goalBuilder?.Build(_runtimeGoals, _activeCatalog);
 
-        // 5) spawn exactly that config
-        spawner?.Spawn(runtimeCfg, level.catalog);
+        // 5) spawn using ACTIVE catalog (prefabs)
+        spawner?.Spawn(runtimeCfg, _activeCatalog);
 
         return level;
     }

@@ -3485,7 +3485,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FixedCameraFollowLocalOffset
   target: {fileID: 1429012931}
   fixedEuler: {x: 60, y: 0, z: 0}
-  localOffset: {x: 0, y: 1.5, z: -12}
+  localOffset: {x: 0, y: 4, z: -15}
   followLerp: 12
 --- !u!114 &648332186
 MonoBehaviour:
@@ -7331,7 +7331,7 @@ Transform:
   m_GameObject: {fileID: 1429012928}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -2.945}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10544,10 +10544,11 @@ MonoBehaviour:
   goalBuilder: {fileID: 1431604025}
   run: {fileID: 1579769750}
   preRunPopup: {fileID: 1431604031}
-  levelText: {fileID: 927726999}
   proceduralBuilder: {fileID: 2006182042}
   proceduralGoals: {fileID: 2006182043}
+  catalogProgression: {fileID: 11400000, guid: 3ca1e47f6878141afbd34ee2a0f2ceea, type: 2}
   pendingRunConfigIsOneBased: 1
+  levelText: {fileID: 927726999}
 --- !u!114 &2006182042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10563,14 +10564,28 @@ MonoBehaviour:
   spawner: {fileID: 2006182040}
   library: {fileID: 11400000, guid: c2a50fe4f7b3345f582409b74a4b4722, type: 2}
   curve: {fileID: 11400000, guid: 66bc63ffd266a46b78091206641e4960, type: 2}
-  fieldCenter: {x: 0, y: 0, z: 0}
-  fieldSize: {x: 40, y: 40}
-  gridCols: 3
-  gridRows: 2
+  hole: {fileID: 1429012931}
+  ringMinRadius: 6
+  ringMaxRadius: 18
+  circleModuleSize: 7
+  gridModuleSize: 8.5
+  gap: 0.25
+  maxRadialLayers: 24
+  extraLayerTries: 6
+  modulesBase: 10
+  modulesMax: 14
+  addEveryLevels: 3
+  addModulesStep: 1
   forceStartSafeFirst: 1
-  avoidRepeatingSameModule: 1
-  slotJitter: 1.2
-  allowedRotations: 000000005a000000b40000000e010000
+  useTagFiltering: 0
+  uniqueModules: 1
+  enableBomb: 1
+  bombFromLevelInclusive: 30
+  bombItemType: 999
+  bombCountMin: 1
+  bombCountMax: 2
+  bombRingMin: 8
+  bombRingMax: 12
 --- !u!114 &2006182043
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10583,8 +10598,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfdccab782d6e4d0081b097b1030027e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGoalBuilder
-  pool: {fileID: 11400000, guid: 5f3e2e80a4ce045318edb04ddc7f8f96, type: 2}
+  pool: {fileID: 11400000, guid: 2d0ed7f1a40f34c3c8edea1b5c582a93, type: 2}
   curve: {fileID: 11400000, guid: da666e3c1cba4495aba7f9b38bd27c46, type: 2}
+  poolByLevel:
+  - fromLevelInclusive: 1
+    toLevelInclusive: 25
+    pool: {fileID: 11400000, guid: 5f3e2e80a4ce045318edb04ddc7f8f96, type: 2}
+  - fromLevelInclusive: 26
+    toLevelInclusive: 59
+    pool: {fileID: 11400000, guid: 492020023f3e041a5a3a72a0d1891de3, type: 2}
+  - fromLevelInclusive: 60
+    toLevelInclusive: 999
+    pool: {fileID: 11400000, guid: 2d0ed7f1a40f34c3c8edea1b5c582a93, type: 2}
+  catalogProgression: {fileID: 11400000, guid: 3ca1e47f6878141afbd34ee2a0f2ceea, type: 2}
 --- !u!1 &2014862153
 GameObject:
   m_ObjectHideFlags: 0

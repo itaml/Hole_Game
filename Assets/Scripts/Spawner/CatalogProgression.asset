@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a863927c044e4cb583fc2f26d8789ad, type: 3}
+  m_Name: CatalogProgression
+  m_EditorClassIdentifier: Assembly-CSharp::CatalogProgression
+  ranges:
+  - fromLevelInclusive: 1
+    toLevelInclusive: 25
+    catalog: {fileID: 11400000, guid: 2871d1db5050f4da892adfa33d01f92a, type: 2}
+    goalPoolOverride: {fileID: 11400000, guid: 5f3e2e80a4ce045318edb04ddc7f8f96, type: 2}
+  - fromLevelInclusive: 26
+    toLevelInclusive: 59
+    catalog: {fileID: 11400000, guid: 661a96969b4644f2698a0bd04407a8e3, type: 2}
+    goalPoolOverride: {fileID: 11400000, guid: 492020023f3e041a5a3a72a0d1891de3, type: 2}
+  - fromLevelInclusive: 60
+    toLevelInclusive: 999
+    catalog: {fileID: 11400000, guid: bffa379c7bb8e4cc8b9c43f869ba12a6, type: 2}
+    goalPoolOverride: {fileID: 11400000, guid: 2d0ed7f1a40f34c3c8edea1b5c582a93, type: 2}

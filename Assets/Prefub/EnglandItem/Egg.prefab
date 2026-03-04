@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5904349734321440060}
@@ -51,6 +51,9 @@ MonoBehaviour:
   <Type>k__BackingField: 16
   <UiIcon>k__BackingField: {fileID: 2056540663, guid: 7897b77a15af486409152f248ac8c0fb, type: 3}
   <XpValue>k__BackingField: 1
+  onAbsorbedSpawn: {fileID: 0}
+  onAbsorbedSpawnOffset: {x: 0, y: 0, z: 0}
+  destroySpawnAfterSeconds: 2
   overrideRadius: 0
 --- !u!54 &866090910362850966
 Rigidbody:
@@ -112,8 +115,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.0506313, y: 0.57215023, z: 1.6300193}
-  m_Center: {x: -0.11683023, y: -0.1347931, z: 0.029292524}
+  m_Size: {x: 1.4368161, y: 0.38165593, z: 1.0849941}
+  m_Center: {x: -0.069206655, y: -0.1877082, z: 0.026646733}
 --- !u!1001 &6231521395706929879
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -124,15 +127,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 578f7965168b5de44a6ce7ff9e0f72a9, type: 3}
       propertyPath: m_LocalScale.x
-      value: 74.34589
+      value: 51.34624
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 578f7965168b5de44a6ce7ff9e0f72a9, type: 3}
       propertyPath: m_LocalScale.y
-      value: 74.34589
+      value: 51.34624
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 578f7965168b5de44a6ce7ff9e0f72a9, type: 3}
       propertyPath: m_LocalScale.z
-      value: 74.34589
+      value: 51.34624
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 578f7965168b5de44a6ce7ff9e0f72a9, type: 3}
       propertyPath: m_LocalPosition.x

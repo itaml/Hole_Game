@@ -11,39 +11,33 @@ public static class SpawnConfigCounter
         foreach (var g in cfg.groups)
         {
             if (g == null) continue;
+            int add = CountGroup(g);
+            if (add <= 0) continue;
 
-            int n = CountGroup(g);
-            if (n <= 0) continue;
-
-            if (map.TryGetValue(g.type, out int cur))
-                map[g.type] = cur + n;
-            else
-                map[g.type] = n;
+            if (map.TryGetValue(g.type, out int cur)) map[g.type] = cur + add;
+            else map[g.type] = add;
         }
 
         return map;
     }
 
-    public static int CountGroup(SpawnGroup g)
+    private static int CountGroup(SpawnGroup g)
     {
-        if (g == null) return 0;
-
         switch (g.formation)
         {
-            case FormationType.Circle:
-                return Mathf.Max(0, g.circleCount);
+            case FormationType.Grid:
+                return Mathf.Max(1, g.rows) * Mathf.Max(1, g.cols);
 
             case FormationType.Line:
-                return Mathf.Max(0, g.lineCount);
+                return Mathf.Max(1, g.lineCount);
 
-            case FormationType.Grid:
-                return Mathf.Max(0, g.rows) * Mathf.Max(0, g.cols);
+            case FormationType.Circle:
+                return Mathf.Max(1, g.circleCount);
 
             case FormationType.CustomPoints:
-                return g.localPoints != null ? Mathf.Max(0, g.localPoints.Count) : 0;
-
-            default:
-                return 0;
+                return g.localPoints != null ? g.localPoints.Count : 0;
         }
+
+        return 0;
     }
 }

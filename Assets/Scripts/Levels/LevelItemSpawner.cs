@@ -106,6 +106,8 @@ public void Spawn(LevelSpawnConfig config, ItemCatalog catalogOverride = null)
             }
 
             var go = Instantiate(prefab, pos, Quaternion.identity, itemsParent);
+            float yOff = catalog.GetYOffset(g.type);
+pos.y = spawnY + yOff;
             ApplyStabilization(go);
         }
     }

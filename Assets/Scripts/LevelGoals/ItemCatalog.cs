@@ -11,6 +11,10 @@ public class ItemCatalog : ScriptableObject
         public ItemType type;
         public Sprite icon;
         public GameObject worldPrefab;   // ✅ добавили префаб предмета в мире
+
+    [Header("Spawn tuning")]
+    [Min(0f)] public float footprintRadius = 0.6f; // XZ радиус (в юнитах мира)
+    public float yOffset = 0f;    
     }
 
     [SerializeField] private List<Entry> entries = new();
@@ -38,4 +42,16 @@ public class ItemCatalog : ScriptableObject
         if (_map == null) OnEnable();
         return _map.TryGetValue(type, out var e) ? e.worldPrefab : null;
     }
+
+    public float GetFootprintRadius(ItemType type)
+{
+    if (_map == null) OnEnable();
+    return _map.TryGetValue(type, out var e) ? e.footprintRadius : 0f;
+}
+
+public float GetYOffset(ItemType type)
+{
+    if (_map == null) OnEnable();
+    return _map.TryGetValue(type, out var e) ? e.yOffset : 0f;
+}
 }

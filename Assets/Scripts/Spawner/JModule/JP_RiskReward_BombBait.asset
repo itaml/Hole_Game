@@ -10,42 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64039b99391fa45089353928776256eb, type: 3}
-  m_Name: M_Double_Cluster
+  m_Name: JP_RiskReward_BombBait
   m_EditorClassIdentifier: Assembly-CSharp::SpawnModule
+  shape: 0
   id: module
   tags: -1
-  cost: 3
-  size: {x: 10, y: 10}
+  cost: 1
+  size: {x: 12, y: 12}
   groups:
-  - type: 1
+  - type: 0
+    useTemplateSizing: 1
+    randomTypeFromGoalPool: 1
     formation: 2
-    localCenter: {x: -4, y: 0, z: 0}
+    localCenter: {x: 0, y: 0, z: 0}
     rotationY: 0
-    jitter: 0
+    jitter: 0.12
     seed: 0
-    circleCount: 12
-    circleRadius: 3
+    circleCount: 0
+    circleRadius: 0
     lineCount: 0
     lineDirection: {x: 0, y: 0, z: 0}
     lineSpacing: 0
     rows: 4
     cols: 4
-    spacingX: 1
-    spacingZ: 1
-    localPoints: []
-  - type: 1
-    formation: 2
-    localCenter: {x: 4, y: 0, z: 0}
-    rotationY: 0
-    jitter: 0
-    seed: 0
-    circleCount: 12
-    circleRadius: 3
-    lineCount: 0
-    lineDirection: {x: 0, y: 0, z: 0}
-    lineSpacing: 0
-    rows: 4
-    cols: 4
-    spacingX: 1
-    spacingZ: 1
+    spacingX: 1.2
+    spacingZ: 1.2
     localPoints: []

@@ -51,6 +51,9 @@ MonoBehaviour:
   <Type>k__BackingField: 32
   <UiIcon>k__BackingField: {fileID: 2066127172, guid: 695d967c668c4b742b06a866ccab741c, type: 3}
   <XpValue>k__BackingField: 1
+  onAbsorbedSpawn: {fileID: 0}
+  onAbsorbedSpawnOffset: {x: 0, y: 0, z: 0}
+  destroySpawnAfterSeconds: 2
   overrideRadius: 0
 --- !u!54 &6981090780700078874
 Rigidbody:
@@ -112,8 +115,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.8734803, y: 0.88769126, z: 0.9181566}
-  m_Center: {x: 0.012943387, y: 0.31512654, z: 0.002723217}
+  m_Size: {x: 1.1387007, y: 0.83509237, z: 1.1387007}
+  m_Center: {x: 0.0001487732, y: -0.003322035, z: 0.00014901161}
 --- !u!1001 &325008042933187551
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -128,7 +131,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 39b03a483cc95e54aa98abcf84dfa16c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.306
+      value: 0.089
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 39b03a483cc95e54aa98abcf84dfa16c, type: 3}
       propertyPath: m_LocalPosition.z

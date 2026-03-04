@@ -17,10 +17,18 @@ public enum ModuleTag
 
     Everything = ~0
 }
+
 [Serializable]
 public class SpawnGroupTemplate
 {
+    [Header("Type")]
     public ItemType type;
+    public bool useTemplateSizing = true; 
+
+    [Tooltip("Если включено — type будет выбран случайно из GoalPool текущей темы (Japan/English/etc).")]
+    public bool randomTypeFromGoalPool = false;
+
+    [Header("Formation")]
     public FormationType formation = FormationType.Grid;
 
     [Header("Local Transform (module space)")]
