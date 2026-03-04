@@ -153,20 +153,13 @@ public class AudioManager : MonoBehaviour
 
     public void PlayButtonClick()
     {
-        if (buttonClickSound != null)
-            sfxSource.PlayOneShot(buttonClickSound);
+        PlaySound(buttonClickSound);
     }
 
-    public void PlayWin()
+    public void PlaySound(AudioClip clip)
     {
-        if (winSound != null)
-            sfxSource.PlayOneShot(winSound);
-    }
-
-    public void PlayLose()
-    {
-        if (loseSound != null)
-            sfxSource.PlayOneShot(loseSound);
+        if (clip == null) return;
+        sfxSource.PlayOneShot(clip);
     }
 
     #endregion
