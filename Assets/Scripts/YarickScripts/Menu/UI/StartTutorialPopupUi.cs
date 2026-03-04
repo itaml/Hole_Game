@@ -8,6 +8,7 @@ namespace Menu.UI
     {
         [SerializeField] private GameObject rootObject;
         [SerializeField] private Button closeButton;
+        [SerializeField] private Button closeButton2;
 
         [SerializeField] private PopupTween tween;
 
@@ -15,11 +16,13 @@ namespace Menu.UI
         {
             if (rootObject == null) rootObject = gameObject;
             if (closeButton != null) closeButton.onClick.AddListener(Hide);
+            if (closeButton2 != null) closeButton2.onClick.AddListener(Hide);
         }
 
         private void OnDestroy()
         {
             if (closeButton != null) closeButton.onClick.RemoveListener(Hide);
+            if (closeButton2 != null) closeButton2.onClick.AddListener(Hide);
         }
 
         public bool IsShown

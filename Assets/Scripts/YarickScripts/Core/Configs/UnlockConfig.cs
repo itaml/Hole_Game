@@ -21,5 +21,7 @@ namespace Core.Configs
 
         public int winStreakUnlockLevel = 20;
         public int interstitialAdsUnlockLevel = 10;
+
+        public int leaderboardUnlockLevel = 20;
     }
 }

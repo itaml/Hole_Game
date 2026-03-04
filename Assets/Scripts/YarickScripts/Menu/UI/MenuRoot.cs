@@ -57,8 +57,9 @@ namespace Menu.UI
             var battlepass = new BattlepassService(battlepassConfig, _time, wallet);
             var streak = new WinStreakService();
             var ads = new AdsPolicyService();
+            var leaderboard = new LeaderboardService(_time);
 
-            _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, _time);
+            _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, leaderboard, _time);
 
             if (SceneFlow.PendingLevelResult != null)
             {

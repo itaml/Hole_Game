@@ -9,8 +9,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{58830793-5AFC-AC93-6DB1-AF62F75E3D0F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -1467,6 +1466,10 @@
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
       <Project>{FEC97247-80CA-C78E-6059-DF544EF6EA9F}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
+    </ProjectReference>
+    <ProjectReference Include="Assembly-CSharp.csproj">
+      <Project>{0FFED39F-27AD-38A8-7F7B-B6E572C3D900}</Project>
+      <Name>Assembly-CSharp</Name>
     </ProjectReference>
     <ProjectReference Include="Assembly-CSharp-Editor-firstpass.csproj">
       <Project>{B964320F-9443-894F-80FE-46203D8EEB3E}</Project>

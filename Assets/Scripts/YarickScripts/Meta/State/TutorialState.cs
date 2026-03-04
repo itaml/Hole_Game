@@ -28,8 +28,11 @@ namespace Meta.State
         public int pendingPostWinTutorialId;
 
         // One-time shown flags for post-win tutorials
-        public bool profilePostWinTutorialShown;
+        public bool profilePostWinTutorialShownProfile;
 
         public long dailyBonusLastClaimUtcTicks;
+
+        public bool leaderboardUnlockTutorialShown;
+        public bool battlepassUnlockTutorialShown;
     }
 }

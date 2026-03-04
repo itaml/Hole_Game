@@ -8,7 +8,7 @@ public class UIPageManager : MonoBehaviour
 
     public GameObject inputBlocker;
 
-    [Header("Pages")]
+    public UIPageBase home;
     public UIPageBase collections;
     public UIPageBase leaderboard;
     public UIPageBase team;
@@ -16,22 +16,24 @@ public class UIPageManager : MonoBehaviour
     private UIPageBase current;
     private bool transitioning;
 
-    void Awake()
+    private void Awake()
     {
         I = this;
 
-        if (collections) collections.PrepareHideInstant();
-        if (leaderboard) leaderboard.PrepareHideInstant();
-        if (team) team.PrepareHideInstant();
+        home.PrepareHideInstant();
+        collections.PrepareHideInstant();
+        leaderboard.PrepareHideInstant();
+        team.PrepareHideInstant();
 
-        if (inputBlocker) inputBlocker.SetActive(false);
+        // стартовая страница
+        StartCoroutine(GoToRoutine(home));
     }
 
     public void OpenCollections() => GoTo(collections);
     public void OpenLeaderboard() => GoTo(leaderboard);
     public void OpenTeam() => GoTo(team);
 
-    public void GoHome() => StartCoroutine(GoHomeRoutine());
+    public void GoHome() => GoTo(home);
 
     public void GoTo(UIPageBase page) => StartCoroutine(GoToRoutine(page));
 

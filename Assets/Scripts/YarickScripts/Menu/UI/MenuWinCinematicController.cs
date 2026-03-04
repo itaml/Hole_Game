@@ -15,7 +15,10 @@ namespace Menu.UI
         [SerializeField] private RewardPopupQueue popupQueue;
 
         [Header("Tutorial")]
-        [SerializeField] private StartTutorialPopupUi tutorialPopup;
+        [SerializeField] private StartTutorialPopupUi tutorialPopupProfile;
+        [SerializeField] private StartTutorialPopupUi tutorialPopupLeaderboard;
+        [SerializeField] private StartTutorialPopupUi tutorialPopupBattlepassStep1;
+        [SerializeField] private StartTutorialPopupUi tutorialPopupBattlepassStep2;
 
         [Header("Block input")]
         [SerializeField] private CanvasGroup inputBlocker;
@@ -167,14 +170,74 @@ if (allGranted != null && allGranted.Length > 0)
 }
 
             // 5) Post-win tutorial popups (after all animations + reward popups)
-            yield return TryShowPostWinTutorial();
-root.SuppressAutoRewardPopups = false;
+            yield return TryShowPostWinProfileTutorial();
+            yield return TryShowStartLeaderboardTutorial();
+            yield return TryShowStartBattlepassTutorial();
+            root.SuppressAutoRewardPopups = false;
             SetBlocked(false);
         }
 
-        private IEnumerator TryShowPostWinTutorial()
+        private IEnumerator TryShowStartBattlepassTutorial()
         {
-            if (tutorialPopup == null) yield break;
+            if (tutorialPopupBattlepassStep1 == null) yield break;
+            if (tutorialPopupBattlepassStep2 == null) yield break;
+            if (root == null || root.Meta == null) yield break;
+
+            var save = root.Meta.Save;
+            if (save == null || save.tutorial == null) yield break;
+
+            int id = save.tutorial.pendingStartTutorialId;
+            if (id != 5) yield break;
+
+            // Clear pending immediately
+            save.tutorial.pendingStartTutorialId = 0;
+
+            // Step 1 (кнопка Close в этом попапе = "Continue")
+            tutorialPopupBattlepassStep1.Show();
+            while (tutorialPopupBattlepassStep1 != null && tutorialPopupBattlepassStep1.IsShown)
+                yield return null;
+
+            // Step 2
+            tutorialPopupBattlepassStep2.Show();
+            while (tutorialPopupBattlepassStep2 != null && tutorialPopupBattlepassStep2.IsShown)
+                yield return null;
+
+            // Mark shown
+            save.tutorial.battlepassUnlockTutorialShown = true;
+
+            root.Meta.SaveNow();
+        }
+
+        private IEnumerator TryShowStartLeaderboardTutorial()
+        {
+            if (tutorialPopupLeaderboard == null) yield break;
+            if (root == null || root.Meta == null) yield break;
+
+            var save = root.Meta.Save;
+            if (save == null || save.tutorial == null) yield break;
+
+            int id = save.tutorial.pendingStartTutorialId;
+            Debug.Log($"StartTutorialId = {id}");
+
+            if (id != 4) yield break; // нам нужен именно лидерборд
+
+            // Clear pending immediately
+            save.tutorial.pendingStartTutorialId = 0;
+
+            tutorialPopupLeaderboard.Show();
+
+            while (tutorialPopupLeaderboard != null && tutorialPopupLeaderboard.IsShown)
+                yield return null;
+
+            // Mark shown
+            save.tutorial.leaderboardUnlockTutorialShown = true;
+
+            root.Meta.SaveNow();
+        }
+
+        private IEnumerator TryShowPostWinProfileTutorial()
+        {
+            if (tutorialPopupProfile == null) yield break;
             if (root == null || root.Meta == null) yield break;
 
             var save = root.Meta.Save;
@@ -186,15 +249,15 @@ root.SuppressAutoRewardPopups = false;
             // Clear pending immediately to avoid duplicates if UI re-renders.
             save.tutorial.pendingPostWinTutorialId = 0;
 
-            tutorialPopup.Show();
+            tutorialPopupProfile.Show();
 
             // Wait until player closes the tutorial popup
-            while (tutorialPopup != null && tutorialPopup.IsShown)
+            while (tutorialPopupProfile != null && tutorialPopupProfile.IsShown)
                 yield return null;
 
             // Mark shown
             if (id == 1)
-                save.tutorial.profilePostWinTutorialShown = true;
+                save.tutorial.profilePostWinTutorialShownProfile = true;
 
             root.Meta.SaveNow();
         }

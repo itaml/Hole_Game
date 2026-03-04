@@ -19,8 +19,9 @@ MonoBehaviour:
   buff3UnlockLevel: 8
   buff4UnlockLevel: 10
   bankUnlockLevel: 6
-  battlepassUnlockLevel: 12
+  battlepassUnlockLevel: 2
   boost1UnlockLevel: 13
   boost2UnlockLevel: 14
   winStreakUnlockLevel: 20
   interstitialAdsUnlockLevel: 10
+  leaderboardUnlockLevel: 20

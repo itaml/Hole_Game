@@ -7,6 +7,7 @@ using Meta.State;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEngine.SocialPlatforms.Impl;
 
 namespace Meta.Services
 {
@@ -26,6 +27,7 @@ namespace Meta.Services
         private readonly WinStreakService _streak;
         private readonly AdsPolicyService _ads;
         private readonly ITimeProvider _time;
+        private readonly LeaderboardService _leaderboard;
 
         public MetaFacade(
             SaveSystem saveSystem,
@@ -37,6 +39,7 @@ namespace Meta.Services
             BattlepassService battlepass,
             WinStreakService streak,
             AdsPolicyService ads,
+            LeaderboardService leaderboard,
             ITimeProvider time)
         {
             _saveSystem = saveSystem;
@@ -48,6 +51,7 @@ namespace Meta.Services
             _battlepass = battlepass;
             _streak = streak;
             _ads = ads;
+            _leaderboard = leaderboard;
             _time = time;
         }
 
@@ -69,7 +73,19 @@ namespace Meta.Services
         {
             _lives.TickRegen(Save);
             _battlepass.EnsureSeason(Save);
+            _leaderboard.Tick(Save);
             _saveSystem.Save();
+        }
+
+        public void OnLeaderboardOpened()
+        {
+            _leaderboard.OnLeaderboardOpened(Save);
+            _saveSystem.Save();
+        }
+
+        public LeaderboardSnapshot GetLeaderboardSnapshot()
+        {
+            return _leaderboard.GetSnapshot(Save);
         }
 
         public void SetCharacterName(string name)
@@ -160,6 +176,9 @@ namespace Meta.Services
                 {
                     Save.profile.threeStarWins++;
                 }
+
+                int add = Math.Max(0, r.starsEarned) * 3; // как ты и хотел: зависит от stars
+                _leaderboard.AddPlayerScore(Save, add);
 
                 Save.profile.currentWinStreak++;
 
@@ -305,12 +324,26 @@ if (!Save.tutorial.boost2StartTutorialShown &&
             }
 
             // Profile tutorial (post-win): when reaching level 18 (after cinematic/rewards)
-            const int ProfileTutorialLevel = 18;
-            if (!Save.tutorial.profilePostWinTutorialShown &&
+            const int ProfileTutorialLevel = 3;
+            if (!Save.tutorial.profilePostWinTutorialShownProfile &&
                 Save.tutorial.pendingPostWinTutorialId == 0 &&
                 prevLevel < ProfileTutorialLevel && newLevel >= ProfileTutorialLevel)
             {
                 Save.tutorial.pendingPostWinTutorialId = 1;
+            }
+
+            if (!Save.tutorial.leaderboardUnlockTutorialShown &&
+                Save.tutorial.pendingStartTutorialId == 0 &&
+                prevLevel < _unlocks.LeaderboardUnlockLevel && newLevel >= _unlocks.LeaderboardUnlockLevel)
+            {
+                Save.tutorial.pendingStartTutorialId = 4;
+            }
+
+            if (!Save.tutorial.battlepassUnlockTutorialShown &&
+    Save.tutorial.pendingStartTutorialId == 0 &&
+    prevLevel < _unlocks.BattlepassUnlockLevel && newLevel >= _unlocks.BattlepassUnlockLevel)
+            {
+                Save.tutorial.pendingStartTutorialId = 5; // батлпас
             }
         }
 

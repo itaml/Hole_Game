@@ -25,6 +25,7 @@ namespace Meta.Services
 
         public int WinStreakUnlockLevel => _cfg.winStreakUnlockLevel;
         public int InterstitialAdsUnlockLevel => _cfg.interstitialAdsUnlockLevel;
+        public int LeaderboardUnlockLevel => _cfg.leaderboardUnlockLevel;
 
         // Existing helpers
         public bool IsStarsChestUnlocked(int level) => level >= _cfg.starsChestUnlockLevel;

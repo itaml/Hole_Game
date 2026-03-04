@@ -70,6 +70,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Core\Events\EventBus.cs" />
     <Compile Include="Assets\Scripts\Boost\BoostPickupItem.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BuffRewardPopupUi.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Meta\State\LeaderboardState.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelSpawnConfig.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\CollectionsPage.cs" />
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\FireworkSpriteAnimUI.cs" />
@@ -122,8 +123,11 @@
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\WinScreenUI.cs" />
     <Compile Include="Assets\Scripts\Core\HoleDirectionArrow.cs" />
     <Compile Include="Assets\Scripts\Core\Tutorial\TutorialPopupUI.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\LeaderboardController.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\ISaveStorage.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\HomePage.cs" />
     <Compile Include="Assets\Scripts\Boost\BoostUnlockSlotUI.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BattlepassWindowAnimator.cs" />
     <Compile Include="Assets\Scripts\Levels\LevelDirector.cs" />
     <Compile Include="Assets\Scripts\Spawner\ProceduralGoalBuilder.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Base\Joystick.cs" />
@@ -149,6 +153,7 @@
     <Compile Include="Assets\Scripts\Core\UI\LoseKaboomUI.cs" />
     <Compile Include="Assets\Scripts\LevelGoals\GoalUIBuilder.cs" />
     <Compile Include="Assets\Scripts\Boost\BoostBasketSpawner.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\TeamPage.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\GoalFinderBoost.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\MallPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\StartPopupUi.cs" />
@@ -165,6 +170,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\PlayerPrefsJsonStorage.cs" />
     <Compile Include="Assets\Scripts\Boost\GrowTempBoost.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectiveTracker.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BattlepassWindowController.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\LivesState.cs" />
     <Compile Include="Assets\Scripts\Core\HoleMouthTrigger.cs" />
     <Compile Include="Assets\Scripts\Core\HoleGrowth.cs" />
@@ -179,6 +185,8 @@
     <Compile Include="Assets\Scripts\Spawner\ProceduralSpawnBuilder.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Analytics\AnalyticsService.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\LevelsChestState.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\LeaderboardService.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BattlepassRewardItemView.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\BankConfig.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\LevelsChestPopupUi.cs" />
     <Compile Include="Assets\Scripts\BattlepassBoostSpawner.cs" />
@@ -190,6 +198,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\WalletState.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\ChestService.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Levels\SpecialLevelBurnStorage.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BattlepassButtonWidget.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\GameBridge\Contracts\RunConfig.cs" />
     <Compile Include="Assets\Scripts\Core\GoalUI.cs" />
     <Compile Include="Assets\Scripts\Core\HoleCountTrigger.cs" />
@@ -197,6 +206,8 @@
     <Compile Include="Assets\Scripts\Core\AbsorbablePhysicsItem.cs" />
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\StarsProgress.cs" />
     <Compile Include="Assets\Scripts\Core\FlyToUiIconSpawner.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\LeaderboardPage.cs" />
+    <Compile Include="Assets\Scripts\YarickScripts\Meta\State\LeaderboardEntryState.cs" />
     <Compile Include="Assets\Scripts\Boost\Find\FinderArrowUI.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Save\JsonUtil.cs" />
     <Compile Include="Assets\Scripts\Spawner\SpawnModuleLibrary.cs" />

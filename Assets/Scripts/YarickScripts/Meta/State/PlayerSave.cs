@@ -19,5 +19,6 @@ namespace Meta.State
         public ProfileState profile = new ProfileState();
 
         public TutorialState tutorial = new TutorialState();
+        public LeaderboardState leaderboard = new LeaderboardState();
     }
 }
