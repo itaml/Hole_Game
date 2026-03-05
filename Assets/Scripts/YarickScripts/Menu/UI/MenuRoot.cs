@@ -20,6 +20,7 @@ namespace Menu.UI
         public BankConfig bankConfig;
         public BattlepassConfig battlepassConfig;
         public BountyConfig bountyConfig;
+        public DualBattlepassConfig dualBattlepassConfig;
 
         private ITimeProvider _time;
         private SaveSystem _saveSystem;
@@ -61,8 +62,10 @@ namespace Menu.UI
             var ads = new AdsPolicyService();
             var leaderboard = new LeaderboardService(_time);
             var bounty = new BountyService(bountyConfig, _saveSystem, _time);
+            var starContest = new StarContestService(_time);
+            var dualBattlepass = new DualBattlepassService(dualBattlepassConfig, _time, wallet);
 
-            _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, leaderboard, _time, bounty);
+            _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, leaderboard, _time, bounty, starContest, dualBattlepass);
 
             if (SceneFlow.PendingLevelResult != null)
             {

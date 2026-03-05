@@ -6,8 +6,6 @@ using GameBridge.Contracts;
 using Meta.State;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using UnityEngine.SocialPlatforms.Impl;
 
 namespace Meta.Services
 {
@@ -29,6 +27,8 @@ namespace Meta.Services
         private readonly ITimeProvider _time;
         private readonly LeaderboardService _leaderboard;
         private readonly BountyService _bounty;
+        private readonly StarContestService _starContest;
+        private readonly DualBattlepassService _dualBattlepass;
 
         public MetaFacade(
             SaveSystem saveSystem,
@@ -42,7 +42,10 @@ namespace Meta.Services
             AdsPolicyService ads,
             LeaderboardService leaderboard,
             ITimeProvider time,
-            BountyService bounty) // <-- добавили
+            BountyService bounty,
+            StarContestService starContest,
+            DualBattlepassService dualBattlepassService
+            ) // <-- добавили
         {
             _saveSystem = saveSystem;
             _unlocks = unlocks;
@@ -57,6 +60,20 @@ namespace Meta.Services
             _time = time;
 
             _bounty = bounty; // <-- добавили
+            _starContest = starContest;
+            _dualBattlepass = dualBattlepassService;
+        }
+
+        public void OnStarContestOpened()
+        {
+            // создаём/обновляем сезон + выдаём награды при окончании
+            _starContest.OnOpened(Save, _wallet);
+            _saveSystem.Save();
+        }
+
+        public StarContestSnapshot GetStarContestSnapshot()
+        {
+            return _starContest.GetSnapshot(Save);
         }
 
         public PlayerSave Save => _saveSystem.Current;
@@ -84,6 +101,9 @@ namespace Meta.Services
             // и далее делаем refresh по таймеру
             if (_unlocks.IsBountyUnlocked(Save.progress.currentLevel))
                 _bounty.EnsureInitializedOrRefreshed();
+
+            _starContest.Tick(Save, _wallet);
+            _dualBattlepass.EnsureSeason(Save);
 
             _saveSystem.Save();
         }
@@ -181,6 +201,8 @@ namespace Meta.Services
 
                 if (_unlocks.IsWinStreakUnlocked(r.levelIndex))
                     _streak.OnLose(Save);
+
+                _starContest.OnLose(Save);
             }
             else // Win
             {
@@ -208,6 +230,13 @@ namespace Meta.Services
 
                 if (_unlocks.IsBankUnlocked(r.levelIndex))
                     _bank.AddWinDeposit(Save);
+
+                if (r.outcome == LevelOutcome.Win && _unlocks.IsDualBattlepassUnlocked(r.levelIndex))
+                {
+                    _dualBattlepass.AddWins(Save, 1);
+                }
+
+                _starContest.OnWin(Save, r.starsEarned);
             }
 
             _grantedRewards.Clear();
@@ -357,6 +386,21 @@ if (!Save.tutorial.boost2StartTutorialShown &&
             {
                 Save.tutorial.pendingStartTutorialId = 5; // батлпас
             }
+
+            if (!Save.tutorial.starContestUnlockTutorialShown &&
+Save.tutorial.pendingStartTutorialId == 0 &&
+prevLevel < _unlocks.StarContestUnlockLevel && newLevel >= _unlocks.StarContestUnlockLevel)
+            {
+                Save.tutorial.pendingStartTutorialId = 6; // батлпас
+                _starContest.Tick(Save, _wallet);
+            }
+
+            if (!Save.tutorial.dualBattlepassUnlockTutorialShown &&
+Save.tutorial.pendingStartTutorialId == 0 &&
+prevLevel < _unlocks.DualBattlepassUnlockLevel && newLevel >= _unlocks.DualBattlepassUnlockLevel)
+            {
+                Save.tutorial.pendingStartTutorialId = 7; // батлпас
+            }
         }
 
         public void RegisterLogin()
@@ -487,6 +531,12 @@ if (!Save.tutorial.boost2StartTutorialShown &&
             if (Save.inventory.boostExtraTime <= 0) return false;
             Save.inventory.boostExtraTime--;
             return true;
+        }
+
+        public void PurchaseDualBattlepassPremium()
+        {
+            _dualBattlepass.ActivatePremium(Save);
+            _saveSystem.Save();
         }
     }
 }

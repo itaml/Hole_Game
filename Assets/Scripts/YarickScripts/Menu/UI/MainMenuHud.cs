@@ -25,10 +25,15 @@ namespace Menu.UI
         [SerializeField] private Button bankOpenButton;
         [SerializeField] private BankPopupUi bankPopup;
 
-        [Header("Bank")]
+        [Header("Bounty")]
         [SerializeField] private GameObject bountyClosed;
         [SerializeField] private Button bountyOpenButton;
         [SerializeField] private BountyPopupUi bountyPopup;
+
+        [Header("StarContest")]
+        [SerializeField] private GameObject starContestClosed;
+        [SerializeField] private Button starContestOpenButton;
+        [SerializeField] private StarContestPopupUi starContestPopup;
 
         [Header("LevelChest")]
         [SerializeField] private Button levelChestOpenBtn;
@@ -65,6 +70,7 @@ namespace Menu.UI
             if (bankOpenButton != null) bankOpenButton.onClick.AddListener(OpenBankPopup);
             if (startButton != null) startButton.onClick.AddListener(OpenStartPopup);
             if (bountyOpenButton != null) bountyOpenButton.onClick.AddListener(OpenBountyPopup);
+            if (starContestOpenButton != null) starContestOpenButton.onClick.AddListener(OpenStarContestPopup);
         }
 
         private void OnDisable()
@@ -75,6 +81,7 @@ namespace Menu.UI
             if (bankOpenButton != null) bankOpenButton.onClick.RemoveListener(OpenBankPopup);
             if (startButton != null) startButton.onClick.RemoveListener(OpenStartPopup);
             if (bountyOpenButton != null) bountyOpenButton.onClick.RemoveListener(OpenBountyPopup);
+            if (starContestOpenButton != null) starContestOpenButton.onClick.RemoveListener(OpenStarContestPopup);
         }
 
         private void Update()
@@ -149,6 +156,10 @@ namespace Menu.UI
                 bonusBar.fillAmount = fill;
             }
 
+            bool starContestUnlocked = root.unlockConfig != null && level >= root.unlockConfig.starContestUnlockLevel;
+            if (starContestClosed != null) starContestClosed.SetActive(!starContestUnlocked);
+            if (starContestOpenButton != null) starContestOpenButton.gameObject.SetActive(starContestUnlocked);
+
             if (startLevelText != null)
                 startLevelText.text = $"Level {level}";
         }
@@ -168,7 +179,13 @@ namespace Menu.UI
             livesPopup.Show(root);
         }
 
-        private void OpenBountyPopup()
+        public void OpenStarContestPopup()
+        {
+            if (starContestPopup == null || root == null) return;
+            starContestPopup.Show(root);
+        }
+
+        public void OpenBountyPopup()
         {
             if (bountyPopup == null || root == null) return;
             bountyPopup.Show(root);

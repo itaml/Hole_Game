@@ -34,5 +34,9 @@ namespace Meta.State
 
         public bool leaderboardUnlockTutorialShown;
         public bool battlepassUnlockTutorialShown;
+
+        public bool starContestUnlockTutorialShown;
+
+        public bool dualBattlepassUnlockTutorialShown;
     }
 }

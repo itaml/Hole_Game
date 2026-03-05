@@ -5,9 +5,6 @@ namespace Meta.State
     [Serializable]
     public sealed class StarContestState
     {
-        // Unlock marker: so we can “create on unlock when enter menu”
-        public bool unlockedOnce;
-
         // Season (daily)
         public long seasonStartUtcTicks;
         public long seasonEndUtcTicks;

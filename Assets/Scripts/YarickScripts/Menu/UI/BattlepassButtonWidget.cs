@@ -57,7 +57,7 @@ namespace Menu.UI
             SetProgress(have, need);
         }
 
-        private void OnClickOpen()
+       public void OnClickOpen()
         {
             if (menuRoot?.Meta == null) return;
 

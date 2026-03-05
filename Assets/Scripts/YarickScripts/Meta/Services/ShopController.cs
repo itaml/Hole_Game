@@ -16,6 +16,9 @@ public class ShopController : MonoBehaviour
     public string bountySlot3ProductId = "bounty_slot3";
     public string bountySlot4ProductId = "bounty_slot4";
 
+    [Header("Dual Battlepass")]
+    public string dualBattlepassPremiumProductId = "dual_battlepass_premium";
+
     private void Awake()
     {
         _map = new Dictionary<string, ShopProduct>(products.Count);
@@ -33,6 +36,17 @@ public class ShopController : MonoBehaviour
         if (save == null)
         {
             Debug.LogError("[ShopController] No Save.");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(productId) && productId == dualBattlepassPremiumProductId)
+        {
+            if (productId == dualBattlepassPremiumProductId)
+            {
+                meta.PurchaseDualBattlepassPremium();
+                return;
+            }
+            meta.SaveNow();
             return;
         }
 

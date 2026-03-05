@@ -18,7 +18,8 @@ namespace Menu.UI
         [SerializeField] private StartTutorialPopupUi tutorialPopupProfile;
         [SerializeField] private StartTutorialPopupUi tutorialPopupLeaderboard;
         [SerializeField] private StartTutorialPopupUi tutorialPopupBattlepassStep1;
-        [SerializeField] private StartTutorialPopupUi tutorialPopupBattlepassStep2;
+        [SerializeField] private StartTutorialPopupUi tutorialStarContest;
+        [SerializeField] private StartTutorialPopupUi tutorialDualBattlepassContest;
 
         [Header("Block input")]
         [SerializeField] private CanvasGroup inputBlocker;
@@ -173,6 +174,8 @@ if (allGranted != null && allGranted.Length > 0)
             yield return TryShowPostWinProfileTutorial();
             yield return TryShowStartLeaderboardTutorial();
             yield return TryShowStartBattlepassTutorial();
+            yield return TryShowStartStarContestTutorial();
+            yield return TryShowStartDualBattlepassTutorial();
             root.SuppressAutoRewardPopups = false;
             SetBlocked(false);
         }
@@ -180,7 +183,6 @@ if (allGranted != null && allGranted.Length > 0)
         private IEnumerator TryShowStartBattlepassTutorial()
         {
             if (tutorialPopupBattlepassStep1 == null) yield break;
-            if (tutorialPopupBattlepassStep2 == null) yield break;
             if (root == null || root.Meta == null) yield break;
 
             var save = root.Meta.Save;
@@ -197,13 +199,56 @@ if (allGranted != null && allGranted.Length > 0)
             while (tutorialPopupBattlepassStep1 != null && tutorialPopupBattlepassStep1.IsShown)
                 yield return null;
 
-            // Step 2
-            tutorialPopupBattlepassStep2.Show();
-            while (tutorialPopupBattlepassStep2 != null && tutorialPopupBattlepassStep2.IsShown)
-                yield return null;
-
             // Mark shown
             save.tutorial.battlepassUnlockTutorialShown = true;
+
+            root.Meta.SaveNow();
+        }
+
+        private IEnumerator TryShowStartStarContestTutorial()
+        {
+            if (tutorialStarContest == null) yield break;
+            if (root == null || root.Meta == null) yield break;
+
+            var save = root.Meta.Save;
+            if (save == null || save.tutorial == null) yield break;
+
+            int id = save.tutorial.pendingStartTutorialId;
+            Debug.Log($"StartTutorialId = {id}");
+
+            if (id != 6) yield break; // нам нужен именно лидерборд
+
+            // Clear pending immediately
+            save.tutorial.pendingStartTutorialId = 0;
+
+            tutorialStarContest.Show();
+
+            while (tutorialStarContest != null && tutorialStarContest.IsShown)
+                yield return null;
+
+            root.Meta.SaveNow();
+        }
+
+        private IEnumerator TryShowStartDualBattlepassTutorial()
+        {
+            if (tutorialDualBattlepassContest == null) yield break;
+            if (root == null || root.Meta == null) yield break;
+
+            var save = root.Meta.Save;
+            if (save == null || save.tutorial == null) yield break;
+
+            int id = save.tutorial.pendingStartTutorialId;
+            Debug.Log($"StartTutorialId = {id}");
+
+            if (id != 7) yield break; // нам нужен именно лидерборд
+
+            // Clear pending immediately
+            save.tutorial.pendingStartTutorialId = 0;
+
+            tutorialDualBattlepassContest.Show();
+
+            while (tutorialDualBattlepassContest != null && tutorialDualBattlepassContest.IsShown)
+                yield return null;
 
             root.Meta.SaveNow();
         }

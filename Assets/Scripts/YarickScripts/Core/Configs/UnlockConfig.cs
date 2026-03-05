@@ -25,5 +25,9 @@ namespace Core.Configs
         public int leaderboardUnlockLevel = 20;
 
         public int bountyUnlockLevel = 12; // поставь нужный тебе уровень
+
+        public int starContestUnlockLevel = 20;
+
+        public int dualBattlepassUnlockLevel = 12;
     }
 }

@@ -20,6 +20,7 @@ namespace Core.RemoteConfig
         public ChestConfig levelsChest;
         public BattlepassConfig battlepass;
         public BountyConfig bounty;
+        public DualBattlepassConfig dualBattlepass;
 
         [Header("Fetch settings")]
         public bool fetchOnStart = true;
@@ -33,6 +34,7 @@ namespace Core.RemoteConfig
         private const string KEY_LEVELS = "cfg_chest_levels";
         private const string KEY_BP = "cfg_battlepass";
         private const string KEY_BOUNTY = "cfg_bounty";
+        private const string KEY_DUAL_BATTLEPASS = "cfg_dual_battlepass";
 
         private async void Start()
         {
@@ -104,11 +106,13 @@ namespace Core.RemoteConfig
                 { KEY_STARS, JsonUtility.ToJson(new ChestDto(starsChest)) },
                 { KEY_LEVELS, JsonUtility.ToJson(new ChestDto(levelsChest)) },
                 { KEY_BP, JsonUtility.ToJson(new BattlepassDto(battlepass)) },
+                { KEY_DUAL_BATTLEPASS, JsonUtility.ToJson(DualBattlepassDto.FromSO(dualBattlepass)) },
             };
         }
 
         private void ApplyAllFromRemoteConfig()
         {
+            ApplyJsonIfValid(KEY_DUAL_BATTLEPASS, ApplyDualBattlepass);
             ApplyJsonIfValid(KEY_BOUNTY, json => ApplyBounty(json));
             ApplyJsonIfValid(KEY_ECO, json => ApplyEconomy(json));
             ApplyJsonIfValid(KEY_BANK, json => ApplyBank(json));
@@ -129,6 +133,36 @@ namespace Core.RemoteConfig
         }
 
         // -------- APPLY METHODS --------
+
+        private void ApplyDualBattlepass(string json)
+        {
+            if (dualBattlepass == null) return;
+
+            var dto = JsonUtility.FromJson<DualBattlepassDto>(json);
+            if (dto == null) return;
+
+            dualBattlepass.seasonDays = dto.seasonDays;
+
+            if (dto.tiers == null)
+            {
+                dualBattlepass.tiers = Array.Empty<DualBattlepassTier>();
+                return;
+            }
+
+            var arr = new DualBattlepassTier[dto.tiers.Length];
+            for (int i = 0; i < dto.tiers.Length; i++)
+            {
+                var t = dto.tiers[i];
+                arr[i] = new DualBattlepassTier
+                {
+                    needWins = t.needWins,
+                    freeReward = t.freeReward,
+                    premiumReward = t.premiumReward
+                };
+            }
+
+            dualBattlepass.tiers = arr;
+        }
 
         private void ApplyBounty(string json)
         {
@@ -176,6 +210,49 @@ namespace Core.RemoteConfig
         }
 
         // -------- DTOs (под твою структуру) --------
+
+        [Serializable]
+        private sealed class DualBattlepassDto
+        {
+            public int seasonDays = 14;
+            public DualBattlepassTierDto[] tiers;
+
+            public static DualBattlepassDto FromSO(DualBattlepassConfig so)
+            {
+                var dto = new DualBattlepassDto();
+                if (so == null) return dto;
+
+                dto.seasonDays = so.seasonDays;
+
+                if (so.tiers == null)
+                {
+                    dto.tiers = Array.Empty<DualBattlepassTierDto>();
+                    return dto;
+                }
+
+                dto.tiers = new DualBattlepassTierDto[so.tiers.Length];
+                for (int i = 0; i < so.tiers.Length; i++)
+                {
+                    var t = so.tiers[i];
+                    dto.tiers[i] = new DualBattlepassTierDto
+                    {
+                        needWins = t != null ? t.needWins : 0,
+                        freeReward = t != null ? t.freeReward : null,
+                        premiumReward = t != null ? t.premiumReward : null
+                    };
+                }
+
+                return dto;
+            }
+        }
+
+        [Serializable]
+        private sealed class DualBattlepassTierDto
+        {
+            public int needWins;
+            public Reward freeReward;
+            public Reward premiumReward;
+        }
 
         [Serializable]
         private sealed class BountyDto

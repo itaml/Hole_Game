@@ -21,8 +21,10 @@ namespace Menu.UI
         [Header("Rewards list")]
         [SerializeField] private BattlepassRewardItemView[] itemPrefab;
 
+        [Header("Overall tiers progress")]
+        [SerializeField] private Image tiersProgressBar;     // fill 0..1
+
         [Header("Tutorial popups (Info button)")]
-        [SerializeField] private StartTutorialPopupUi tutorialStep1;
         [SerializeField] private StartTutorialPopupUi tutorialStep2;
         [SerializeField] private Button infoButton;
 
@@ -41,14 +43,10 @@ namespace Menu.UI
                 infoButton.onClick.RemoveListener(OnClickInfo);
         }
 
-        private void Start()
-        {
-            RefreshAll();
-        }
-
         private void Update()
         {
             RefreshTimerOnly();
+            RefreshAll();
         }
 
         public void RefreshAll()
@@ -60,9 +58,9 @@ namespace Menu.UI
             bool unlocked = menuRoot.Meta.Save.progress.currentLevel >= unlockConfig.battlepassUnlockLevel;
             if (!unlocked)
             {
-                // Если у тебя тут отдельный locked state — переключай тут.
                 SetTimer(TimeSpan.Zero);
                 SetProgress(0, 1);
+                SetTiersProgress(0, 1);
                 return;
             }
 
@@ -105,6 +103,19 @@ namespace Menu.UI
             }
 
             SetProgress(have, need);
+
+            // ---- NEW: overall tiers progress ----
+            int total = cfg != null && cfg.tiers != null ? cfg.tiers.Length : 0;
+            int completed = Mathf.Clamp(tier, 0, total); // tier = сколько тиров уже получено
+            SetTiersProgress(completed, total);
+        }
+
+        private void SetTiersProgress(int completed, int total)
+        {
+            if (total <= 0) total = 1;
+
+            if (tiersProgressBar)
+                tiersProgressBar.fillAmount = Mathf.Clamp01((float)completed / total);
         }
 
         private void SetTimer(TimeSpan remaining)
@@ -123,9 +134,7 @@ namespace Menu.UI
             if (need <= 0) need = 1;
 
             if (progressBar)
-            {
-                progressBar.fillAmount = have;
-            }
+                progressBar.fillAmount = Mathf.Clamp01((float)have / need);
 
             if (progressText)
                 progressText.text = $"{have}/{need}";
@@ -266,16 +275,12 @@ namespace Menu.UI
         private void OnClickInfo()
         {
             // Показать 2 попапа обучения по кнопке info (даже если уже показывали)
-            if (tutorialStep1 == null || tutorialStep2 == null) return;
+            if (tutorialStep2 == null) return;
             StartCoroutine(ShowInfoTutorial());
         }
 
         private System.Collections.IEnumerator ShowInfoTutorial()
         {
-            tutorialStep1.Show();
-            while (tutorialStep1 != null && tutorialStep1.IsShown)
-                yield return null;
-
             tutorialStep2.Show();
             while (tutorialStep2 != null && tutorialStep2.IsShown)
                 yield return null;

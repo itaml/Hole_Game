@@ -14,6 +14,12 @@ namespace Meta.Services
 
         public int BountyUnlockLevel => _cfg.bountyUnlockLevel;
 
+        public int DualBattlepassUnlockLevel => _cfg.dualBattlepassUnlockLevel;
+        public bool IsDualBattlepassUnlocked(int level) => level >= _cfg.dualBattlepassUnlockLevel;
+
+        public int StarContestUnlockLevel => _cfg.starContestUnlockLevel;
+        public bool IsStarContestUnlocked(int level) => level >= _cfg.starContestUnlockLevel;
+
         public bool IsBountyUnlocked(int level)
             => level >= _cfg.bountyUnlockLevel;
 
