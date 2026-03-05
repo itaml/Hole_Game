@@ -19,6 +19,7 @@ namespace Menu.UI
         public ChestConfig levelsChestConfig;
         public BankConfig bankConfig;
         public BattlepassConfig battlepassConfig;
+        public BountyConfig bountyConfig;
 
         private ITimeProvider _time;
         private SaveSystem _saveSystem;
@@ -40,6 +41,7 @@ namespace Menu.UI
 
         // Флаг для отключения авто-попапов во время синематика
         public bool SuppressAutoRewardPopups { get; set; }
+        [SerializeField] private ShopController shopController;
 
 
         private void Awake()
@@ -58,8 +60,9 @@ namespace Menu.UI
             var streak = new WinStreakService();
             var ads = new AdsPolicyService();
             var leaderboard = new LeaderboardService(_time);
+            var bounty = new BountyService(bountyConfig, _saveSystem, _time);
 
-            _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, leaderboard, _time);
+            _meta = new MetaFacade(_saveSystem, unlocks, lives, wallet, chests, bank, battlepass, streak, ads, leaderboard, _time, bounty);
 
             if (SceneFlow.PendingLevelResult != null)
             {
@@ -144,6 +147,17 @@ namespace Menu.UI
 
             _saveSystem.Save();
             return true;
+        }
+
+        public void OnBountyPurchaseSucceeded(string productId)
+        {
+            // productId должны совпадать с теми, что у тебя в IAP Catalog
+            if (productId == shopController.bountySlot3ProductId)
+                Meta.Bounty.TryClaimPaid(2);
+            else if (productId == shopController.bountySlot3ProductId)
+                Meta.Bounty.TryClaimPaid(3);
+
+            Meta.SaveNow();
         }
     }
 }

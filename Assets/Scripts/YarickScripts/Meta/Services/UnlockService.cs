@@ -12,6 +12,11 @@ namespace Meta.Services
         public int StarsChestUnlockLevel => _cfg.starsChestUnlockLevel;
         public int LevelsChestUnlockLevel => _cfg.levelsChestUnlockLevel;
 
+        public int BountyUnlockLevel => _cfg.bountyUnlockLevel;
+
+        public bool IsBountyUnlocked(int level)
+            => level >= _cfg.bountyUnlockLevel;
+
         public int BankUnlockLevel => _cfg.bankUnlockLevel;
         public int BattlepassUnlockLevel => _cfg.battlepassUnlockLevel;
 

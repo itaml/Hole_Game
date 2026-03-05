@@ -25,6 +25,11 @@ namespace Menu.UI
         [SerializeField] private Button bankOpenButton;
         [SerializeField] private BankPopupUi bankPopup;
 
+        [Header("Bank")]
+        [SerializeField] private GameObject bountyClosed;
+        [SerializeField] private Button bountyOpenButton;
+        [SerializeField] private BountyPopupUi bountyPopup;
+
         [Header("LevelChest")]
         [SerializeField] private Button levelChestOpenBtn;
         [SerializeField] private LevelsChestPopupUi levelChestPopup;
@@ -59,6 +64,7 @@ namespace Menu.UI
             if (livesPlusButton != null) livesPlusButton.onClick.AddListener(OpenLivesPopup);
             if (bankOpenButton != null) bankOpenButton.onClick.AddListener(OpenBankPopup);
             if (startButton != null) startButton.onClick.AddListener(OpenStartPopup);
+            if (bountyOpenButton != null) bountyOpenButton.onClick.AddListener(OpenBountyPopup);
         }
 
         private void OnDisable()
@@ -68,6 +74,7 @@ namespace Menu.UI
             if (livesPlusButton != null) livesPlusButton.onClick.RemoveListener(OpenLivesPopup);
             if (bankOpenButton != null) bankOpenButton.onClick.RemoveListener(OpenBankPopup);
             if (startButton != null) startButton.onClick.RemoveListener(OpenStartPopup);
+            if (bountyOpenButton != null) bountyOpenButton.onClick.RemoveListener(OpenBountyPopup);
         }
 
         private void Update()
@@ -130,6 +137,10 @@ namespace Menu.UI
             if (bankClosed != null) bankClosed.SetActive(!bankUnlocked);
             if (bankOpenButton != null) bankOpenButton.gameObject.SetActive(bankUnlocked);
 
+            bool bountyUnlocked = root.Meta != null && root.Meta.Save.progress.currentLevel >= root.unlockConfig.bountyUnlockLevel;
+            bountyClosed.SetActive(!bountyUnlocked);
+            bountyOpenButton.interactable = bountyUnlocked;
+
             bool bonusUnlocked = root.unlockConfig != null && level >= root.unlockConfig.winStreakUnlockLevel;
             if (bonusClosed != null) bonusClosed.SetActive(!bonusUnlocked);
             if (bonusBar != null)
@@ -155,6 +166,12 @@ namespace Menu.UI
         {
             if (livesPopup == null || root == null) return;
             livesPopup.Show(root);
+        }
+
+        private void OpenBountyPopup()
+        {
+            if (bountyPopup == null || root == null) return;
+            bountyPopup.Show(root);
         }
 
         private void OpenBankPopup()

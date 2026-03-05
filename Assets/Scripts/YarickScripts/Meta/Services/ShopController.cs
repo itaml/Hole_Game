@@ -1,4 +1,4 @@
-using Menu.UI;
+п»їusing Menu.UI;
 using Meta.State;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,10 @@ public class ShopController : MonoBehaviour
 
     private Dictionary<string, ShopProduct> _map;
 
+    [Header("Bounty IAP productIds")]
+    public string bountySlot3ProductId = "bounty_slot3";
+    public string bountySlot4ProductId = "bounty_slot4";
+
     private void Awake()
     {
         _map = new Dictionary<string, ShopProduct>(products.Count);
@@ -24,12 +28,47 @@ public class ShopController : MonoBehaviour
 
     public void OnPurchaseSucceeded(string productId)
     {
-        var save = _menuRoot?.Meta?.Save;
+        var meta = _menuRoot?.Meta;
+        var save = meta?.Save;
         if (save == null)
         {
             Debug.LogError("[ShopController] No Save.");
             return;
         }
+
+        // вњ… BOUNTY purchases (slot 3 / slot 4)
+        if (!string.IsNullOrWhiteSpace(productId))
+        {
+            if (productId == bountySlot3ProductId)
+            {
+                // slot index 2
+                meta.Bounty.EnsureInitializedOrRefreshed(); // РЅР° РІСЃСЏРєРёР№, РµСЃР»Рё РєСѓРїРёР»Рё СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ unlock
+                bool ok = meta.Bounty.TryClaimPaid(2);
+
+                Debug.Log("buyes");
+                meta.SaveNow();
+
+                if (!ok)
+                    Debug.LogWarning("[ShopController] Bounty slot3 purchase succeeded but reward wasn't claimed (locked/claimed?).");
+
+                return;
+            }
+
+            if (productId == bountySlot4ProductId)
+            {
+                // slot index 3
+                meta.Bounty.EnsureInitializedOrRefreshed();
+                bool ok = meta.Bounty.TryClaimPaid(3);
+                meta.SaveNow();
+
+                if (!ok)
+                    Debug.LogWarning("[ShopController] Bounty slot4 purchase succeeded but reward wasn't claimed (locked/claimed?).");
+
+                return;
+            }
+        }
+
+        // ---- OLD SHOP FLOW ----
 
         if (!_map.TryGetValue(productId, out var product))
         {
@@ -37,21 +76,21 @@ public class ShopController : MonoBehaviour
             return;
         }
 
-        // Если это remove ads и уже куплено — просто игнор (на всякий)
+        // Р•СЃР»Рё СЌС‚Рѕ remove ads Рё СѓР¶Рµ РєСѓРїР»РµРЅРѕ вЂ” РїСЂРѕСЃС‚Рѕ РёРіРЅРѕСЂ (РЅР° РІСЃСЏРєРёР№)
         if (product.removesAds && save.profile.adsRemoved)
         {
             Debug.Log("[ShopController] Ads already removed, ignoring duplicate grant.");
             return;
         }
 
-        // 1) начисляем награду (coins/buffs/boosts/infinite life etc.)
+        // 1) РЅР°С‡РёСЃР»СЏРµРј РЅР°РіСЂР°РґСѓ (coins/buffs/boosts/infinite life etc.)
         ApplyReward(save, product.reward);
 
         // 2) special: remove ads
         if (product.removesAds)
             save.profile.adsRemoved = true;
 
-        _menuRoot.Meta.SaveNow();
+        meta.SaveNow();
 
         hide.Refresh();
     }

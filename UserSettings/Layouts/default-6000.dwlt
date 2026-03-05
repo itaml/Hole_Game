@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 997
   m_ShowMode: 4
-  m_Title: Hierarchy
+  m_Title: Project
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 112}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 41
+  controlID: 40
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -145,7 +145,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 112}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 42
+  controlID: 41
   draggingID: 0
 --- !u!114 &7
 MonoBehaviour:
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 56}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 43
+  controlID: 42
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -712,45 +712,31 @@ MonoBehaviour:
       m_LastClickedID:
         m_Data: 0
       m_ExpandedIDs:
-      - m_Data: -185256
-      - m_Data: -183538
-      - m_Data: -183512
-      - m_Data: -173132
-      - m_Data: -162690
-      - m_Data: -162688
-      - m_Data: -157670
-      - m_Data: -157668
-      - m_Data: -151246
-      - m_Data: -96614
-      - m_Data: -67166
-      - m_Data: -55130
-      - m_Data: -46358
-      - m_Data: -45254
-      - m_Data: -44856
-      - m_Data: -44648
-      - m_Data: -44238
-      - m_Data: -41894
-      - m_Data: -41484
-      - m_Data: -40964
-      - m_Data: -35842
-      - m_Data: -33282
-      - m_Data: -32486
-      - m_Data: -30782
-      - m_Data: -1340
-      - m_Data: 34242
-      - m_Data: 34590
-      - m_Data: 37168
-      - m_Data: 37482
-      - m_Data: 679472
-      - m_Data: 680212
-      - m_Data: 705860
-      - m_Data: 705968
-      - m_Data: 706544
-      - m_Data: 706732
-      - m_Data: 875126
-      - m_Data: 877418
-      - m_Data: 878196
-      - m_Data: 878628
+      - m_Data: -58894
+      - m_Data: -57100
+      - m_Data: -54724
+      - m_Data: -49042
+      - m_Data: -49036
+      - m_Data: -35330
+      - m_Data: -31868
+      - m_Data: -31696
+      - m_Data: -30620
+      - m_Data: -30510
+      - m_Data: -28898
+      - m_Data: -14684
+      - m_Data: -3536
+      - m_Data: -2654
+      - m_Data: 73900
+      - m_Data: 103018
+      - m_Data: 109246
+      - m_Data: 120170
+      - m_Data: 120352
+      - m_Data: 120648
+      - m_Data: 121164
+      - m_Data: 121686
+      - m_Data: 126580
+      - m_Data: 127040
+      - m_Data: 127924
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1399,9 +1385,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 9.294052, y: 2466.5815, z: 18.321413}
+    m_Target: {x: 407.77963, y: 1169.8778, z: -3.083372}
     speed: 2
-    m_Value: {x: 9.294052, y: 2466.5815, z: 18.321413}
+    m_Value: {x: 407.77963, y: 1169.8778, z: -3.083372}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1451,9 +1437,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 1576.4692
+    m_Target: 393.9485
     speed: 2
-    m_Value: 1576.4692
+    m_Value: 393.9485
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -1591,7 +1577,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Sprites
+    - Assets/Scripts/YarickScripts/Core/RemoteConfig
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1601,28 +1587,29 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 82
   m_LastFolders:
-  - Assets/Sprites
+  - Assets/Scripts/YarickScripts/Core/RemoteConfig
   m_LastFoldersGridSize: 82
   m_LastProjectPath: D:\Projects\Unity\ZmTeam\Hole_Game
   m_LockTracker:
     m_IsLocked: 0
   m_LastLocalAssetsSearchArea: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 79}
+    scrollPos: {x: 0, y: 416}
     m_SelectedIDs:
-    - m_Data: 38876
+    - m_Data: 45654
     m_LastClickedID:
-      m_Data: 38876
+      m_Data: 45654
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 42782
-    - m_Data: 42784
-    - m_Data: 42786
-    - m_Data: 42788
-    - m_Data: 42790
-    - m_Data: 42792
-    - m_Data: 42794
-    - m_Data: 42796
+    - m_Data: 46322
+    - m_Data: 46324
+    - m_Data: 46326
+    - m_Data: 46328
+    - m_Data: 46330
+    - m_Data: 46332
+    - m_Data: 46334
+    - m_Data: 46336
+    - m_Data: 46338
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1655,14 +1642,15 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 42782
-    - m_Data: 42784
-    - m_Data: 42786
-    - m_Data: 42788
-    - m_Data: 42790
-    - m_Data: 42792
-    - m_Data: 42794
-    - m_Data: 42796
+    - m_Data: 46322
+    - m_Data: 46324
+    - m_Data: 46326
+    - m_Data: 46328
+    - m_Data: 46330
+    - m_Data: 46332
+    - m_Data: 46334
+    - m_Data: 46336
+    - m_Data: 46338
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1690,11 +1678,10 @@ MonoBehaviour:
       m_ResourceFile: 
   m_ListAreaState:
     m_SelectedInstanceIDs:
-    - m_Data: 35874
-    m_LastClickedInstanceID: 35874
+    - m_Data: 29380
+    m_LastClickedInstanceID: 29380
     m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs:
-    - m_Data: 45212
     - m_Data: 232296
     - m_Data: 88340
     - m_Data: -15806
@@ -1749,9 +1736,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 672
-    width: 1215
-    height: 266
+    y: 658
+    width: 1367
+    height: 336
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0

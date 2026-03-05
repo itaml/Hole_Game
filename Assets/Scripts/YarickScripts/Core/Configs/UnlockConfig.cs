@@ -23,5 +23,7 @@ namespace Core.Configs
         public int interstitialAdsUnlockLevel = 10;
 
         public int leaderboardUnlockLevel = 20;
+
+        public int bountyUnlockLevel = 12; // поставь нужный тебе уровень
     }
 }

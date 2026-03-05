@@ -43,6 +43,9 @@ namespace Menu.UI
             tween?.PlayShow(); // добавить
 
             Render();
+
+            var handler = GetComponent<BankHelpHandler>();
+            handler?.Bind(menu);
         }
 
         public void Hide()

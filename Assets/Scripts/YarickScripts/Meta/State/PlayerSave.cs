@@ -20,5 +20,6 @@ namespace Meta.State
 
         public TutorialState tutorial = new TutorialState();
         public LeaderboardState leaderboard = new LeaderboardState();
+        public BountyState bounty = new BountyState();
     }
 }
