@@ -66,6 +66,7 @@ public class MagnetBoost : MonoBehaviour
 
         if (routine != null) StopCoroutine(routine);
         routine = StartCoroutine(Work());
+                SfxClipRouter.Instance?.Play(SfxKey.Magnit);
     }
 
     public void Stop()

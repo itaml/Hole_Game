@@ -71,6 +71,7 @@ public class GoalFinderBoost : MonoBehaviour
             Debug.Log($"[FinderBoost] Activate duration={durationSeconds:0.##}");
 
         BuildTargets();
+                SfxClipRouter.Instance?.Play(SfxKey.Radar);
     }
 
     public void StopBoost()

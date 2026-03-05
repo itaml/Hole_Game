@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 9192991694197077526}
   - component: {fileID: 7269006824934983367}
   - component: {fileID: 5851440800426867184}
+  - component: {fileID: 7819639548692314351}
   m_Layer: 5
   m_Name: WinIntroPopup
   m_TagString: Untagged
@@ -95,6 +96,36 @@ MonoBehaviour:
   - {fileID: 1091133327961765846}
   - {fileID: 756915811225039594}
   - {fileID: 3491811335364720046}
+--- !u!114 &7819639548692314351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 368601153619672050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cf3dcd32e0374334b952cf4dc9dbe1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PopupTweenAnimator
+  root: {fileID: 368601153619672050}
+  panel: {fileID: 2896370505632618722}
+  canvasGroup: {fileID: 0}
+  closeButton: {fileID: 0}
+  backdropButton: {fileID: 0}
+  showDuration: 0.25
+  showEase: 27
+  showStartScale: 0.85
+  hideDuration: 0.18
+  hideEase: 26
+  hideEndScale: 0.85
+  useFade: 1
+  showStartAlpha: 0
+  showEndAlpha: 1
+  slideFrom: 0
+  slideDistance: 120
+  useUnscaledTime: 1
+  blockRaycastsDuringTween: 1
 --- !u!1 &570421417471482606
 GameObject:
   m_ObjectHideFlags: 0
@@ -106,6 +137,7 @@ GameObject:
   - component: {fileID: 8639780303733457838}
   - component: {fileID: 8507357705859153412}
   - component: {fileID: 3503210974516538396}
+  - component: {fileID: 4531339366329053508}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -170,6 +202,24 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4531339366329053508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570421417471482606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7a458d5f1074ea682c88804db16fcc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LogoIntroSpin
+  spins: 2
+  duration: 1.2
+  ease: 9
+  startScale: 0.8
+  punch: 0.15
+  punchTime: 0.25
 --- !u!1 &2796887823605658901
 GameObject:
   m_ObjectHideFlags: 0

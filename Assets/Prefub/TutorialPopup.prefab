@@ -1647,6 +1647,7 @@ GameObject:
   - component: {fileID: 5919159189683340250}
   - component: {fileID: 8851385878133827288}
   - component: {fileID: 4789281021977395746}
+  - component: {fileID: 6321662435286542191}
   m_Layer: 5
   m_Name: TutorialPopup
   m_TagString: Untagged
@@ -1729,6 +1730,27 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &6321662435286542191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2191740422945655567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84743a5f7c8b8ff42b484c0e4456a008, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Menu.UI.PopupTween
+  overlay: {fileID: 4789281021977395746}
+  panelCg: {fileID: 4789281021977395746}
+  panel: {fileID: 0}
+  overlayFade: 0.15
+  panelFade: 0.12
+  panelTime: 0.2
+  panelStartScaleMul: 0.85
+  panelFromY: -40
+  hideTime: 0.12
 --- !u!1 &2314461512604240497
 GameObject:
   m_ObjectHideFlags: 0

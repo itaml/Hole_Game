@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class HoleController : MonoBehaviour
 {
@@ -10,6 +11,15 @@ public class HoleController : MonoBehaviour
     public int Level { get; private set; } = 1;
     public int Xp { get; private set; }
 
+
+void Start()
+{
+    transform
+        .DOScale(1.04f, 1.2f)
+        .SetLoops(-1, LoopType.Yoyo)
+        .SetEase(Ease.InOutSine)
+        .SetUpdate(true);
+}
     private void Reset()
     {
         rb = GetComponent<Rigidbody>();
@@ -39,6 +49,7 @@ public class HoleController : MonoBehaviour
         {
             Level = newLevel;
         }
+        SfxClipRouter.Instance?.Play(SfxKey.Item);
     }
 
 }

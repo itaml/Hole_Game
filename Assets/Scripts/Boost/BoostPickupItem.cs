@@ -21,5 +21,6 @@ public class BoostPickupItem : MonoBehaviour
     public float GetAddSeconds()
     {
         return source == BoostSpawnSource.Battlepass ? battlepassAddSeconds : spawnerAddSeconds;
+        SfxClipRouter.Instance?.Play(SfxKey.Time);
     }
 }

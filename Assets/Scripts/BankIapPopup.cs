@@ -13,9 +13,9 @@ public sealed class BankIapPopup : MonoBehaviour
     [SerializeField] private Button iapButton_Button;
 
     [SerializeField] private Image bar;
-    [SerializeField] private TMP_Text capacityText;
-    [SerializeField] private TMP_Text halfcapacityText;
-    [SerializeField] private TMP_Text textDesc;
+    [SerializeField] private TMP_Text capacityText;       // cap
+    [SerializeField] private TMP_Text halfcapacityText;   // half
+    [SerializeField] private TMP_Text textDesc;           // description
 
     [Header("IAP")]
     [SerializeField] private CodelessIAPButton iapButton_IAPButton;
@@ -23,12 +23,12 @@ public sealed class BankIapPopup : MonoBehaviour
 
     [Header("Events")]
     public UnityEvent onPurchaseSucceeded;
-    public UnityEvent<string> onPurchaseFailed; // reason string
+    public UnityEvent<string> onPurchaseFailed;
 
-    // Опционально: чтобы можно было из кода сделать onSuccess += ...
     public event Action PurchaseSucceeded;
 
     private bool _bound;
+    private RunController _run;
 
     private void Awake()
     {
@@ -38,48 +38,8 @@ public sealed class BankIapPopup : MonoBehaviour
             closeButton.onClick.AddListener(Hide);
     }
 
-    private void Update()
-    {
-        Render();
-    }
-
-    void Render()
-    {
-        //int coins = save.bank.bankCoins; // Тут надо подставить вместо save.bank.bankCoins просто bankCoins из твоего локального кошелька где ты в начале спарсил _cfg.bankCoinsSnapshot
-        //int cap = bankConfig.capacity : 0; // Тут надо подставить вместо bankConfig.capacity просто bankCapacity из твоего локального кошелька где ты в начале спарсил _cfg.bankCapacitySnapshot
-
-        //int half = cap / 2;
-
-        //capacityText.text = cap.ToString();
-        //halfcapacityText.text = half.ToString();
-
-        //if (coins == _menu.bankConfig.capacity) text.text = "Hotel safe is full. Break it now for best deal!";
-        //else if (coins >= half) text.text = "Hotel safe to collect golds or save more gold for best deal";
-        //else text.text = "Add at least " + half.ToString() + " gold to the Hotel safe to buy it at a great deal";
-
-        float fill = 0f;
-        //if (cap > 0)
-            //fill = Mathf.Clamp01(coins / (float)cap);
-
-        if (bar != null)
-            bar.fillAmount = fill;
-
-        if (iapButton_Button != null)
-        {
-            //bool active = cap > 0 && coins >= Mathf.CeilToInt(cap * 0.5f);
-            //iapButton_Button.interactable = active;
-        }
-    }
-
-    private void OnEnable()
-    {
-        BindIap();
-    }
-
-    private void OnDisable()
-    {
-        UnbindIap();
-    }
+    private void OnEnable() => BindIap();
+    private void OnDisable() => UnbindIap();
 
     private void OnDestroy()
     {
@@ -87,6 +47,76 @@ public sealed class BankIapPopup : MonoBehaviour
             closeButton.onClick.RemoveListener(Hide);
 
         UnbindIap();
+    }
+
+    public void Setup(RunController run)
+    {
+        _run = run;
+        Refresh();
+    }
+
+    public void Show()
+    {
+        if (rootObject != null) rootObject.SetActive(true);
+        else gameObject.SetActive(true);
+
+        Refresh();
+    }
+
+    public void Hide()
+    {
+        if (rootObject != null) rootObject.SetActive(false);
+        else gameObject.SetActive(false);
+    }
+
+    public void Refresh()
+    {
+        if (_run == null)
+        {
+            SetVisible(false);
+            return;
+        }
+
+        int coins = _run.BankCoins;
+        int cap = _run.BankCapacity;
+
+        // РµСЃР»Рё Р±Р°РЅРє Р·Р°РєСЂС‹С‚ РёР»Рё РґР°РЅРЅС‹С… РЅРµС‚ - РЅРµ РїРѕРєР°Р·С‹РІР°РµРј
+        if (!_run.BankOpen || cap <= 0)
+        {
+            SetVisible(false);
+            return;
+        }
+
+        int half = cap / 2;
+        bool active = coins >= Mathf.CeilToInt(cap * 0.5f);
+
+        SetVisible(active); // РїРѕРєР°Р·С‹РІР°РµРј РўРћР›Р¬РљРћ РµСЃР»Рё >= РїРѕР»РѕРІРёРЅС‹ (РїРѕ С‚РІРѕРµРјСѓ РўР—)
+
+        if (!active)
+            return;
+
+        if (capacityText) capacityText.text = cap.ToString();
+        if (halfcapacityText) halfcapacityText.text = half.ToString();
+
+        float fill = Mathf.Clamp01(coins / (float)cap);
+        if (bar) bar.fillAmount = fill;
+
+        if (iapButton_Button)
+            iapButton_Button.interactable = true;
+
+        if (textDesc)
+        {
+            if (coins >= cap)
+                textDesc.text = "Hotel safe is full. Break it now for best deal!";
+            else
+                textDesc.text = "Hotel safe is ready. Break it to collect your gold!";
+        }
+    }
+
+    private void SetVisible(bool visible)
+    {
+        if (rootObject != null) rootObject.SetActive(visible);
+        else gameObject.SetActive(visible);
     }
 
     private void BindIap()
@@ -107,31 +137,19 @@ public sealed class BankIapPopup : MonoBehaviour
         _bound = false;
     }
 
-    public void Show()
-    {
-        if (rootObject != null) rootObject.SetActive(true);
-        else gameObject.SetActive(true);
-    }
-
-    public void Hide()
-    {
-        if (rootObject != null) rootObject.SetActive(false);
-        else gameObject.SetActive(false);
-    }
-
     private void OnPurchaseComplete(Product product)
     {
         if (product == null || product.definition == null) return;
 
-        // защита: реагируем только на нужный продукт
         if (!string.IsNullOrEmpty(productId) && product.definition.id != productId)
             return;
 
-        // ТУТ твоя логика (или ты в инспекторе повесишь UnityEvent)
+        // вњ… РїРµСЂРµРЅРѕСЃРёРј Р±Р°РЅРє РІ coins Рё РѕР±РЅСѓР»СЏРµРј Р±Р°РЅРє
+        _run?.ClaimBankToCoins();
+
         onPurchaseSucceeded?.Invoke();
         PurchaseSucceeded?.Invoke();
 
-        // по желанию: закрывать сразу
         Hide();
     }
 }

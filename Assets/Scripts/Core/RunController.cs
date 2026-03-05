@@ -3,10 +3,13 @@ using GameBridge.SceneFlow;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class RunController : MonoBehaviour
 {
     public enum LoseReason { TimeUp, Kaboom }
+
+    public event Action BankChanged;
 
     [Header("Run Time (minutes)")]
     [SerializeField] private float levelDurationMinutes = 2.3f;
@@ -71,6 +74,11 @@ public class RunController : MonoBehaviour
 
     [Header("Debug UI (optional)")]
     [SerializeField] private Text debugTimerText;
+    [SerializeField] private HotelSafeWidget safeWidget;
+
+    private int _bankCoins;
+private int _bankCapacity;
+private bool _bankOpen;
 
     public float DefaultDurationMinutes => levelDurationMinutes;
     public bool IsRunning { get; private set; }
@@ -87,10 +95,9 @@ public class RunController : MonoBehaviour
     private bool _losePending;
     private bool _initialized;
     private bool _ended;
-
     [Header("Boosts")]
-[SerializeField] private bool boostsEnabled = true;
-public RunConfig PendingConfig => _cfg;
+    [SerializeField] private bool boostsEnabled = true;
+     public RunConfig PendingConfig => _cfg;
 
     private RunConfig _cfg;
 
@@ -99,6 +106,11 @@ public RunConfig PendingConfig => _cfg;
 
     public float TimeLeft => _timeLeft;
     public float TimeTotal => _timeTotal;
+
+    public bool BankOpen => _bankOpen;
+public int BankCoins => _bankCoins;
+public int BankCapacity => _bankCapacity;
+public bool CanUseBank => _bankOpen && _bankCapacity > 0 && _bankCoins >= Mathf.CeilToInt(_bankCapacity * 0.5f);
 
     // FREE должен показываться, пока не использовали, и исчезнуть навсегда после использования
     private const string KEY_TIMEUP_FREE_USED = "TimeUpFreeReviveUsed";
@@ -143,6 +155,7 @@ public RunConfig PendingConfig => _cfg;
                     buff4Count = fallbackFreezeTime,
                     walletCoinsSnapshot = 0,
                     levelIndex = 0
+                    
                 };
 
                 buffInventory.ApplyRunConfig(fake);
@@ -161,6 +174,9 @@ public RunConfig PendingConfig => _cfg;
         _initialized = true;
 
         _coins = Mathf.Max(0, _cfg.walletCoinsSnapshot);
+        _bankOpen = _cfg.isBankOpen;
+        _bankCoins = Mathf.Max(0, _cfg.bankCoinsSnapshot);
+        _bankCapacity = Mathf.Max(0, _cfg.bankCapacitySnapshot);
 
         if (buffInventory != null)
             buffInventory.ApplyRunConfig(_cfg);
@@ -187,6 +203,20 @@ public RunConfig PendingConfig => _cfg;
             objectives.OnGoalCompleted -= HandleGoalCompleted;
         }
     }
+
+  public void ClaimBankToCoins()
+{
+    if (!CanUseBank) return;
+
+    AddCoins(_bankCoins);
+    _bankCoins = 0;
+    
+
+    UpdateCoinsUI();
+    
+
+    BankChanged?.Invoke();   // ✅ сообщаем всем UI
+}
 
     public void ApplyLevelDuration(float minutesOverride)
     {
@@ -484,6 +514,7 @@ private void ApplyBoost(BoostPickupItem boost, AbsorbablePhysicsItem item)
     {
         if (!IsRunning) return;
 
+        SfxClipRouter.Instance?.Play(SfxKey.Win);
         IsRunning = false;
         HideScreens();
 
@@ -513,10 +544,12 @@ private void ApplyBoost(BoostPickupItem boost, AbsorbablePhysicsItem item)
 {
     if (!IsRunning) return;
 
+    SfxClipRouter.Instance?.Play(SfxKey.Lose);
     IsRunning = false;
     HideScreens();
     _losePending = true;
 
+    safeWidget?.Refresh();
     UpdateCoinsUI();
 
     if (reason == LoseReason.TimeUp)
@@ -536,7 +569,7 @@ private void ApplyBoost(BoostPickupItem boost, AbsorbablePhysicsItem item)
     else // Kaboom
     {
         SetLoseContainers(LoseReason.Kaboom);
-
+        SfxClipRouter.Instance?.Play(SfxKey.BombLoose);
         bool canAfford = _coins >= kaboomReviveCost;
 
         loseKaboomUI?.Show(
@@ -662,6 +695,7 @@ private void HideScreens()
             buff2Count = Mathf.Max(0, b2),
             buff3Count = Mathf.Max(0, b3),
             buff4Count = Mathf.Max(0, b4),
+            bankCoinsResult = Mathf.Max(0, _bankCoins),
         };
 
         SceneFlow.ReturnToMenu(result);
@@ -677,4 +711,6 @@ private void HideScreens()
 
         ReturnToMenu(LevelOutcome.Lose, 0);
     }
+
+    
 }

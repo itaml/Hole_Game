@@ -30,6 +30,7 @@ public class FreezeTimeBoost : MonoBehaviour
 
         if (routine != null) StopCoroutine(routine);
         routine = StartCoroutine(Work());
+        SfxClipRouter.Instance?.Play(SfxKey.Frozen);
     }
 
     public void Stop()

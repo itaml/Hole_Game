@@ -33,7 +33,7 @@ public class GoalSlotUI : MonoBehaviour
         if (checkImage) checkImage.gameObject.SetActive(false);
     }
 
-public void Setup(Sprite icon, int requiredRemaining)
+    public void Setup(Sprite icon, int requiredRemaining)
 {
     ApplySpriteProperSize(icon);
     SetRemaining(requiredRemaining);

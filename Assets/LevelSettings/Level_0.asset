@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Level_0
   m_EditorClassIdentifier: Assembly-CSharp::LevelDefinition
   spawnConfig: {fileID: 11400000, guid: 02980dfaac6b047c7b89112646916e40, type: 2}
-  goals: {fileID: 11400000, guid: 92eab14bd639b4a04acd1e90e90b9391, type: 2}
+  goals: {fileID: 11400000, guid: 49ecec2df583f4708b917e0402224f82, type: 2}
   catalog: {fileID: 11400000, guid: 2871d1db5050f4da892adfa33d01f92a, type: 2}
   durationMinutesOverride: 2
