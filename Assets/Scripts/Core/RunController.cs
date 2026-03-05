@@ -197,6 +197,12 @@ public RunConfig PendingConfig => _cfg;
  public void StartRun()
 {
     HideScreens();
+    var bpm = FindFirstObjectByType<BattlepassCollectibleManager>();
+if (bpm != null)
+{
+    bpm.ResetForNewRun();
+    bpm.SpawnIfNeeded();
+}
 
     _timeTotal = Mathf.Max(1f, levelDurationMinutes * 60f);
     _timeLeft = _timeTotal;
@@ -344,6 +350,17 @@ public void OnItemCollected(AbsorbablePhysicsItem item)
     if (item.TryGetComponent<BoostPickupItem>(out var boost))
 {
     ApplyBoostPickup(boost, item);
+    return;
+}
+
+if (item.Type == ItemType.BattlepassToken)
+{
+    AddBattlepassItems(1);
+
+    var bpm = FindFirstObjectByType<BattlepassCollectibleManager>();
+    if (bpm != null)
+        bpm.OnTokenCollected();
+
     return;
 }
     Debug.Log($"[Collected] {item.name} type={item.Type} xp={item.XpValue} timeLeft={_timeLeft:F2}");

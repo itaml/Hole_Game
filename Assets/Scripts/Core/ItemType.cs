@@ -44,5 +44,6 @@ public enum ItemType
     Cherry,          // данго (шарики на палочке)
     Peach, // такояки на шпажке
     Strawberry,
-        Bomb = 999,
+    Bomb = 999,
+    BattlepassToken = 1000,
 }

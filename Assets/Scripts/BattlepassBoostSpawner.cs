@@ -15,7 +15,7 @@ public class BattlepassBoostSpawner : MonoBehaviour
     [Header("Behaviour")]
     [SerializeField] private bool spawnOncePerRun = true;
     [SerializeField] private Transform flyFromPoint;
-[SerializeField] private Transform flyToPoint;
+    [SerializeField] private Transform flyToPoint;
 
     private bool _spawnedThisRun;
 
@@ -45,14 +45,22 @@ public void SpawnIfNeeded()
     if (spawnOncePerRun && _spawnedThisRun)
         return;
 
-    int bpLevel = Mathf.Clamp(cfg.bonusSpawnLevel, 1, 3); // 1..3
-    _spawnedThisRun = true;
+    // ✅ 0 = вообще не спавним
+    int bpLevelRaw = cfg.bonusSpawnLevel;
+
+    if (bpLevelRaw <= 0)
+        return;
+
+    // ✅ 1..3
+    int bpLevel = Mathf.Clamp(bpLevelRaw, 1, 3);
 
     if (basketPrefab == null || flyFromPoint == null || flyToPoint == null)
     {
         Debug.LogWarning("[BP] Missing basketPrefab/fly points");
         return;
     }
+
+    _spawnedThisRun = true;
 
     var basket = Instantiate(basketPrefab, flyFromPoint.position, flyFromPoint.rotation);
     basket.gameObject.SetActive(true);
@@ -66,6 +74,6 @@ public void SpawnIfNeeded()
 
     basket.FlyInAndShoot(flyFromPoint, flyToPoint, flyToPoint.forward);
 
-    Debug.Log($"[BP] Spawned basket. bpLevel={bpLevel}");
+    Debug.Log($"[BP] Spawned basket. bpLevel={bpLevel} raw={bpLevelRaw}");
 }
 }

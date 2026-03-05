@@ -108,6 +108,7 @@
     <Compile Include="Assets/Scripts/YarickScripts/Meta/State/ProfileState.cs" />
     <Compile Include="Assets/Scripts/YarickScripts/Meta/Services/MetaFacade.cs" />
     <Compile Include="Assets/Scripts/Core/UI/PauseUI.cs" />
+    <Compile Include="Assets/Scripts/Pass/BattlepassCollectibleManager.cs" />
     <Compile Include="Assets/Scripts/Boost/GrowTempBoostButtonUI.cs" />
     <Compile Include="Assets/Scripts/Core/WIN.LOOSE/WinScreenUI.cs" />
     <Compile Include="Assets/Scripts/Core/HoleDirectionArrow.cs" />

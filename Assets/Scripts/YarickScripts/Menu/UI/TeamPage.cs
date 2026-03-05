@@ -4,7 +4,7 @@ using DG.Tweening;
 public class TeamPage : UIPageBase
 {
     [Header("Refs")]
-    public CanvasGroup rootCG;          // на весь page root
+    public CanvasGroup rootCG;          // пїЅпїЅ пїЅпїЅпїЅпїЅ page root
     public RectTransform header;
     public RectTransform main;
     public RectTransform[] buttons;
@@ -21,7 +21,7 @@ public class TeamPage : UIPageBase
     {
         base.PrepareShow();
 
-        // Стартовое состояние перед IN
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ IN
         rootCG.alpha = 0f;
 
         header.anchoredPosition = headerPos + new Vector2(0, 60);
@@ -69,7 +69,7 @@ public class TeamPage : UIPageBase
 
         seq = DOTween.Sequence();
 
-        // Уезжаем обратно
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         seq.Join(rootCG.DOFade(0f, outDuration));
         seq.Join(header.DOAnchorPos(headerPos + new Vector2(0, 60), outDuration).SetEase(Ease.InCubic));
         seq.Join(main.DOAnchorPos(mainPos + new Vector2(0, -80), outDuration).SetEase(Ease.InCubic));
@@ -79,7 +79,7 @@ public class TeamPage : UIPageBase
 
     public override void PrepareHideInstant()
     {
-        // Мгновенно скрыть (чтобы при следующем открытии не мигало)
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
         Kill();
         if (rootCG) { rootCG.alpha = 0f; rootCG.interactable = false; rootCG.blocksRaycasts = false; }
         base.PrepareHideInstant();
