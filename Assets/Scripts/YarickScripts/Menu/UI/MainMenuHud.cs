@@ -114,15 +114,23 @@ namespace Menu.UI
                 if (root.Meta.IsInfiniteLivesActive())
                 {
                     livesText.text = "∞";
+                    livesPlusButton.gameObject.SetActive(false);
                 }
                 else if (save.lives.currentLives >= save.lives.maxLives)
                 {
                     livesText.text = "Full";
+                    livesPlusButton.gameObject.SetActive(false);
+                }
+                else if (save.lives.currentLives != 0)
+                {
+                    livesText.text = save.lives.currentLives.ToString();
+                    livesPlusButton.gameObject.SetActive(true);
                 }
                 else
                 {
                     var t = GetTimeToNextLife(save.lives.nextLifeReadyAtUtcTicks);
                     livesText.text = UiTimeFormat.FormatHMS(t);
+                    livesPlusButton.gameObject.SetActive(true);
                 }
             }
 

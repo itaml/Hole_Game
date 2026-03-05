@@ -15,6 +15,7 @@ namespace Menu.UI
         [SerializeField] private Button watchAdLifeButton;
         [SerializeField] private TMP_Text buyLifePriceText; // optional
         [SerializeField] private Button closeButton;
+        [SerializeField] private StorePageAnimatorDOTween store;
 
         [SerializeField] private PopupTween tween;
 
@@ -104,8 +105,6 @@ namespace Menu.UI
                 bool canBuy = !_menu.Meta.IsInfiniteLivesActive()
                              && save.lives.currentLives < save.lives.maxLives
                              && save.wallet.coins >= cost;
-
-                buyLifeButton.interactable = canBuy;
             }
 
             if (watchAdLifeButton != null)
@@ -129,7 +128,15 @@ namespace Menu.UI
         private void OnClickBuyLife()
         {
             if (_menu == null) return;
-            _menu.TryBuyLife();
+            if (_menu.Meta.Save.wallet.coins >= _menu.economyConfig.buyLifeCostCoins)
+            {
+                _menu.TryBuyLife();
+            }
+            else
+            {
+                Hide();
+                store.Open();
+            }
         }
     }
 }

@@ -365,7 +365,7 @@ if (!Save.tutorial.boost2StartTutorialShown &&
             }
 
             // Profile tutorial (post-win): when reaching level 18 (after cinematic/rewards)
-            const int ProfileTutorialLevel = 3;
+            const int ProfileTutorialLevel = 5;
             if (!Save.tutorial.profilePostWinTutorialShownProfile &&
                 Save.tutorial.pendingPostWinTutorialId == 0 &&
                 prevLevel < ProfileTutorialLevel && newLevel >= ProfileTutorialLevel)
@@ -460,16 +460,10 @@ prevLevel < _unlocks.DualBattlepassUnlockLevel && newLevel >= _unlocks.DualBattl
             if (_unlocks.IsWinStreakUnlocked(level))
                 bonusSpawnLevel = _streak.GetStreak(Save);
 
-            // Buff availability: only if unlocked by level; otherwise send 0 to Game UI
-            bool buff1Unlocked = _unlocks.IsBuff1Unlocked(level);
-            bool buff2Unlocked = _unlocks.IsBuff2Unlocked(level);
-            bool buff3Unlocked = _unlocks.IsBuff3Unlocked(level);
-            bool buff4Unlocked = _unlocks.IsBuff4Unlocked(level);
-
-            int buff1Count = buff1Unlocked ? Save.inventory.buffGrowTemp : 0;
-            int buff2Count = buff2Unlocked ? Save.inventory.buffRadar : 0;
-            int buff3Count = buff3Unlocked ? Save.inventory.buffMagnet : 0;
-            int buff4Count = buff4Unlocked ? Save.inventory.buffFreezeTime : 0;
+            int buff1Count = Save.inventory.buffGrowTemp;
+            int buff2Count = Save.inventory.buffRadar;
+            int buff3Count = Save.inventory.buffMagnet ;
+            int buff4Count = Save.inventory.buffFreezeTime;
 
             // Boost activation (must respect unlock + inventory or infinite)
             bool boost1Active = ResolveBoost1Activation(level, boost1Selected);

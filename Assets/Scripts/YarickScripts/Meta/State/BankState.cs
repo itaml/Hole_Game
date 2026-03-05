@@ -5,6 +5,6 @@ namespace Meta.State
     [Serializable]
     public sealed class BankState
     {
-        public int bankCoins = 5000;
+        public int bankCoins = 0;
     }
 }

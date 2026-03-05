@@ -70,6 +70,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\StarContestPopupUiTween.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Events\EventBus.cs" />
     <Compile Include="Assets\Scripts\Boost\BoostPickupItem.cs" />
+    <Compile Include="Assets\Scripts\PopupTweenAnimator.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\StarContestEntryState.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BuffRewardPopupUi.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\LeaderboardState.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\WinStreakService.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\LevelsChestAutoOpenUi.cs" />
     <Compile Include="Assets\Scripts\Core\RunController.cs" />
+    <Compile Include="Assets\Scripts\LogoIntroSpin.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\UnlockService.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\State\DualBattlepassState.cs" />
     <Compile Include="Assets\Scripts\Core\Tutorial\TimerCloneUI.cs" />
@@ -113,6 +115,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\DailyBonusController.cs" />
     <Compile Include="Assets\Scripts\Core\WIN.LOOSE\WinIntroPopup.cs" />
     <Compile Include="Assets\Scripts\Spawner\CatalogProgression.cs" />
+    <Compile Include="Assets\Scripts\HotelSafeWidget.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Meta\Services\LivesService.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\ChestConfig.cs" />
     <Compile Include="Assets\Scripts\Core\FixedCameraFollowLocalOffset.cs" />
@@ -121,6 +124,7 @@
     <Compile Include="Assets\Scripts\Core\Tutorial\Level1UIRules.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\RewardPopupRouter.cs" />
     <Compile Include="Assets\Scripts\Core\Tutorial\TutorialManager.cs" />
+    <Compile Include="Assets\Scripts\SfxClipRouter.cs" />
     <Compile Include="Assets\Scripts\Core\UI\PreRunGoalSlotUI.cs" />
     <Compile Include="Assets\Joystick Pack\Scripts\Joysticks\FloatingJoystick.cs" />
     <Compile Include="Assets\Scripts\Core\VelocityLimiter.cs" />
@@ -193,6 +197,7 @@
     <Compile Include="Assets\Scripts\YarickScripts\Core\Configs\DualBattlepassConfig.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\BankHelpHandler.cs" />
     <Compile Include="Assets\Joystick Pack\Examples\JoystickSetterExample.cs" />
+    <Compile Include="Assets\Scripts\DinoPanelCollisionIntro.cs" />
     <Compile Include="Assets\Scripts\YarickScripts\Menu\UI\StorePageAnimatorDOTween.cs" />
     <Compile Include="Assets\Scripts\Spawner\SpawnGroupTemplate.cs" />
     <Compile Include="Assets\Scripts\Core\ItemType.cs" />

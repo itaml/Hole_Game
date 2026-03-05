@@ -1,5 +1,6 @@
 using Core.Configs;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 
 namespace Menu.UI
@@ -7,9 +8,6 @@ namespace Menu.UI
     public sealed class LevelsChestAutoOpenUi : MonoBehaviour
     {
         [SerializeField] private MenuRoot root;
-
-        [Header("UI")]
-        [SerializeField] private TMP_Text progressText;
 
         [Header("Popups")]
         [SerializeField] private RewardPopupRouter popupRouter;
@@ -23,16 +21,6 @@ namespace Menu.UI
 
         private void Update()
         {
-            if (root == null || root.Meta == null || root.levelsChestConfig == null) return;
-
-            var save = root.Meta.Save;
-
-            int progress = save.levelsChest.progress;
-            int threshold = Mathf.Max(0, root.levelsChestConfig.threshold);
-
-            if (progressText != null)
-                progressText.text = $"{progress:00}/{threshold:00}";
-
             TryConsumeAndShowGrantedRewards();
         }
 

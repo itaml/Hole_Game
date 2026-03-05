@@ -8,9 +8,6 @@ namespace Menu.UI
     {
         [SerializeField] private MenuRoot root;
 
-        [Header("UI")]
-        [SerializeField] private TMP_Text progressText;  // "06/20"
-
         [Header("Popups")]
         [SerializeField] private RewardPopupRouter popupRouter;
 
@@ -24,16 +21,6 @@ namespace Menu.UI
 
         private void Update()
         {
-            if (root == null || root.Meta == null || root.starsChestConfig == null) return;
-
-            var save = root.Meta.Save;
-
-            int progress = save.starsChest.progress;
-            int threshold = Mathf.Max(0, root.starsChestConfig.threshold);
-
-            if (progressText != null)
-                progressText.text = $"{progress:00}/{threshold:00}";
-
             // 🔥 ВАЖНО: авто-открытие уже произошло в MetaFacade.ApplyLevelResult через ChestService,
             // поэтому тут мы только "снимаем" выданные награды и показываем попапы.
             TryConsumeAndShowGrantedRewards();
