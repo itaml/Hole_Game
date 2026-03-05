@@ -62,6 +62,7 @@ public class HoleGrowth : MonoBehaviour
         if (amount <= 0) return;
 
         _xp += amount;
+        SfxClipRouter.Instance?.Play(SfxKey.Item);
 
         bool leveledUp = false;
 
@@ -99,6 +100,7 @@ public void ClearTempScaleMultiplier()
         UpdateSlider();
 
         PlayLevelUpEffects();
+        
     }
 
     private void PlayLevelUpEffects()
@@ -107,6 +109,7 @@ public void ClearTempScaleMultiplier()
             StopCoroutine(_punchRoutine);
 
         _punchRoutine = StartCoroutine(ScalePunch());
+        SfxClipRouter.Instance?.Play(SfxKey.Size);
     }
 
     private IEnumerator ScalePunch()

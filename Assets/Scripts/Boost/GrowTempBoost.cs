@@ -49,6 +49,7 @@ public class GrowTempBoost : MonoBehaviour
 
         if (routine != null) StopCoroutine(routine);
         routine = StartCoroutine(Work());
+                SfxClipRouter.Instance?.Play(SfxKey.Size);
     }
 
     public void Stop()
