@@ -25,3 +25,4 @@ MonoBehaviour:
   winStreakUnlockLevel: 1
   interstitialAdsUnlockLevel: 1
   leaderboardUnlockLevel: 1
+  bountyUnlockLevel: 2

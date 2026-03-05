@@ -28,6 +28,7 @@ namespace Meta.Services
         private readonly AdsPolicyService _ads;
         private readonly ITimeProvider _time;
         private readonly LeaderboardService _leaderboard;
+        private readonly BountyService _bounty;
 
         public MetaFacade(
             SaveSystem saveSystem,
@@ -40,7 +41,8 @@ namespace Meta.Services
             WinStreakService streak,
             AdsPolicyService ads,
             LeaderboardService leaderboard,
-            ITimeProvider time)
+            ITimeProvider time,
+            BountyService bounty) // <-- добавили
         {
             _saveSystem = saveSystem;
             _unlocks = unlocks;
@@ -53,6 +55,8 @@ namespace Meta.Services
             _ads = ads;
             _leaderboard = leaderboard;
             _time = time;
+
+            _bounty = bounty; // <-- добавили
         }
 
         public PlayerSave Save => _saveSystem.Current;
@@ -60,6 +64,7 @@ namespace Meta.Services
         public void SaveNow() => _saveSystem.Save();
 
         private readonly List<Reward> _grantedRewards = new();
+        public BountyService Bounty => _bounty;
 
         public Reward[] ConsumeGrantedRewards()
         {
@@ -74,6 +79,12 @@ namespace Meta.Services
             _lives.TickRegen(Save);
             _battlepass.EnsureSeason(Save);
             _leaderboard.Tick(Save);
+
+            // Bounty: создаём первый пул при первом заходе в меню после unlock
+            // и далее делаем refresh по таймеру
+            if (_unlocks.IsBountyUnlocked(Save.progress.currentLevel))
+                _bounty.EnsureInitializedOrRefreshed();
+
             _saveSystem.Save();
         }
 

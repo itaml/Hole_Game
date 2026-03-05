@@ -15,7 +15,6 @@ namespace Menu.UI
         [Header("Top UI")]
         [SerializeField] private TMP_Text seasonTimerText; // "10d 5h"
         [SerializeField] private TMP_Text seasonTimerText2; // "10d 5h"
-        [SerializeField] private TMP_Text seasonTimerText3; // "10d 5h"
         [SerializeField] private Image progressBar;
         [SerializeField] private TMP_Text progressText;    // "3/5"
 
@@ -117,8 +116,6 @@ namespace Menu.UI
                 seasonTimerText.text = $"{d}d {h}h";
             if (seasonTimerText2)
                 seasonTimerText2.text = $"{d}d {h}h";
-            if (seasonTimerText3)
-                seasonTimerText3.text = $"{d}d {h}h";
         }
 
         private void SetProgress(int have, int need)

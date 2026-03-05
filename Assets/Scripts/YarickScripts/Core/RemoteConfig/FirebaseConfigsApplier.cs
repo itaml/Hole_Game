@@ -19,6 +19,7 @@ namespace Core.RemoteConfig
         public ChestConfig starsChest;
         public ChestConfig levelsChest;
         public BattlepassConfig battlepass;
+        public BountyConfig bounty;
 
         [Header("Fetch settings")]
         public bool fetchOnStart = true;
@@ -31,6 +32,7 @@ namespace Core.RemoteConfig
         private const string KEY_STARS = "cfg_chest_stars";
         private const string KEY_LEVELS = "cfg_chest_levels";
         private const string KEY_BP = "cfg_battlepass";
+        private const string KEY_BOUNTY = "cfg_bounty";
 
         private async void Start()
         {
@@ -107,6 +109,7 @@ namespace Core.RemoteConfig
 
         private void ApplyAllFromRemoteConfig()
         {
+            ApplyJsonIfValid(KEY_BOUNTY, json => ApplyBounty(json));
             ApplyJsonIfValid(KEY_ECO, json => ApplyEconomy(json));
             ApplyJsonIfValid(KEY_BANK, json => ApplyBank(json));
             ApplyJsonIfValid(KEY_STARS, json => ApplyChest(starsChest, json));
@@ -126,6 +129,15 @@ namespace Core.RemoteConfig
         }
 
         // -------- APPLY METHODS --------
+
+        private void ApplyBounty(string json)
+        {
+            var dto = JsonUtility.FromJson<BountyDto>(json);
+            if (dto == null) return;
+
+            bounty.refreshDays = dto.refreshDays;
+            bounty.possibleRewards = dto.possibleRewards ?? Array.Empty<Reward>();
+        }
 
         private void ApplyEconomy(string json)
         {
@@ -164,6 +176,21 @@ namespace Core.RemoteConfig
         }
 
         // -------- DTOs (под твою структуру) --------
+
+        [Serializable]
+        private sealed class BountyDto
+        {
+            public int refreshDays = 2;
+            public Reward[] possibleRewards;
+
+            public BountyDto() { }
+            public BountyDto(BountyConfig so)
+            {
+                if (so == null) return;
+                refreshDays = so.refreshDays;
+                possibleRewards = so.possibleRewards;
+            }
+        }
 
         [Serializable]
         private sealed class EconomyDto
