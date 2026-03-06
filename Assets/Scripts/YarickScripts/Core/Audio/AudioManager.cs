@@ -19,8 +19,6 @@ public class AudioManager : MonoBehaviour
 
     [Header("SFX Clips")]
     [SerializeField] private AudioClip buttonClickSound;
-    [SerializeField] private AudioClip winSound;
-    [SerializeField] private AudioClip loseSound;
 
     [Header("Audio Sources")]
     [SerializeField] private AudioSource musicSource;

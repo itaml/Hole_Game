@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a445491df8c19ab49bcc939f9934144d, type: 3}
   m_Name: ChestConfigLevels
   m_EditorClassIdentifier: Assembly-CSharp::Core.Configs.ChestConfig
-  threshold: 10
+  threshold: 1
   possibleRewards:
   - weight: 16
     coins: 0

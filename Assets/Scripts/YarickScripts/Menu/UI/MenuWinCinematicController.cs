@@ -43,9 +43,9 @@ namespace Menu.UI
         [Tooltip("1 = как сейчас. 1.3-1.8 обычно комфортно. 2 = заметно медленнее.")]
         [SerializeField] private float speedMultiplier = 1.6f;
 
-        [SerializeField] private float preFlyHold = 0.18f;        // пауза после появления токена перед полётом
-        [SerializeField] private float postFlyHold = 0.12f;       // пауза после прилёта
-        [SerializeField] private float betweenStagesHold = 0.12f; // пауза между крупными стадиями
+        [SerializeField] private float preFlyHold = 0.18f;
+        [SerializeField] private float postFlyHold = 0.12f;
+        [SerializeField] private float betweenStagesHold = 0.12f;
 
         [SerializeField] private float flyBattlepass = 0.55f;
         [SerializeField] private float flyLevel = 0.48f;
@@ -56,6 +56,10 @@ namespace Menu.UI
 
         [SerializeField] private float popupAfterOpenHold = 0.18f;
 
+        [Header("Chest reward popups")]
+        [SerializeField] private ChestRewardPopupUi levelsChestRewardPopup;
+        [SerializeField] private ChestRewardPopupUi starsChestRewardPopup;
+
         private void Reset()
         {
             root = FindFirstObjectByType<MenuRoot>();
@@ -64,6 +68,12 @@ namespace Menu.UI
 
         private void Start()
         {
+            if (popupQueue == null)
+                popupQueue = FindFirstObjectByType<RewardPopupQueue>();
+
+            levelsChestRewardPopup?.Init(popupQueue);
+            starsChestRewardPopup?.Init(popupQueue);
+
             if (root == null) return;
             if (root.AppliedLevelResult != null)
                 StartCoroutine(PlayFlow(root.AppliedLevelResult));
@@ -79,6 +89,47 @@ namespace Menu.UI
 
             var allGranted = root.Meta.ConsumeGrantedRewards();
 
+            // ВАЖНО:
+            // По факту у тебя награды в allGranted лежат в порядке:
+            // сначала StarChest rewards, потом LevelsChest rewards, потом остальные.
+            // Поэтому режем именно так.
+            Core.Configs.Reward[] starChestRewards = System.Array.Empty<Core.Configs.Reward>();
+            Core.Configs.Reward[] levelChestRewards = System.Array.Empty<Core.Configs.Reward>();
+            Core.Configs.Reward[] remainingRewards = System.Array.Empty<Core.Configs.Reward>();
+
+            int levelChestAdds = IsLevelsChestUnlocked(r.levelIndex) ? 1 : 0;
+            int levelOpenCount = 0;
+
+            if (levelChestAdds > 0)
+            {
+                int threshold = Mathf.Max(1, root.levelsChestConfig.threshold);
+                int total = root.PreLevelsChestProgress + levelChestAdds;
+                levelOpenCount = total / threshold;
+            }
+
+            int starsAdds = IsStarsChestUnlocked(r.levelIndex) ? Mathf.Max(0, r.starsEarned) : 0;
+            int starOpenCount = 0;
+
+            if (starsAdds > 0)
+            {
+                int threshold = Mathf.Max(1, root.starsChestConfig.threshold);
+                int total = root.PreStarsChestProgress + starsAdds;
+                starOpenCount = total / threshold;
+            }
+
+            if (allGranted != null && allGranted.Length > 0)
+            {
+                // Сначала в массиве star rewards
+                starChestRewards = TakeFirst(allGranted, starOpenCount);
+
+                // Потом level rewards
+                var afterStars = SkipFirst(allGranted, starOpenCount);
+                levelChestRewards = TakeFirst(afterStars, levelOpenCount);
+
+                // Потом всё остальное
+                remainingRewards = SkipFirst(allGranted, starOpenCount + levelOpenCount);
+            }
+
             // 1) Battlepass
             if (IsBattlepassUnlocked(r.levelIndex) && r.battlepassItemsCollected > 0 && battlepassButton != null)
             {
@@ -93,52 +144,45 @@ namespace Menu.UI
                 yield return Wait(betweenStagesHold * speedMultiplier);
             }
 
-            // 2) Level chest token
-            int levelChestAdds = IsLevelsChestUnlocked(r.levelIndex) ? 1 : 0;
-            int levelOpenCount = 0;
-
+            // 2) Level chest token / награда за уровень
             if (levelChestAdds > 0 && levelsChestButton != null)
             {
-                yield return FlyTo(levelChestTokenSprite, levelChestAdds, flySpawnCenter, levelsChestButton, flyLevel * speedMultiplier);
+                yield return FlyTo(
+                    levelChestTokenSprite,
+                    levelChestAdds,
+                    flySpawnCenter,
+                    levelsChestButton,
+                    flyLevel * speedMultiplier);
+
                 Punch(levelsChestButton, punchTime * speedMultiplier);
                 yield return Wait(postFlyHold * speedMultiplier);
 
-                int threshold = Mathf.Max(1, root.levelsChestConfig.threshold);
-                int total = root.PreLevelsChestProgress + levelChestAdds;
-                levelOpenCount = total / threshold;
-
                 if (levelOpenCount > 0)
                 {
-                    // OPEN (заметнее и дольше)
                     levelsChestButton.DOPunchRotation(new Vector3(0, 0, 12f), openPunchTime * speedMultiplier, 12, 0.9f);
                     levelsChestButton.DOPunchScale(Vector3.one * 0.28f, openPunchTime * speedMultiplier, 12, 0.9f);
 
                     yield return Wait(popupAfterOpenHold * speedMultiplier);
 
-                    if (allGranted != null && allGranted.Length > 0)
-                    {
-                        var lvlRewards = TakeFirst(allGranted, levelOpenCount);
-                        ShowRewards(lvlRewards);
-                        yield return WaitForPopups();
-                    }
+                    ShowChestRewards(levelsChestRewardPopup, levelChestRewards);
+                    yield return WaitForPopups();
 
                     yield return Wait(betweenStagesHold * speedMultiplier);
                 }
             }
 
-            // 3) Stars
-            int starsAdds = IsStarsChestUnlocked(r.levelIndex) ? Mathf.Max(0, r.starsEarned) : 0;
-            int starOpenCount = 0;
-
+            // 3) Stars after level chest flow
             if (starsAdds > 0 && starsChestButton != null)
             {
-                yield return FlyTo(starTokenSprite, starsAdds, flySpawnCenter, starsChestButton, flyStars * speedMultiplier);
+                yield return FlyTo(
+                    starTokenSprite,
+                    starsAdds,
+                    flySpawnCenter,
+                    starsChestButton,
+                    flyStars * speedMultiplier);
+
                 Punch(starsChestButton, punchTime * speedMultiplier);
                 yield return Wait(postFlyHold * speedMultiplier);
-
-                int threshold = Mathf.Max(1, root.starsChestConfig.threshold);
-                int total = root.PreStarsChestProgress + starsAdds;
-                starOpenCount = total / threshold;
 
                 if (starOpenCount > 0)
                 {
@@ -147,37 +191,44 @@ namespace Menu.UI
 
                     yield return Wait(popupAfterOpenHold * speedMultiplier);
 
-                    var starRewards = SkipFirst(allGranted, levelOpenCount);
-                    starRewards = TakeFirst(starRewards, starOpenCount);
-
-                    ShowRewards(starRewards);
+                    ShowChestRewards(starsChestRewardPopup, starChestRewards);
                     yield return WaitForPopups();
+
+                    yield return Wait(betweenStagesHold * speedMultiplier);
                 }
             }
 
-            
-// 4) Any remaining rewards (e.g., feature unlock welcome grants: buffs/boosts, etc.)
-// MenuWinCinematicController ранее показывал только награды, связанные с открытием сундуков.
-// Из-за этого "welcome rewards" могли теряться и попап не появлялся.
-if (allGranted != null && allGranted.Length > 0)
-{
-    int consumed = levelOpenCount + starOpenCount;
-    var remaining = SkipFirst(allGranted, consumed);
-    if (remaining != null && remaining.Length > 0)
-    {
-        ShowRewards(remaining);
-        yield return WaitForPopups();
-    }
-}
+            // 4) Remaining rewards
+            if (remainingRewards != null && remainingRewards.Length > 0)
+            {
+                ShowRewards(remainingRewards);
+                yield return WaitForPopups();
+            }
 
-            // 5) Post-win tutorial popups (after all animations + reward popups)
+            // 5) Tutorials
             yield return TryShowPostWinProfileTutorial();
             yield return TryShowStartLeaderboardTutorial();
             yield return TryShowStartBattlepassTutorial();
             yield return TryShowStartStarContestTutorial();
             yield return TryShowStartDualBattlepassTutorial();
+
             root.SuppressAutoRewardPopups = false;
             SetBlocked(false);
+        }
+
+        private void ShowChestRewards(ChestRewardPopupUi popup, Core.Configs.Reward[] rewards)
+        {
+            if (popupQueue == null || popup == null || rewards == null || rewards.Length == 0)
+                return;
+
+            for (int i = 0; i < rewards.Length; i++)
+            {
+                var reward = rewards[i];
+                if (reward == null)
+                    continue;
+
+                popupQueue.Enqueue(() => popup.Show(reward));
+            }
         }
 
         private IEnumerator TryShowStartBattlepassTutorial()
@@ -191,17 +242,13 @@ if (allGranted != null && allGranted.Length > 0)
             int id = save.tutorial.pendingStartTutorialId;
             if (id != 5) yield break;
 
-            // Clear pending immediately
             save.tutorial.pendingStartTutorialId = 0;
 
-            // Step 1 (кнопка Close в этом попапе = "Continue")
             tutorialPopupBattlepassStep1.Show();
             while (tutorialPopupBattlepassStep1 != null && tutorialPopupBattlepassStep1.IsShown)
                 yield return null;
 
-            // Mark shown
             save.tutorial.battlepassUnlockTutorialShown = true;
-
             root.Meta.SaveNow();
         }
 
@@ -216,9 +263,8 @@ if (allGranted != null && allGranted.Length > 0)
             int id = save.tutorial.pendingStartTutorialId;
             Debug.Log($"StartTutorialId = {id}");
 
-            if (id != 6) yield break; // нам нужен именно лидерборд
+            if (id != 6) yield break;
 
-            // Clear pending immediately
             save.tutorial.pendingStartTutorialId = 0;
 
             tutorialStarContest.Show();
@@ -240,9 +286,8 @@ if (allGranted != null && allGranted.Length > 0)
             int id = save.tutorial.pendingStartTutorialId;
             Debug.Log($"StartTutorialId = {id}");
 
-            if (id != 7) yield break; // нам нужен именно лидерборд
+            if (id != 7) yield break;
 
-            // Clear pending immediately
             save.tutorial.pendingStartTutorialId = 0;
 
             tutorialDualBattlepassContest.Show();
@@ -264,9 +309,8 @@ if (allGranted != null && allGranted.Length > 0)
             int id = save.tutorial.pendingStartTutorialId;
             Debug.Log($"StartTutorialId = {id}");
 
-            if (id != 4) yield break; // нам нужен именно лидерборд
+            if (id != 4) yield break;
 
-            // Clear pending immediately
             save.tutorial.pendingStartTutorialId = 0;
 
             tutorialPopupLeaderboard.Show();
@@ -274,9 +318,7 @@ if (allGranted != null && allGranted.Length > 0)
             while (tutorialPopupLeaderboard != null && tutorialPopupLeaderboard.IsShown)
                 yield return null;
 
-            // Mark shown
             save.tutorial.leaderboardUnlockTutorialShown = true;
-
             root.Meta.SaveNow();
         }
 
@@ -291,16 +333,13 @@ if (allGranted != null && allGranted.Length > 0)
             int id = save.tutorial.pendingPostWinTutorialId;
             if (id == 0) yield break;
 
-            // Clear pending immediately to avoid duplicates if UI re-renders.
             save.tutorial.pendingPostWinTutorialId = 0;
 
             tutorialPopupProfile.Show();
 
-            // Wait until player closes the tutorial popup
             while (tutorialPopupProfile != null && tutorialPopupProfile.IsShown)
                 yield return null;
 
-            // Mark shown
             if (id == 1)
                 save.tutorial.profilePostWinTutorialShownProfile = true;
 
@@ -309,16 +348,20 @@ if (allGranted != null && allGranted.Length > 0)
 
         private void ShowRewards(Core.Configs.Reward[] rewards)
         {
-            if (rewards == null || rewards.Length == 0) return;
+            if (rewards == null || rewards.Length == 0)
+                return;
+
             popupRouter.ShowRewards(rewards);
         }
 
         private IEnumerator WaitForPopups()
         {
-            if (popupQueue == null) yield break;
-            while (popupQueue.IsBusy) yield return null;
+            if (popupQueue == null)
+                yield break;
 
-            // маленькая пауза после закрытия последнего попапа, чтобы не “рубило”
+            while (popupQueue.IsBusy)
+                yield return null;
+
             yield return Wait(0.10f * speedMultiplier);
         }
 
@@ -331,20 +374,20 @@ if (allGranted != null && allGranted.Length > 0)
             inst.gameObject.SetActive(true);
 
             var img = inst.GetComponentInChildren<Image>(true);
-            if (img != null) img.sprite = sprite;
+            if (img != null)
+                img.sprite = sprite;
 
             var txt = inst.GetComponentInChildren<TMP_Text>(true);
-            if (txt != null) txt.text = amount > 1 ? $"+{amount}" : "";
+            if (txt != null)
+                txt.text = amount > 1 ? $"+{amount}" : "";
 
             inst.position = from.position;
 
-            // появление — чтобы игрок успел увидеть объект ДО полёта
             inst.localScale = Vector3.one * 0.70f;
             inst.DOScale(1.0f, 0.18f * speedMultiplier).SetEase(Ease.OutBack).SetUpdate(true);
 
             yield return Wait(preFlyHold * speedMultiplier);
 
-            // легкий “подпрыг” перед стартом
             inst.DOPunchScale(Vector3.one * 0.08f, 0.18f * speedMultiplier, 8, 0.8f).SetUpdate(true);
 
             Vector3 p0 = from.position;
@@ -360,9 +403,9 @@ if (allGranted != null && allGranted.Length > 0)
 
             inst.DOScale(0.65f, duration).SetEase(Ease.InCubic).SetUpdate(true);
 
-            while (!done) yield return null;
+            while (!done)
+                yield return null;
 
-            // микропаузка “приземления”
             yield return Wait(postFlyHold * speedMultiplier);
 
             Destroy(inst.gameObject);

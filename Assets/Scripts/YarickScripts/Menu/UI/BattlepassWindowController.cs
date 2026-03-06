@@ -16,7 +16,9 @@ namespace Menu.UI
         [SerializeField] private TMP_Text seasonTimerText; // "10d 5h"
         [SerializeField] private TMP_Text seasonTimerText2; // "10d 5h"
         [SerializeField] private Image progressBar;
-        [SerializeField] private TMP_Text progressText;    // "3/5"
+        [SerializeField] private Image progressBar2;
+        [SerializeField] private TMP_Text progressText;
+        [SerializeField] private TMP_Text progressText2;// "3/5"
 
         [Header("Rewards list")]
         [SerializeField] private BattlepassRewardItemView[] itemPrefab;
@@ -136,8 +138,14 @@ namespace Menu.UI
             if (progressBar)
                 progressBar.fillAmount = Mathf.Clamp01((float)have / need);
 
+            if (progressBar2)
+                progressBar2.fillAmount = Mathf.Clamp01((float)have / need);
+
             if (progressText)
                 progressText.text = $"{have}/{need}";
+
+            if (progressText2)
+                progressText2.text = $"{have}/{need}";
         }
 
         private void BuildRewardsList()

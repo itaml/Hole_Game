@@ -13,10 +13,6 @@ namespace Menu.UI
         [Header("Locked")]
         [SerializeField] private GameObject closedRoot;
 
-        [Header("Progress")]
-        [SerializeField] private Image progressBar;
-        [SerializeField] private TMP_Text progressText; // "3/5" или "0/10"
-
         [SerializeField] private BattlepassWindowAnimator windowAnimator;
         [SerializeField] private Button openButton;
         [SerializeField] private GameObject openObj;
@@ -41,20 +37,12 @@ namespace Menu.UI
             if (openObj) openObj.SetActive(unlocked);
             if (openButton) openButton.interactable = unlocked;
 
-            if (!unlocked)
-            {
-                SetProgress(0, 1);
-                return;
-            }
-
             var save = menuRoot.Meta.Save;
             var cfg = menuRoot.battlepassConfig;
 
             int tier = save.battlepass.tier;
             int need = GetNeedItems(cfg, tier);
             int have = Mathf.Clamp(save.battlepass.tierProgress, 0, need);
-
-            SetProgress(have, need);
         }
 
        public void OnClickOpen()
@@ -68,19 +56,6 @@ namespace Menu.UI
             if (!unlocked) return;
 
             windowAnimator?.Show();
-        }
-
-        private void SetProgress(int have, int need)
-        {
-            if (need <= 0) need = 1;
-
-            if (progressBar)
-            {
-                progressBar.fillAmount = have;
-            }
-
-            if (progressText)
-                progressText.text = $"{have}/{need}";
         }
 
         private int GetNeedItems(BattlepassConfig cfg, int tier)

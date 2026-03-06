@@ -16,9 +16,9 @@ MonoBehaviour:
   levelsChestUnlockLevel: 1
   buff1UnlockLevel: 3
   buff2UnlockLevel: 4
-  buff3UnlockLevel: 6
-  buff4UnlockLevel: 8
-  bankUnlockLevel: 10
+  buff3UnlockLevel: 8
+  buff4UnlockLevel: 10
+  bankUnlockLevel: 9
   battlepassUnlockLevel: 12
   boost1UnlockLevel: 13
   boost2UnlockLevel: 14
