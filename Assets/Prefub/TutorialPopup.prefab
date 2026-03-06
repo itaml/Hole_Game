@@ -668,7 +668,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8740665733372730103
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1648,6 +1648,7 @@ GameObject:
   - component: {fileID: 8851385878133827288}
   - component: {fileID: 4789281021977395746}
   - component: {fileID: 6321662435286542191}
+  - component: {fileID: 7664368114059964318}
   m_Layer: 5
   m_Name: TutorialPopup
   m_TagString: Untagged
@@ -1751,6 +1752,36 @@ MonoBehaviour:
   panelStartScaleMul: 0.85
   panelFromY: -40
   hideTime: 0.12
+--- !u!114 &7664368114059964318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2191740422945655567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cf3dcd32e0374334b952cf4dc9dbe1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PopupTweenAnimator
+  root: {fileID: 2191740422945655567}
+  panel: {fileID: 2419590798579279562}
+  canvasGroup: {fileID: 0}
+  closeButton: {fileID: 0}
+  backdropButton: {fileID: 0}
+  showDuration: 0.25
+  showEase: 27
+  showStartScale: 0.85
+  hideDuration: 0.18
+  hideEase: 26
+  hideEndScale: 0.85
+  useFade: 1
+  showStartAlpha: 0
+  showEndAlpha: 1
+  slideFrom: 0
+  slideDistance: 120
+  useUnscaledTime: 1
+  blockRaycastsDuringTween: 1
 --- !u!1 &2314461512604240497
 GameObject:
   m_ObjectHideFlags: 0
@@ -3373,8 +3404,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TutorialPopupUI, Assembly-CSharp
-        m_MethodName: Close
+        m_TargetAssemblyTypeName: TutorialManager, Assembly-CSharp
+        m_MethodName: CloseCurrentGuide
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6205,8 +6236,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TutorialPopupUI, Assembly-CSharp
-        m_MethodName: Close
+        m_TargetAssemblyTypeName: TutorialManager, Assembly-CSharp
+        m_MethodName: CloseCurrentGuide
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6916,7 +6947,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8288570292175486271
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7029,7 +7060,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8700898359323906567
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8183,8 +8214,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TutorialPopupUI, Assembly-CSharp
-        m_MethodName: Close
+        m_TargetAssemblyTypeName: TutorialManager, Assembly-CSharp
+        m_MethodName: CloseCurrentGuide
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9238,8 +9269,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TutorialPopupUI, Assembly-CSharp
-        m_MethodName: Close
+        m_TargetAssemblyTypeName: TutorialManager, Assembly-CSharp
+        m_MethodName: CloseCurrentGuide
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

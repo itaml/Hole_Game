@@ -16,7 +16,7 @@ public class GrowTempBoost : MonoBehaviour
     [SerializeField] private float duration = 6f;
 
     [Header("Effect")]
-    [Tooltip("Во сколько раз увеличить размер/радиус дыры на время буста.")]
+    [Tooltip("Во сколько раз увеличить размер дыры на время буста.")]
     [SerializeField] private float scaleMultiplier = 1.35f;
 
     [Header("UI (active only while boost active)")]
@@ -29,17 +29,24 @@ public class GrowTempBoost : MonoBehaviour
     {
         if (holeGrowth == null)
             holeGrowth = FindFirstObjectByType<HoleGrowth>();
+
+        SetActiveImages(false);
     }
 
+    /// <summary>
+    /// Включить буст.
+    /// Если буст уже активен, таймер перезапустится.
+    /// </summary>
     public void Activate()
     {
-        if (IsActive) return;
-
         if (holeGrowth == null)
         {
-            Debug.LogError("[GrowTempBoost] HoleGrowth not found/assigned.");
+            Debug.LogError("[GrowTempBoost] HoleGrowth not found.");
             return;
         }
+
+        if (routine != null)
+            StopCoroutine(routine);
 
         IsActive = true;
         remaining = duration;
@@ -47,20 +54,24 @@ public class GrowTempBoost : MonoBehaviour
         holeGrowth.SetTempScaleMultiplier(scaleMultiplier);
         SetActiveImages(true);
 
-        if (routine != null) StopCoroutine(routine);
         routine = StartCoroutine(Work());
-                SfxClipRouter.Instance?.Play(SfxKey.Size);
+
+        SfxClipRouter.Instance?.Play(SfxKey.Size);
     }
 
+    /// <summary>
+    /// Принудительно выключить буст.
+    /// </summary>
     public void Stop()
     {
-        if (!IsActive) return;
+        if (routine != null)
+        {
+            StopCoroutine(routine);
+            routine = null;
+        }
 
         IsActive = false;
         remaining = 0f;
-
-        if (routine != null) StopCoroutine(routine);
-        routine = null;
 
         if (holeGrowth != null)
             holeGrowth.ClearTempScaleMultiplier();
@@ -72,13 +83,13 @@ public class GrowTempBoost : MonoBehaviour
     {
         while (remaining > 0f)
         {
-            remaining -= Time.deltaTime; // обычное время
+            remaining -= Time.deltaTime;
             yield return null;
         }
 
+        routine = null;
         IsActive = false;
         remaining = 0f;
-        routine = null;
 
         if (holeGrowth != null)
             holeGrowth.ClearTempScaleMultiplier();
@@ -89,8 +100,11 @@ public class GrowTempBoost : MonoBehaviour
     private void SetActiveImages(bool on)
     {
         if (activeImages == null) return;
+
         for (int i = 0; i < activeImages.Length; i++)
+        {
             if (activeImages[i] != null)
                 activeImages[i].gameObject.SetActive(on);
+        }
     }
 }

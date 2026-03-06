@@ -17,7 +17,8 @@ public enum SfxKey
     Radar,
     Magnit,
     TryRevive,
-    Frozen
+    Frozen,
+    Salut
 
     // добавишь свои по мере надобности
 }

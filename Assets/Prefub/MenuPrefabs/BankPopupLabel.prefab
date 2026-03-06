@@ -1125,6 +1125,7 @@ GameObject:
   - component: {fileID: 5375727451357766547}
   - component: {fileID: 2648911339289415060}
   - component: {fileID: 6623412186734743983}
+  - component: {fileID: 6188927611940894967}
   m_Layer: 5
   m_Name: BankPopupLabel
   m_TagString: Untagged
@@ -1227,10 +1228,52 @@ MonoBehaviour:
   productId: com.adsyunity.p26003.bank
   onPurchaseSucceeded:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: RunController, Assembly-CSharp
+        m_MethodName: ClaimBankToCoins
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onPurchaseFailed:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6188927611940894967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8313452825548538326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cf3dcd32e0374334b952cf4dc9dbe1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PopupTweenAnimator
+  root: {fileID: 8313452825548538326}
+  panel: {fileID: 9001691355546846422}
+  canvasGroup: {fileID: 0}
+  closeButton: {fileID: 0}
+  backdropButton: {fileID: 0}
+  showDuration: 0.25
+  showEase: 27
+  showStartScale: 0.85
+  hideDuration: 0.18
+  hideEase: 26
+  hideEndScale: 0.85
+  useFade: 1
+  showStartAlpha: 0
+  showEndAlpha: 1
+  slideFrom: 0
+  slideDistance: 120
+  useUnscaledTime: 1
+  blockRaycastsDuringTween: 1
 --- !u!1 &8935181763008442109
 GameObject:
   m_ObjectHideFlags: 0

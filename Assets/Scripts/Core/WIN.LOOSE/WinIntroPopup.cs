@@ -28,10 +28,6 @@ public class WinIntroPopup : MonoBehaviour
     [SerializeField] private Vector2 fireworkSize = new Vector2(420, 420); // сделай больше если надо
     [SerializeField] private float fireworkScale = 1.2f;                  // сделай 1.5-2 если надо
     [SerializeField] private bool forceFireworkSize = true;
-
-    [Header("Sound")]
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip fireworkSfx;
     [Range(0f, 1f)] [SerializeField] private float sfxVolume = 1f;
 
     private Coroutine _routine;
@@ -139,8 +135,14 @@ public class WinIntroPopup : MonoBehaviour
             fw.transform.SetAsLastSibling();
             _spawned.Add(fw.gameObject);
 
-            if (audioSource && fireworkSfx)
-                audioSource.PlayOneShot(fireworkSfx, sfxVolume);
+if (SfxClipRouter.Instance != null)
+{
+    SfxClipRouter.Instance.Play(SfxKey.Salut);
+}
+else
+{
+    Debug.LogWarning("[WinIntroPopup] SfxClipRouter.Instance is NULL — salute sound not played.");
+}
 
             yield return fw.Play(frames, fps);
 
